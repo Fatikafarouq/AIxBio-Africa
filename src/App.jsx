@@ -733,7 +733,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
           <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,fontWeight:700,color:"rgba(255,255,255,.85)",letterSpacing:".06em",textTransform:"uppercase" }}>Fellow Applications Closed</span>
           <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"rgba(255,255,255,.55)" }}>Now welcoming applications from prospective <strong style={{ color:"#fff" }}>mentors</strong> for the pilot cohort.</span>
         </div>
-        <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer"
+        <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer"
           style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#fff",letterSpacing:".06em",textTransform:"uppercase",textDecoration:"none",border:"1px solid #B8102A",padding:"6px 16px",transition:"background .18s",background:"#B8102A" }}
           onMouseEnter={e=>e.currentTarget.style.background="#8A0D20"}
           onMouseLeave={e=>e.currentTarget.style.background="#B8102A"}>
@@ -850,7 +850,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
             <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Want to help shape this cohort?</h4>
             <Txt muted s={{ fontSize:14.5 }}>We're welcoming mentor applications now — <strong style={{ color:"#1A1917" }}>volunteer role</strong>, no deadline set.</Txt>
           </div>
-          <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply to Mentor →</a>
+          <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply to Mentor →</a>
         </div>
       </Sec>
     )}
@@ -903,9 +903,9 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
             <Txt muted s={{ fontSize:14.5 }}>This is a volunteer role — mentors are not compensated for the pilot cohort. In return, mentors join a growing interdisciplinary network at the intersection of AI and biosecurity in African contexts, and are credited as contributors to the programme.</Txt>
           </div>
           <div className="reveal" style={{ padding:"26px 28px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:10 }}>Now welcoming mentor applications</h4>
+            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Now welcoming mentor applications</h4>
             <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers on a volunteer basis, we'd love to hear from you.</Txt>
-            <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
+            <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
           </div>
         </div>
       </Sec>
@@ -935,7 +935,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
           <Txt s={{ marginBottom:14 }}>Thank you to everyone who applied to join our pilot cohort. Applications are now closed while we review submissions — decisions will be released in July 2026.</Txt>
           <Txt muted s={{ marginBottom:28 }}>In the meantime, we're welcoming applications from prospective mentors interested in supporting this cohort. It's a volunteer role open to researchers and practitioners across AI, biosecurity, health systems, and governance.</Txt>
           <a
-            href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form"
+            href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form"
             target="_blank"
             rel="noopener noreferrer"
             className="br"
@@ -958,7 +958,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
           <Txt muted s={{ fontSize:14.5 }}>We respond to fellowship and mentor questions within 3–5 working days.</Txt>
         </div>
         <div style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-          <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",flexShrink:0 }}>Apply to Mentor →</a>
+          <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",flexShrink:0 }}>Apply to Mentor →</a>
           <button className="bo" style={{ flexShrink:0 }} onClick={()=>go("contact")}>Contact Us</button>
         </div>
       </div>
@@ -978,7 +978,7 @@ const MentorsPage = ({ go }) => (<>
       <div className="reveal" style={{ padding:"28px 30px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
         <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Now welcoming mentor applications</h4>
         <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers on a volunteer basis, we'd love to hear from you.</Txt>
-        <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
+        <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
       </div>
     </div>
   </Sec>
