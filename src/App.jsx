@@ -119,7 +119,7 @@ const FAQS = [
   {q:"Is there a cost to participate?",a:"The programme is offered at no cost to accepted fellows. There is no stipend for the pilot cohort."},
   {q:"What are the expected outputs?",a:"By the end of the fellowship, each fellow is expected to produce one of the following: a research report, a preprint, a conference paper submission, or a policy research paper."},
   {q:"Can I apply if I am not based in Africa?",a:"The fellowship is designed for African researchers or those working on African biosecurity and AI contexts. Applicants from outside Africa whose work is directly relevant may be considered on a case-by-case basis."},
-  {q:"When is the application deadline?",a:"Applications are open now. The deadline to apply is 3 July 2026. Decisions will be released in July 2026 and the fellowship begins in July 2026."},
+  {q:"When is the application deadline?",a:"Fellow applications for the pilot cohort closed on 3 July 2026. Decisions will be released in July 2026 and the fellowship begins in July 2026. We are currently welcoming applications from prospective mentors for this cohort — see the Mentors tab for details."},
   {q:"What disciplines are relevant?",a:"We welcome researchers from life sciences, veterinary medicine, public health, computational biology, computer science, policy, governance, and related fields. The common thread is an interest in AI, biosecurity, and their intersection in African contexts."},
   {q:"How competitive is admission?",a:"The pilot cohort is limited to 5 fellows to ensure quality of mentorship and research support. We particularly encourage applications from researchers from underrepresented backgrounds in biosecurity and AI research."},
 ];
@@ -298,7 +298,7 @@ const Nav = ({ go, page }) => {
               <span style={{ display:"block",width:13,height:1.5,background:textCol,transition:"background .28s" }}/>
             </button>
 
-            <button className="nbr" onClick={() => go("apply")}>Apply Now</button>
+            <button className="nbr" onClick={() => go("mentors")}>Become a Mentor</button>
           </div>
         </div>
       </nav>
@@ -336,8 +336,8 @@ const Nav = ({ go, page }) => {
           <button
             className="br"
             style={{ marginTop:16,textAlign:"center" }}
-            onClick={() => { go("apply"); setMobileOpen(false); }}
-          >Apply Now →</button>
+            onClick={() => { go("mentors"); setMobileOpen(false); }}
+          >Become a Mentor →</button>
         </div>
       )}
     </>
@@ -479,15 +479,15 @@ const HomeFellowship = ({ go }) => (
       <div className="reveal">
         <Ey label="Fellowship"/>
         <H2 s={{ marginBottom:16 }}>5-Week Research Fellowship</H2>
-        <div style={{ display:"inline-flex",alignItems:"center",gap:8,background:"rgba(26,118,70,.08)",border:"1px solid rgba(26,118,70,.22)",padding:"7px 14px",marginBottom:18 }}>
-          <span style={{ width:7,height:7,borderRadius:"50%",background:"#1A7646",flexShrink:0,display:"inline-block" }}/>
-          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#1A7646",letterSpacing:".06em",textTransform:"uppercase" }}>Applications Now Open · Deadline 3 July 2026</span>
+        <div style={{ display:"inline-flex",alignItems:"center",gap:8,background:"rgba(90,89,86,.08)",border:"1px solid rgba(90,89,86,.22)",padding:"7px 14px",marginBottom:18 }}>
+          <span style={{ width:7,height:7,borderRadius:"50%",background:"#5A5956",flexShrink:0,display:"inline-block" }}/>
+          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#5A5956",letterSpacing:".06em",textTransform:"uppercase" }}>Fellow Applications Closed</span>
         </div>
         <Txt s={{ marginBottom:16 }}>The AIxBio Africa Research Fellowship is a 5-week remote research programme for aspiring and early-career researchers interested in producing rigorous, impactful work on AI, biosecurity, health systems, governance, and related societal challenges in Africa.</Txt>
         <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>Fellows pursue independent research projects aligned with AIxBio Africa's mission and produce a substantial research output suitable for publication. The programme is offered at no cost to participants.</Txt>
         <div style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-          <a href="https://airtable.com/apph1o7t9K13CL84h/pagLMJMS9TBmEDkyw/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply Now</a>
           <button className="bo" onClick={() => go("fellowship")}>Programme Details →</button>
+          <button className="br" onClick={() => go("mentors")}>Become a Mentor →</button>
         </div>
       </div>
       <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
@@ -726,18 +726,18 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
   return (<>
     <PageHdr label="Fellowship" title="AIxBio Africa Research Fellowship – Pilot Cohort 2026" sub="A 5-week remote research programme for aspiring and early-career researchers working on AI, biosecurity, health systems, governance, and societal challenges in Africa."/>
 
-    {/* Applications open banner */}
-    <div style={{ background:"#1A7646",padding:"14px 44px" }}>
+    {/* Fellow applications closed / mentor call banner */}
+    <div style={{ background:"#1A1917",padding:"14px 44px" }}>
       <div style={{ maxWidth:1160,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
-        <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,fontWeight:700,color:"#fff",letterSpacing:".06em",textTransform:"uppercase" }}>🟢 Applications Now Open</span>
-          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"rgba(255,255,255,.8)" }}>Application Deadline: <strong style={{ color:"#fff" }}>3 July 2026</strong></span>
+        <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,fontWeight:700,color:"rgba(255,255,255,.85)",letterSpacing:".06em",textTransform:"uppercase" }}>Fellow Applications Closed</span>
+          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"rgba(255,255,255,.55)" }}>Now welcoming applications from prospective <strong style={{ color:"#fff" }}>mentors</strong> for the pilot cohort.</span>
         </div>
-        <a href="https://airtable.com/apph1o7t9K13CL84h/pagLMJMS9TBmEDkyw/form" target="_blank" rel="noopener noreferrer"
-          style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#fff",letterSpacing:".06em",textTransform:"uppercase",textDecoration:"none",border:"1px solid rgba(255,255,255,.5)",padding:"6px 16px",transition:"background .18s",background:"rgba(255,255,255,.12)" }}
-          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.22)"}
-          onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.12)"}>
-          Apply Now →
+        <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer"
+          style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#fff",letterSpacing:".06em",textTransform:"uppercase",textDecoration:"none",border:"1px solid #B8102A",padding:"6px 16px",transition:"background .18s",background:"#B8102A" }}
+          onMouseEnter={e=>e.currentTarget.style.background="#8A0D20"}
+          onMouseLeave={e=>e.currentTarget.style.background="#B8102A"}>
+          Apply to Mentor →
         </a>
       </div>
     </div>
@@ -756,8 +756,8 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
             <H2 s={{ marginBottom:20 }}>Fellowship Overview</H2>
             <Txt s={{ marginBottom:14 }}>AIxBio Africa is an independent research organisation advancing research at the intersection of artificial intelligence, biosecurity, health, governance, and societal resilience in African contexts.</Txt>
             <Txt s={{ marginBottom:14 }}>The AIxBio Africa Research Fellowship is a 5-week remote research program for aspiring and early-career researchers interested in producing rigorous, impactful work on AI, biosecurity, health systems, governance, and related societal challenges in Africa.</Txt>
-            <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>Fellows will pursue independent research projects aligned with AIxBio Africa's mission and produce a substantial research output suitable for publication.</Txt>
-            <a href="https://airtable.com/apph1o7t9K13CL84h/pagLMJMS9TBmEDkyw/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply Now →</a>
+            <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>Fellows will pursue independent research projects aligned with AIxBio Africa's mission and produce a substantial research output suitable for publication. Fellow applications for this cohort are now closed.</Txt>
+            <button className="br" onClick={() => setTab("mentors")}>Explore Mentor Applications →</button>
           </div>
 
           {/* Fellowship Details */}
@@ -830,11 +830,11 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
           <Ey label="Timeline"/>
           <H2 s={{ marginBottom:28 }}>Key Dates</H2>
           <div style={{ display:"flex",flexDirection:"column",gap:0 }}>
-            {[["Applications Open","Now","tg"],["Application Deadline","3 July 2026","tr"],["Decisions Released","July 2026","tb"],["Fellowship Begins","July 2026","ta"]].map(([event,date,tc],i,arr)=>(
+            {[["Fellow Applications","Closed 3 July 2026","tl"],["Decisions Released","July 2026","tb"],["Fellowship Begins","July 2026","ta"],["Mentor Applications","Open Now","tg"]].map(([event,date,tc],i,arr)=>(
               <div key={event} style={{ display:"flex",alignItems:"center",gap:24,padding:"18px 0",borderBottom:i<arr.length-1?"1px solid var(--brd)":"none" }}>
                 <div style={{ display:"flex",alignItems:"center",gap:14,flex:1 }}>
                   <div style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:0 }}>
-                    <div style={{ width:10,height:10,borderRadius:"50%",background: i===0 ? "#1A7646" : "#B8102A",flexShrink:0 }}/>
+                    <div style={{ width:10,height:10,borderRadius:"50%",background: event==="Mentor Applications" ? "#1A7646" : "#B8102A",flexShrink:0 }}/>
                   </div>
                   <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:14.5,color:"#3A3835" }}>{event}</span>
                 </div>
@@ -847,10 +847,10 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
         {/* CTA */}
         <div className="reveal" style={{ marginTop:48,paddingTop:40,borderTop:"1px solid var(--brd)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:16 }}>
           <div>
-            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Ready to apply?</h4>
-            <Txt muted s={{ fontSize:14.5 }}>Application deadline: <strong style={{ color:"#1A1917" }}>3 July 2026</strong></Txt>
+            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Want to help shape this cohort?</h4>
+            <Txt muted s={{ fontSize:14.5 }}>We're welcoming mentor applications now — <strong style={{ color:"#1A1917" }}>volunteer role</strong>, no deadline set.</Txt>
           </div>
-          <a href="https://airtable.com/apph1o7t9K13CL84h/pagLMJMS9TBmEDkyw/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply Now →</a>
+          <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply to Mentor →</a>
         </div>
       </Sec>
     )}
@@ -860,7 +860,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
         <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72 }}>
           <div className="reveal">
             <Ey label="Who Can Apply"/><H2 s={{ marginBottom:20 }}>Eligibility</H2>
-            <Txt s={{ marginBottom:16 }}>Applicants from all African countries are encouraged to apply.</Txt>
+            <Txt s={{ marginBottom:16 }}>Fellow applications for the pilot cohort are now closed. Eligibility criteria below are retained for reference and for future cohorts.</Txt>
             <Txt s={{ marginBottom:28 }}>We welcome applications from a broad range of backgrounds. No prior research experience in AI safety or biosecurity is required — what matters is genuine intellectual curiosity and a commitment to producing meaningful research.</Txt>
             <div style={{ marginBottom:20 }}>
               <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:14 }}>We welcome applications from</div>
@@ -887,7 +887,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
               <h4 style={{ fontFamily:"'Figtree',sans-serif",fontSize:11,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:12 }}>Selection</h4>
               <Txt muted s={{ fontSize:13.5 }}>Selection is based on demonstrated interest, motivation, analytical ability, and commitment to producing a research output. The pilot cohort is limited to 5 fellows.</Txt>
             </div>
-            <a href="https://airtable.com/apph1o7t9K13CL84h/pagLMJMS9TBmEDkyw/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply Now →</a>
+            <button className="br" onClick={() => setTab("mentors")}>Interested in Mentoring Instead? →</button>
           </div>
         </div>
       </Sec>
@@ -896,16 +896,16 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
     {tab==="mentors" && (
       <Sec bg="#fff">
         <div style={{ maxWidth:700 }}>
-          <div className="reveal" style={{ marginBottom:40 }}>
+          <div className="reveal" style={{ marginBottom:32 }}>
             <Ey label="Mentors"/>
             <H2 s={{ marginBottom:20 }}>Mentor Network</H2>
-            <Txt s={{ marginBottom:20 }}>The mentor network for the inaugural fellowship is currently being assembled. We are engaging researchers and practitioners working in biosecurity, artificial intelligence, public policy, and related fields. Additional mentors will be announced as partnerships are finalised.</Txt>
-            <Txt muted s={{ fontSize:14.5 }}>We will not publish mentor names or profiles until arrangements are formally confirmed with each individual.</Txt>
+            <Txt s={{ marginBottom:20 }}>With fellow applications now closed for the pilot cohort, we're turning our attention to building out the mentor network. We're inviting researchers and practitioners across AI, biosecurity, health systems, and governance to help guide fellows through their independent research projects.</Txt>
+            <Txt muted s={{ fontSize:14.5 }}>This is a volunteer role — mentors are not compensated for the pilot cohort. In return, mentors join a growing interdisciplinary network at the intersection of AI and biosecurity in African contexts, and are credited as contributors to the programme.</Txt>
           </div>
           <div className="reveal" style={{ padding:"26px 28px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:10 }}>Interested in contributing as a mentor?</h4>
-            <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers, we would like to hear from you.</Txt>
-            <button className="br" onClick={() => go("contact")}>Contact Us →</button>
+            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:10 }}>Now welcoming mentor applications</h4>
+            <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers on a volunteer basis, we'd love to hear from you.</Txt>
+            <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
           </div>
         </div>
       </Sec>
@@ -926,32 +926,25 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
       <Sec bg="#fff">
         <div style={{ maxWidth:620 }}>
           <Ey label="Apply"/>
-          <H2 s={{ marginBottom:16 }}>Apply for the Fellowship</H2>
-          {/* Deadline callout */}
-          <div style={{ display:"flex",alignItems:"center",gap:10,background:"rgba(184,16,42,.06)",border:"1px solid rgba(184,16,42,.18)",padding:"12px 18px",marginBottom:28 }}>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,fontWeight:700,color:"#B8102A",letterSpacing:".04em",textTransform:"uppercase" }}>Application Deadline</span>
-            <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#1A1917" }}>3 July 2026</span>
+          <H2 s={{ marginBottom:16 }}>Fellow Applications Are Closed</H2>
+          {/* Status callout */}
+          <div style={{ display:"flex",alignItems:"center",gap:10,background:"rgba(90,89,86,.06)",border:"1px solid rgba(90,89,86,.18)",padding:"12px 18px",marginBottom:28,flexWrap:"wrap" }}>
+            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,fontWeight:700,color:"#5A5956",letterSpacing:".04em",textTransform:"uppercase" }}>Fellow Applications</span>
+            <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#1A1917" }}>Closed 3 July 2026</span>
           </div>
-          <Txt s={{ marginBottom:14 }}>The application form is hosted on Airtable. It will take approximately 15–20 minutes to complete. Please have the following ready before you begin:</Txt>
-          <div style={{ marginBottom:28 }}>
-            {["Your contact details and country of residence","Current institution or affiliation (if applicable)","A brief description of your research background","A short statement of interest (why this fellowship, why now)","A research question or topic you would like to explore","An optional professional reference"].map((item,i)=>(
-              <div key={i} style={{ display:"flex",gap:12,padding:"9px 0",borderBottom:"1px solid var(--brd)" }}>
-                <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",flexShrink:0,marginTop:1 }}>{String(i+1).padStart(2,"0")}</span>
-                <Txt muted s={{ fontSize:14.5,lineHeight:1.6 }}>{item}</Txt>
-              </div>
-            ))}
-          </div>
+          <Txt s={{ marginBottom:14 }}>Thank you to everyone who applied to join our pilot cohort. Applications are now closed while we review submissions — decisions will be released in July 2026.</Txt>
+          <Txt muted s={{ marginBottom:28 }}>In the meantime, we're welcoming applications from prospective mentors interested in supporting this cohort. It's a volunteer role open to researchers and practitioners across AI, biosecurity, health systems, and governance.</Txt>
           <a
-            href="https://airtable.com/apph1o7t9K13CL84h/pagLMJMS9TBmEDkyw/form"
+            href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form"
             target="_blank"
             rel="noopener noreferrer"
             className="br"
             style={{ textDecoration:"none",display:"inline-block",padding:"14px 36px",fontSize:13,letterSpacing:".05em",marginBottom:16 }}
           >
-            Open Application Form →
+            Apply to Mentor →
           </a>
           <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#9A9896",lineHeight:1.6 }}>
-            The form opens in a new tab. If you experience any issues, contact us at <span style={{ color:"#1A1917" }}>contact@aixbio.africa</span>
+            Questions about your fellowship application? Contact us at <span style={{ color:"#1A1917" }}>contact@aixbio.africa</span>
           </p>
         </div>
       </Sec>
@@ -961,11 +954,11 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
     <Sec bg="#F7F6F2" style={{ padding:"44px 44px" }}>
       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16 }}>
         <div>
-          <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:4 }}>Questions about the fellowship?</h4>
-          <Txt muted s={{ fontSize:14.5 }}>We respond to fellowship questions within 3–5 working days. Deadline: 3 July 2026.</Txt>
+          <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:4 }}>Questions about the fellowship or mentoring?</h4>
+          <Txt muted s={{ fontSize:14.5 }}>We respond to fellowship and mentor questions within 3–5 working days.</Txt>
         </div>
         <div style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-          <a href="https://airtable.com/apph1o7t9K13CL84h/pagLMJMS9TBmEDkyw/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",flexShrink:0 }}>Apply Now →</a>
+          <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",flexShrink:0 }}>Apply to Mentor →</a>
           <button className="bo" style={{ flexShrink:0 }} onClick={()=>go("contact")}>Contact Us</button>
         </div>
       </div>
@@ -976,16 +969,16 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
 /* ══════════ MENTORS PAGE ════════════════════════════ */
 
 const MentorsPage = ({ go }) => (<>
-  <PageHdr label="Mentors" title="Mentor Network" sub="We are currently assembling the mentor network for the inaugural fellowship."/>
+  <PageHdr label="Mentors" title="Mentor Network" sub="Fellow applications for our pilot cohort are now closed — we're welcoming mentor applications for this cohort."/>
   <Sec bg="#fff">
     <div style={{ maxWidth:700 }}>
-      <Txt s={{ marginBottom:18 }}>The mentor network for the inaugural fellowship is currently being assembled. We are engaging researchers and practitioners working in biosecurity, artificial intelligence, public policy, and related fields. Additional mentors will be announced as partnerships are finalised.</Txt>
-      <Txt muted s={{ marginBottom:48 }}>We will not publish mentor names or profiles until arrangements are formally confirmed with each individual.</Txt>
+      <Txt s={{ marginBottom:18 }}>With fellow applications now closed, we're turning our attention to building out the mentor network for the inaugural fellowship. We're inviting researchers and practitioners working in biosecurity, artificial intelligence, public health, veterinary science, policy, and related fields to help guide fellows through their independent research projects.</Txt>
+      <Txt muted s={{ marginBottom:48 }}>This is a volunteer role — mentors are not compensated for the pilot cohort. In return, mentors join a growing interdisciplinary network at the intersection of AI and biosecurity in African contexts, and are credited as contributors to the programme.</Txt>
 
       <div className="reveal" style={{ padding:"28px 30px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-        <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Interested in contributing as a mentor?</h4>
-        <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers, we would like to hear from you.</Txt>
-        <button className="br" onClick={() => go("contact")}>Get in Touch →</button>
+        <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Now welcoming mentor applications</h4>
+        <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers on a volunteer basis, we'd love to hear from you.</Txt>
+        <a href="https://airtable.com/apph1o7t9K13CL84h/pagR81fo91J8CVmE9/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
       </div>
     </div>
   </Sec>
