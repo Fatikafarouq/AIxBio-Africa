@@ -1,4 +1,50 @@
-,255,.07);}
+import { useState, useEffect, useCallback } from "react";
+
+/* ══════════════════════════════════════════════════════
+   AIxbio Africa · Institutional Website
+   Founder: Fatika Umar Ibrahim
+   ══════════════════════════════════════════════════════ */
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Figtree:wght@300;400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:#F7F6F2;color:#1A1917;font-family:'Figtree',system-ui,sans-serif;}
+::selection{background:#B8102A;color:#fff;}
+:root{
+  --bg:#F7F6F2;--wht:#ffffff;--blk:#1A1917;--sec:#5A5956;--red:#B8102A;--rdk:#8A0D20;
+  --brd:#E5E3DE;--brd2:#CECCCA;--navh:68px;
+}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1);}
+.reveal.in{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.07s;}.d2{transition-delay:.14s;}.d3{transition-delay:.21s;}.d4{transition-delay:.28s;}.d5{transition-delay:.35s;}
+@keyframes fin{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes aflt{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+.ha{animation:fin .9s cubic-bezier(.4,0,.2,1) .2s both;}
+.hb{animation:fin .9s cubic-bezier(.4,0,.2,1) .42s both;}
+.hc{animation:fin .9s cubic-bezier(.4,0,.2,1) .6s both;}
+.hd{animation:fin .9s cubic-bezier(.4,0,.2,1) .76s both;}
+.aflt{animation:aflt 11s ease-in-out infinite;}
+.lft{transition:transform .26s cubic-bezier(.4,0,.2,1),box-shadow .26s,border-color .26s;}
+.lft:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.07);border-color:#B8102A!important;}
+.nb{background:none;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:500;letter-spacing:.01em;padding:4px 0;transition:color .17s;white-space:nowrap;}
+.nbr{background:#B8102A;color:#fff;border:none;font-family:'Figtree',sans-serif;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:9px 20px;cursor:pointer;transition:background .2s;border-radius:0;}
+.nbr:hover{background:#8A0D20;}
+.tag{display:inline-block;font-family:'Figtree',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+.tr{background:rgba(184,16,42,.09);color:#B8102A;}.tg{background:rgba(26,118,70,.09);color:#1A7646;}.tb{background:rgba(43,87,164,.09);color:#2B57A4;}.ta{background:rgba(152,104,18,.09);color:#986812;}.tl{background:rgba(80,76,72,.09);color:#504C48;}
+.pat-lt{background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='%23B8102A' fill-opacity='.03'/%3E%3C/svg%3E");}
+.pat-dk{background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='%23B8102A' fill-opacity='.055'/%3E%3C/svg%3E");}
+input,textarea,select{font-family:'Figtree',sans-serif;font-size:14px;color:#1A1917;background:#fff;border:1px solid var(--brd);padding:11px 14px;width:100%;outline:none;transition:border-color .2s;border-radius:0;-webkit-appearance:none;appearance:none;}
+input:focus,textarea:focus,select:focus{border-color:#B8102A;}
+input::placeholder,textarea::placeholder{color:#9A9896;}
+textarea{resize:vertical;min-height:100px;}
+.br{background:#B8102A;color:#fff;border:none;font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;padding:12px 24px;transition:background .2s,transform .14s;border-radius:0;}
+.br:hover{background:#8A0D20;transform:translateY(-1px);}
+.br:disabled{background:#b0aeab;cursor:not-allowed;transform:none;}
+.bo{background:transparent;color:#B8102A;border:1.5px solid #B8102A;font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;padding:11px 22px;transition:background .2s,color .2s;border-radius:0;}
+.bo:hover{background:#B8102A;color:#fff;}
+.bg{background:transparent;color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.28);font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;padding:11px 22px;transition:border-color .2s,background .2s;border-radius:0;}
+.bg:hover{border-color:rgba(255,255,255,.68);background:rgba(255,255,255,.07);}
 .bn{background:transparent;border:none;font-family:'Figtree',sans-serif;cursor:pointer;padding:0;}
 table{width:100%;border-collapse:collapse;}
 th{font-family:'Figtree',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sec);padding:9px 14px;text-align:left;border-bottom:1px solid var(--brd);}
