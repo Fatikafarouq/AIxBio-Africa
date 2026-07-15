@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+ import { useState, useEffect, useCallback } from "react";
 
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
@@ -132,15 +132,26 @@ const SCHEDULE = [
   {week:"Week 5",title:"Capstone and Next Steps",topics:["Research memo presentation to cohort and mentors","Peer and mentor feedback","Publishing pathways and fellowship alumni network","Career development in biosecurity research"]},
 ];
 
+/* ══════════ TEAM / FOUNDING TEAM DATA ═══════════════ */
+
 const FOUNDING_ROLES = [
-  {title:"Founding Partnerships & Grants Associate",desc:"Help build strategic partnerships, recruit mentors, identify funding opportunities, and support grant development.",tc:"tr"},
-  {title:"Founding Fellowship Program Manager",desc:"Coordinate and manage AIxBio Africa's fellowship programme, ensuring an outstanding experience for fellows and mentors.",tc:"tb"},
-  {title:"Founding Communications & LinkedIn Manager",desc:"Lead our communications strategy and help grow AIxBio Africa's online presence.",tc:"ta"},
-  {title:"Founding Community & Events Coordinator",desc:"Build and engage our community through webinars, workshops, networking events, and outreach activities.",tc:"tg"},
-  {title:"Founding Executive & Operations Assistant",desc:"Support the Founder in coordinating day-to-day operations and helping the organization run efficiently.",tc:"tl"},
+  {title:"Founding Partnerships & Grants Associate",desc:"Help build strategic partnerships, recruit mentors, identify funding opportunities, and support grant development."},
+  {title:"Founding Fellowship Program Manager",desc:"Coordinate and manage AIxBio Africa's fellowship programme, ensuring an outstanding experience for fellows and mentors."},
+  {title:"Founding Communications & LinkedIn Manager",desc:"Lead our communications strategy and help grow AIxBio Africa's online presence."},
+  {title:"Founding Community & Events Coordinator",desc:"Build and engage our community through webinars, workshops, networking events, and outreach activities."},
+  {title:"Founding Executive & Operations Assistant",desc:"Support the Founder in coordinating day-to-day operations and helping the organization run efficiently."},
 ];
 
-const FOUNDING_TEAM_APPLY_URL = "https://airtable.com/appkjlP1PITnNuUqa/pagMJQXa2k8jLZlQX/form";
+const FOUNDING_BENEFITS = [
+  "Build systems and programs from the ground up.",
+  "Take ownership of projects with real responsibility.",
+  "Work closely with the Founder and other founding team members.",
+  "Collaborate with researchers, mentors, and professionals.",
+  "Develop leadership and operational experience.",
+  "Help shape the culture and future direction of AIxBio Africa.",
+];
+
+const TEAM_APPLY_URL = "https://airtable.com/appkjlP1PITnNuUqa/pagMJQXa2k8jLZlQX/form";
 
 /* ══════════ PRIMITIVES ══════════════════════════════ */
 
@@ -239,6 +250,7 @@ const Nav = ({ go, page }) => {
     ["Research","research"],
     ["Fellowship","fellowship"],
     ["Mentors","mentors"],
+    ["Team","team"],
     ["Blog","blog"],
     ["FAQs","faqs"],
     ["Contact","contact"],
@@ -308,7 +320,7 @@ const Nav = ({ go, page }) => {
               <span style={{ display:"block",width:13,height:1.5,background:textCol,transition:"background .28s" }}/>
             </button>
 
-            <button className="nbr" onClick={() => go("mentors")}>Become a Mentor</button>
+            <button className="nbr" onClick={() => go("team")}>Join Our Team</button>
           </div>
         </div>
       </nav>
@@ -346,8 +358,8 @@ const Nav = ({ go, page }) => {
           <button
             className="br"
             style={{ marginTop:16,textAlign:"center" }}
-            onClick={() => { go("mentors"); setMobileOpen(false); }}
-          >Become a Mentor →</button>
+            onClick={() => { go("team"); setMobileOpen(false); }}
+          >Join Our Team →</button>
         </div>
       )}
     </>
@@ -571,10 +583,23 @@ const HomeNewsletter = ({ addSub }) => {
 
 /* HomePartners removed — unverified affiliations omitted for credibility */
 
+const HomeTeamCta = ({ go }) => (
+  <section className="sec-pad" style={{ background:"#F7F6F2",padding:"72px 44px",borderTop:"1px solid var(--brd)" }}>
+    <div style={{ maxWidth:1160,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20 }}>
+      <div style={{ maxWidth:620 }}>
+        <Ey label="Join Our Founding Team"/>
+        <H2 s={{ marginBottom:10 }}>Help Build AIxBio Africa</H2>
+        <Txt muted s={{ fontSize:15 }}>We're assembling a small founding team of volunteers to help build AIxBio Africa from the ground up.</Txt>
+      </div>
+      <button className="br" onClick={() => go("team")} style={{ flexShrink:0 }}>Join Our Team →</button>
+    </div>
+  </section>
+);
+
 const HomePage = ({ go, addSub }) => (<>
   <Hero go={go}/><HomeAbout go={go}/><HomeResearch go={go}/>
   <Spotlight go={go}/><HomeFellowship go={go}/><HomeBlog go={go}/>
-  <HomeNewsletter addSub={addSub}/>
+  <HomeTeamCta go={go}/><HomeNewsletter addSub={addSub}/>
 </>);
 
 /* ══════════ RESEARCH PAGES ══════════════════════════ */
@@ -996,44 +1021,34 @@ const MentorsPage = ({ go }) => (<>
 
 /* ══════════ FOUNDING TEAM PAGE ══════════════════════ */
 
-const FoundingTeamPage = ({ go }) => (<>
-  <PageHdr label="Founding Team" title="Join Our Founding Team" sub="Help build AIxBio Africa from the ground up — volunteer founding roles for people excited about AI safety, biosecurity, and scientific capacity in Africa."/>
+const TeamPage = ({ go }) => (<>
+  <PageHdr label="Join Our Founding Team" title="Help Build AIxBio Africa" sub="We're assembling a small founding team of passionate individuals who want to help build AIxBio Africa from the ground up."/>
 
   <Sec bg="#fff">
-    <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,alignItems:"center",marginBottom:64 }}>
+    <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,alignItems:"start",marginBottom:56 }}>
       <div className="reveal">
-        <Ey label="Founding Team"/>
-        <H2 s={{ marginBottom:20 }}>Build AIxBio Africa With Us</H2>
-        <Txt s={{ marginBottom:16 }}>We're assembling a small founding team of passionate individuals who want to help build AIxBio Africa from the ground up.</Txt>
         <Txt s={{ marginBottom:16 }}>These are volunteer founding team opportunities for people excited about creating meaningful impact through AI safety, biosecurity, and scientific capacity in Africa. If you're looking to take ownership, contribute your skills, and grow alongside an ambitious organization, we'd love to hear from you.</Txt>
-        <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>As AIxBio Africa grows and secures funding, we intend to prioritize outstanding founding team members for future funded opportunities where suitable roles and funding become available. While we cannot guarantee future paid positions, we're committed to growing with the people who help build this organization.</Txt>
-        <a href={FOUNDING_TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply Now →</a>
+        <Txt muted s={{ marginBottom:28 }}>As AIxBio Africa grows and secures funding, we intend to prioritize outstanding founding team members for future funded opportunities where suitable roles and funding become available. While we cannot guarantee future paid positions, we're committed to growing with the people who help build this organization.</Txt>
+        <a href={TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply Now →</a>
       </div>
-      <div style={{ display:"inline-flex",alignItems:"center",gap:8,background:"rgba(90,89,86,.08)",border:"1px solid rgba(90,89,86,.22)",padding:"7px 14px",alignSelf:"start" }}>
-        <span style={{ width:7,height:7,borderRadius:"50%",background:"#1A7646",flexShrink:0,display:"inline-block" }}/>
-        <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#5A5956",letterSpacing:".06em",textTransform:"uppercase" }}>Applications Open · Rolling Basis</span>
+      <div>
+        <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:16 }}>Why We're Building a Founding Team</div>
+        <Txt s={{ marginBottom:14 }}>Every impactful organization begins with a small group of people who believe in the mission and are willing to help build it.</Txt>
+        <Txt s={{ marginBottom:14 }}>As AIxBio Africa grows, we're looking for people who want to contribute beyond volunteering for isolated tasks. We're looking for collaborators who are excited about shaping programs, building systems, creating partnerships, supporting our community, and helping define what AIxBio Africa becomes.</Txt>
+        <Txt muted>If you're excited by the challenge of building something meaningful from the beginning, this is an opportunity to make a lasting contribution.</Txt>
       </div>
-    </div>
-
-    {/* Why we're building a founding team */}
-    <div className="reveal" style={{ marginBottom:56 }}>
-      <Ey label="Why We're Building a Founding Team"/>
-      <H2 s={{ marginBottom:20 }}>Every Impactful Organization Starts Somewhere</H2>
-      <Txt s={{ marginBottom:14 }}>Every impactful organization begins with a small group of people who believe in the mission and are willing to help build it.</Txt>
-      <Txt s={{ marginBottom:14 }}>As AIxBio Africa grows, we're looking for people who want to contribute beyond volunteering for isolated tasks. We're looking for collaborators who are excited about shaping programs, building systems, creating partnerships, supporting our community, and helping define what AIxBio Africa becomes.</Txt>
-      <Txt>If you're excited by the challenge of building something meaningful from the beginning, this is an opportunity to make a lasting contribution.</Txt>
     </div>
 
     {/* What it means to be a founding team member */}
     <div className="reveal" style={{ marginBottom:56 }}>
       <Ey label="What It Means"/>
-      <H2 s={{ marginBottom:20 }}>What It Means to Be a Founding Team Member</H2>
-      <Txt s={{ marginBottom:28 }}>Being part of the founding team means taking ownership of meaningful work while helping shape the future of AIxBio Africa. As a founding team member, you'll have the opportunity to:</Txt>
-      <div className="g3" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16 }}>
-        {["Build systems and programs from the ground up.","Take ownership of projects with real responsibility.","Work closely with the Founder and other founding team members.","Collaborate with researchers, mentors, and professionals.","Develop leadership and operational experience.","Help shape the culture and future direction of AIxBio Africa."].map((t,i)=>(
-          <div key={i} className={`reveal d${(i%5)+1}`} style={{ display:"flex",gap:12,padding:"18px 20px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+      <H2 s={{ marginBottom:20 }}>Being a Founding Team Member</H2>
+      <Txt s={{ marginBottom:24 }}>Being part of the founding team means taking ownership of meaningful work while helping shape the future of AIxBio Africa. As a founding team member, you'll have the opportunity to:</Txt>
+      <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+        {FOUNDING_BENEFITS.map((b,i) => (
+          <div key={i} style={{ display:"flex",gap:12,padding:"16px 18px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
             <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
-            <Txt muted s={{ fontSize:14,lineHeight:1.58 }}>{t}</Txt>
+            <Txt muted s={{ fontSize:14,lineHeight:1.6 }}>{b}</Txt>
           </div>
         ))}
       </div>
@@ -1044,63 +1059,58 @@ const FoundingTeamPage = ({ go }) => (<>
       <Ey label="Current Opportunities"/>
       <H2 s={{ marginBottom:32 }}>Founding Team Roles</H2>
       <div style={{ display:"flex",flexDirection:"column" }}>
-        {FOUNDING_ROLES.map((r,i,arr) => (
-          <div key={r.title} className={`reveal d${(i%5)+1}`} style={{ display:"grid",gridTemplateColumns:"56px 1fr auto",gap:24,padding:"24px 0",borderTop:"1px solid var(--brd)",alignItems:"center" }}>
-            <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"rgba(26,25,23,.22)" }}>{String(i+1).padStart(2,"0")}</span>
+        {FOUNDING_ROLES.map((r,i) => (
+          <div key={r.title} style={{ display:"grid",gridTemplateColumns:"1fr auto",gap:24,padding:"24px 0",borderTop:"1px solid var(--brd)",alignItems:"center" }}>
             <div>
-              <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:5,flexWrap:"wrap" }}>
-                <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917" }}>{r.title}</h3>
-                <span className="chip cg">Volunteer</span>
-              </div>
+              <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917",marginBottom:6 }}>{r.title}</h3>
               <Txt muted s={{ fontSize:14 }}>{r.desc}</Txt>
+              <span className="chip cg" style={{ marginTop:10,display:"inline-block" }}>Volunteer</span>
             </div>
-            <a href={FOUNDING_TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,fontWeight:600,color:"#B8102A",letterSpacing:".04em",textTransform:"uppercase",textDecoration:"none",whiteSpace:"nowrap" }}>Apply →</a>
+            <a href={TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="bo" style={{ textDecoration:"none",whiteSpace:"nowrap" }}>Apply →</a>
           </div>
         ))}
         <div style={{ borderTop:"1px solid var(--brd)" }}/>
       </div>
     </div>
 
-    {/* Who we're looking for + Commitment */}
-    <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,marginBottom:56 }}>
-      <div className="reveal">
-        <Ey label="Who We're Looking For"/>
-        <H2 s={{ marginBottom:20 }}>Who We're Looking For</H2>
-        <Txt s={{ marginBottom:20 }}>We care more about your commitment, initiative, and willingness to learn than checking every box on a job description. We're looking for people who are:</Txt>
+    {/* Who we're looking for */}
+    <div className="reveal" style={{ marginBottom:56 }}>
+      <Ey label="Who We're Looking For"/>
+      <H2 s={{ marginBottom:20 }}>Fit Over Résumé</H2>
+      <Txt s={{ marginBottom:24 }}>We care more about your commitment, initiative, and willingness to learn than checking every box on a job description. We're looking for people who are:</Txt>
+      <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
         {["Passionate about meaningful impact.","Proactive and reliable.","Comfortable working in a remote environment.","Strong communicators and team players.","Excited to help build an organization from the ground up."].map((t,i)=>(
-          <div key={i} style={{ display:"flex",gap:10,padding:"10px 0",borderBottom:"1px solid var(--brd)" }}>
+          <div key={i} style={{ display:"flex",gap:10,padding:"14px 0" }}>
             <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
             <Txt muted s={{ fontSize:14.5,lineHeight:1.58 }}>{t}</Txt>
           </div>
         ))}
       </div>
-      <div className="reveal d2">
-        <Ey label="Commitment"/>
-        <H2 s={{ marginBottom:20 }}>Commitment</H2>
-        <div style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"24px 26px",marginBottom:20 }}>
-          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 0",borderBottom:"1px solid var(--brd)" }}>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"#5A5956" }}>Position Type</span>
-            <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#1A1917" }}>Volunteer</span>
-          </div>
-          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 0" }}>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"#5A5956" }}>Time Commitment</span>
-            <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#1A1917" }}>~5–10 hrs/week</span>
-          </div>
+    </div>
+
+    {/* Commitment */}
+    <div className="reveal" style={{ marginBottom:56 }}>
+      <Ey label="Commitment"/>
+      <H2 s={{ marginBottom:20 }}>Time &amp; Structure</H2>
+      <div style={{ display:"flex",gap:18,padding:"22px 24px",background:"#F7F6F2",border:"1px solid var(--brd)",marginBottom:16,flexWrap:"wrap" }}>
+        <div>
+          <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#B8102A",letterSpacing:".1em",textTransform:"uppercase",marginBottom:4 }}>Time Commitment</div>
+          <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917" }}>5–10 hours per week</div>
         </div>
-        <Txt muted s={{ fontSize:14.5 }}>We understand that everyone has different schedules, but we're looking for people who can contribute consistently and take ownership of their responsibilities.</Txt>
       </div>
+      <Txt muted s={{ fontSize:14.5 }}>These are volunteer founding team positions. We understand that everyone has different schedules, but we're looking for people who can contribute consistently and take ownership of their responsibilities.</Txt>
     </div>
 
     {/* Why join */}
     <div className="reveal" style={{ marginBottom:56 }}>
       <Ey label="Why Join?"/>
-      <H2 s={{ marginBottom:20 }}>Why Join?</H2>
+      <H2 s={{ marginBottom:20 }}>A Unique Opportunity</H2>
       <Txt s={{ marginBottom:24 }}>Joining AIxBio Africa at this stage offers a unique opportunity to help shape an organization from its earliest days. As a founding team member, you'll have the opportunity to:</Txt>
       <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
         {["Make a meaningful contribution to an emerging nonprofit.","Work directly with the organization's leadership.","Build leadership and project management experience.","Expand your professional network.","Collaborate with experts, mentors, and researchers.","Grow alongside the organization and be considered for future funded opportunities where available."].map((t,i)=>(
-          <div key={i} style={{ display:"flex",gap:16,padding:"18px 20px",border:"1px solid var(--brd)",background:"#fff" }}>
-            <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:700,color:"rgba(184,16,42,.4)",paddingTop:2,flexShrink:0 }}>{String(i+1).padStart(2,"0")}</div>
-            <Txt muted s={{ fontSize:14,lineHeight:1.6 }}>{t}</Txt>
+          <div key={i} style={{ display:"flex",gap:10,padding:"14px 0" }}>
+            <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
+            <Txt muted s={{ fontSize:14.5,lineHeight:1.58 }}>{t}</Txt>
           </div>
         ))}
       </div>
@@ -1109,22 +1119,23 @@ const FoundingTeamPage = ({ go }) => (<>
     {/* Application process */}
     <div className="reveal" style={{ marginBottom:56 }}>
       <Ey label="Application Process"/>
-      <H2 s={{ marginBottom:32 }}>How to Apply</H2>
+      <H2 s={{ marginBottom:28 }}>How to Apply</H2>
       <div style={{ display:"flex",flexDirection:"column",gap:0 }}>
-        {["Submit your application.","Applications are reviewed on a rolling basis.","Shortlisted applicants will be invited for an interview.","Successful applicants will join the AIxBio Africa Founding Team."].map((t,i,arr)=>(
+        {["Submit your application.","Applications are reviewed on a rolling basis.","Shortlisted applicants will be invited for an interview.","Successful applicants will join the AIxBio Africa Founding Team."].map((step,i,arr) => (
           <div key={i} style={{ display:"flex",alignItems:"center",gap:18,padding:"16px 0",borderBottom:i<arr.length-1?"1px solid var(--brd)":"none" }}>
             <div className="step-dot" style={{ background:"rgba(184,16,42,.09)",color:"#B8102A" }}>{i+1}</div>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:14.5,color:"#3A3835" }}>{t}</span>
+            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:14.5,color:"#3A3835" }}>{step}</span>
           </div>
         ))}
       </div>
     </div>
 
     {/* Closing CTA */}
-    <div className="reveal" style={{ paddingTop:40,borderTop:"1px solid var(--brd)",textAlign:"center" }}>
-      <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(22px,2.6vw,32px)",fontWeight:600,color:"#1A1917",marginBottom:10,fontStyle:"italic" }}>Every organization starts somewhere. This is ours.</h4>
-      <Txt muted s={{ marginBottom:26,maxWidth:520,margin:"0 auto 26px" }}>If you're excited about helping build AIxBio Africa and contributing to our mission, we'd love to hear from you.</Txt>
-      <a href={FOUNDING_TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"15px 36px",fontSize:13,letterSpacing:".05em" }}>Apply to Join Our Founding Team →</a>
+    <div className="reveal" style={{ textAlign:"center",padding:"48px 24px",background:"#1C1B18" }}>
+      <p style={{ fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",fontSize:19,color:"rgba(255,255,255,.6)",marginBottom:6 }}>Every organization starts somewhere.</p>
+      <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:600,color:"#fff",marginBottom:22 }}>This is ours.</h3>
+      <Txt s={{ color:"rgba(255,255,255,.55)",marginBottom:26,maxWidth:480,marginLeft:"auto",marginRight:"auto" }}>If you're excited about helping build AIxBio Africa and contributing to our mission, we'd love to hear from you.</Txt>
+      <a href={TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 34px",fontSize:13,letterSpacing:".05em" }}>Apply to Join Our Founding Team →</a>
     </div>
   </Sec>
 </>);
@@ -1471,7 +1482,7 @@ const Footer = ({ go }) => (
             </a>
           </div>
         </div>
-        {[{t:"Research",ls:[["Research","research"],["About","about"],["Blog","blog"]]},{t:"Fellowship",ls:[["Overview","fellowship"],["Mentors","mentors"],["Apply","apply"]]},{t:"Organisation",ls:[["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"],["Founding Team","founding-team"]]}].map(({t,ls})=>(
+        {[{t:"Research",ls:[["Research","research"],["About","about"],["Blog","blog"]]},{t:"Fellowship",ls:[["Overview","fellowship"],["Mentors","mentors"],["Apply","apply"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
           <div key={t}>
             <h4 style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"rgba(255,255,255,.28)",letterSpacing:".17em",textTransform:"uppercase",marginBottom:16 }}>{t}</h4>
             <ul style={{ listStyle:"none",display:"flex",flexDirection:"column",gap:10 }}>
@@ -1527,7 +1538,7 @@ export default function App() {
       {page==="fellowship"&&<FellowshipPage go={go} addApp={addApp}/>}
       {page==="apply"&&<FellowshipPage go={go} addApp={addApp} startTab="apply"/>}
       {page==="mentors"&&<MentorsPage go={go}/>}
-      {page==="founding-team"&&<FoundingTeamPage go={go}/>}
+      {page==="team"&&<TeamPage go={go}/>}
       {page==="blog"&&<BlogPage go={go}/>}
       {page==="blog-post"&&<BlogPost slug={params.slug} go={go}/>}
       {page==="contact"&&<ContactPage go={go} addContact={addContact}/>}
@@ -1543,3 +1554,4 @@ export default function App() {
       <Footer go={go}/>
     </div>
   );
+}
