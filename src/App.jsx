@@ -1,4 +1,4 @@
- import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
@@ -136,10 +136,10 @@ const SCHEDULE = [
 
 const FOUNDING_ROLES = [
   {title:"Founding Partnerships & Grants Associate",desc:"Help build strategic partnerships, recruit mentors, identify funding opportunities, and support grant development."},
-  {title:"Founding Fellowship Program Manager",desc:"Coordinate and manage AIxBio Africa's fellowship programme, ensuring an outstanding experience for fellows and mentors."},
   {title:"Founding Communications & LinkedIn Manager",desc:"Lead our communications strategy and help grow AIxBio Africa's online presence."},
-  {title:"Founding Community & Events Coordinator",desc:"Build and engage our community through webinars, workshops, networking events, and outreach activities."},
   {title:"Founding Executive & Operations Assistant",desc:"Support the Founder in coordinating day-to-day operations and helping the organization run efficiently."},
+  {title:"Founding Director of Research",desc:"Help shape and lead AIxBio Africa's research agenda, guiding methodology, quality, and rigor across our biosecurity and AI safety research areas."},
+  {title:"Founding Operations Lead",desc:"Own the operational backbone of AIxBio Africa, building the systems and processes that keep the organization running smoothly as it grows."},
 ];
 
 const FOUNDING_BENEFITS = [
