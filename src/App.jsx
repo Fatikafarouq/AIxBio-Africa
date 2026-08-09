@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import markAiken from "./assets/mentors/mark-aiken.png";
+import gowthaamGokulakrishnan from "./assets/mentors/gowthaam-gokulakrishnan.jpeg";
+import jeanneVincendeau from "./assets/mentors/jeanne-vincendeau.jpeg";
 
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
@@ -109,9 +112,26 @@ const BLOG = [
    body:`Red-teaming AI systems for biosecurity requires a specific and defensible methodology. You need to test consistently, score consistently, and interpret results in a way that is useful to researchers and AI developers.\n\nOur approach draws on the Frontier Model Forum's biological threat taxonomy, which provides a structured way of thinking about stages at which AI systems might contribute to biological harm. We test across multiple framing conditions — naive user, domain expert, operational actor — and across multiple levels of specificity.\n\nScoring is done against a rubric that distinguishes between refusals, partial responses, and full responses, and separately assesses hazardous information content. One methodological commitment we are firm about: we do not use AI systems to score AI systems. Self-preference bias is a real problem in LLM-as-judge approaches, and we avoid it by scoring manually against our rubric.`},
 ];
 
-/* NOTE: Mentor profiles are not published until partnerships are formally confirmed.
-   The MENTORS array has been intentionally left empty. Confirmed mentors will be
-   added here and announced publicly once arrangements are finalised. */
+const MENTORS = [
+  {
+    name: "Mark Aiken",
+    role: "Policy Mentor",
+    img: markAiken,
+    bio: "Mark is a lawyer and AI governance practitioner with over 20 years of experience advancing good governance, institutional reform, and public policy across Africa, Asia-Pacific, and the Middle East. His work spans governments, the United Nations, multilateral development banks, and international organisations, leading complex governance initiatives in high-risk and politically sensitive environments. His current research focuses on the governance of AI, with particular interest in decision support systems and their responsible deployment across the public and private sectors.",
+  },
+  {
+    name: "Gowthaam Gokulakrishnan",
+    role: "Technical Mentor",
+    img: gowthaamGokulakrishnan,
+    bio: "Gowthaam is a Senior Machine Learning Engineer at a Bulge Bracket Bank. He is passionate about building AI solutions that solve complex real-world problems. Beyond his professional work, he enjoys mentoring students and young professionals, helping them strengthen technical skills, build confidence, and navigate their career journeys with purpose. Through AIxBio Africa, Gowthaam looks forward to sharing his experiences, supporting fellows in achieving their goals, and contributing to a community that empowers the next generation of innovators and leaders.",
+  },
+  {
+    name: "Jeanne Vincendeau",
+    role: "Governance Mentor",
+    img: jeanneVincendeau,
+    bio: "Jeanne is an independent researcher working at the intersection of international relations, political violence, and AI governance. Her work explores power concentration, AI geopolitics, and the use of AI in diplomatic contexts, always with a focus on ensuring AI development remains inclusive and human-centered. She is the co-founder of Horizon AGI, a French nonprofit supporting AI safety by raising awareness and empowering interdisciplinary talents. Through the fellowship, Jeanne is committed to helping fellows strengthen their political impact while building confidence in navigating the technical-governance gaps of the AI safety ecosystem.",
+  },
+];
 
 const FAQS = [
   {q:"How long is the fellowship?",a:"The fellowship is a 5-week intensive remote programme. All sessions are conducted online, with a combination of scheduled seminars, mentored research time, and small group work."},
@@ -1003,11 +1023,31 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
 
 /* ══════════ MENTORS PAGE ════════════════════════════ */
 
+const MentorCard = ({ name, role, img, bio }) => (
+  <div className="reveal lft" style={{ background:"#fff",border:"1px solid var(--brd)",padding:"28px 26px",display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap" }}>
+    <img src={img} alt={name} style={{ width:92,height:92,borderRadius:"50%",objectFit:"cover",flexShrink:0,border:"1px solid var(--brd)" }}/>
+    <div style={{ flex:1,minWidth:220 }}>
+      <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:6 }}>{name}</h3>
+      <span className="tag tr" style={{ marginBottom:14,display:"inline-block" }}>{role}</span>
+      <Txt muted s={{ fontSize:14,lineHeight:1.7 }}>{bio}</Txt>
+    </div>
+  </div>
+);
+
 const MentorsPage = ({ go }) => (<>
-  <PageHdr label="Mentors" title="Mentor Network" sub="Fellow applications for our pilot cohort are now closed — we're welcoming mentor applications for this cohort."/>
+  <PageHdr label="Mentors" title="Mentor Network" sub="Meet the mentors guiding fellows through the AIxBio Africa Pilot Cohort 2026, and learn how to join our growing mentor network."/>
   <Sec bg="#fff">
+    <div style={{ marginBottom:56 }}>
+      <Ey label="Pilot Cohort 2026"/>
+      <H2 s={{ marginBottom:18 }}>Mentors for Pilot Cohort 2026</H2>
+      <Txt muted s={{ marginBottom:32,maxWidth:700 }}>Our pilot cohort fellows are guided by mentors across technical, policy, and governance domains, each bringing deep expertise to help fellows shape and strengthen their research.</Txt>
+      <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
+        {MENTORS.map(m => <MentorCard key={m.name} {...m}/>)}
+      </div>
+    </div>
+
     <div style={{ maxWidth:700 }}>
-      <Txt s={{ marginBottom:18 }}>With fellow applications now closed, we're turning our attention to building out the mentor network for the inaugural fellowship. We're inviting researchers and practitioners working in biosecurity, artificial intelligence, public health, veterinary science, policy, and related fields to help guide fellows through their independent research projects.</Txt>
+      <Txt s={{ marginBottom:18 }}>Beyond the pilot cohort, we're building out a wider mentor network. We're inviting researchers and practitioners working in biosecurity, artificial intelligence, public health, veterinary science, policy, and related fields to help guide future fellows through their independent research projects.</Txt>
       <Txt muted s={{ marginBottom:48 }}>This is a volunteer role — mentors are not compensated for the pilot cohort. In return, mentors join a growing interdisciplinary network at the intersection of AI and biosecurity in African contexts, and are credited as contributors to the programme.</Txt>
 
       <div className="reveal" style={{ padding:"28px 30px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
