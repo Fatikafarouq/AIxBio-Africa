@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
-
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
    Founder: Fatika Umar Ibrahim
