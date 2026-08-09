@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import markAiken from "./assets/mentors/mark-aiken.png";
-import gowthaamGokulakrishnan from "./assets/mentors/gowthaam-gokulakrishnan.jpeg";
-import jeanneVincendeau from "./assets/mentors/jeanne-vincendeau.jpeg";
+import markAiken from "./assets/mark-aiken.png";
+import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
+import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
 
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
