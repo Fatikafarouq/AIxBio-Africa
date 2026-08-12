@@ -204,63 +204,60 @@ const FELLOWS = [
     outputs: []
   },
   {
-  id: "fellow-3",
-  name: "Fellow 3",
-  image: null,
-  role: "",
-  affiliation: "",
-  country: "",
-  projectTitle: "",
-  researchQuestion: "",
-  projectSummary: "",
-  africanContext: "",
-  researchAreas: [],
-  methodology: [],
-  mentor: {
+    id: "fellow-3",
+    placeholder: true,
     name: "",
-    affiliation: ""
+    image: null,
+    role: "",
+    affiliation: "",
+    country: "",
+    projectTitle: "",
+    researchQuestion: "",
+    projectSummary: "",
+    africanContext: "",
+    researchAreas: [],
+    methodology: [],
+    mentor: { name: "", affiliation: "" },
+    status: "",
+    expectedOutput: "",
+    bio: "",
+    links: {
+      linkedin: "",
+      website: "",
+      github: "",
+      scholar: "",
+      orcid: ""
+    },
+    outputs: []
   },
-  status: "",
-  expectedOutput: "",
-  bio: "",
-  links: {
-    linkedin: "",
-    website: "",
-    github: "",
-    scholar: "",
-    orcid: ""
-  },
-  outputs: []
-},
   {
-  id: "fellow-4",
-  name: "Fellow 4",
-  image: null,
-  role: "",
-  affiliation: "",
-  country: "",
-  projectTitle: "",
-  researchQuestion: "",
-  projectSummary: "",
-  africanContext: "",
-  researchAreas: [],
-  methodology: [],
-  mentor: {
+    id: "fellow-4",
+    placeholder: true,
     name: "",
-    affiliation: ""
-  },
-  status: "",
-  expectedOutput: "",
-  bio: "",
-  links: {
-    linkedin: "",
-    website: "",
-    github: "",
-    scholar: "",
-    orcid: ""
-  },
-  outputs: []
-},
+    image: null,
+    role: "",
+    affiliation: "",
+    country: "",
+    projectTitle: "",
+    researchQuestion: "",
+    projectSummary: "",
+    africanContext: "",
+    researchAreas: [],
+    methodology: [],
+    mentor: { name: "", affiliation: "" },
+    status: "",
+    expectedOutput: "",
+    bio: "",
+    links: {
+      linkedin: "",
+      website: "",
+      github: "",
+      scholar: "",
+      orcid: ""
+    },
+    outputs: []
+  }
+];
 
 const FAQS = [
   {q:"How long is the fellowship?",a:"The fellowship is a 5-week intensive remote programme. All sessions are conducted online, with a combination of scheduled seminars, mentored research time, and small group work."},
@@ -901,6 +898,23 @@ const FellowLinks = ({ links = {}, outputs = [] }) => {
 const FellowCard = ({ fellow, expanded, onToggle }) => {
   const detailsId = `fellow-details-${fellow.id}`;
   const isTodo = fellow.name.includes("TODO");
+
+  if (fellow.placeholder) {
+    return (
+      <article className="fellow-card" style={{ alignSelf:"stretch",overflow:"hidden",minHeight:260 }}>
+        <div style={{ minHeight:260,padding:"32px 24px",display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center" }}>
+          <div style={{ maxWidth:300 }}>
+            <div aria-hidden="true" style={{ width:68,height:68,margin:"0 auto 18px",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+              <AfricaSvg style={{ width:26,height:"auto",color:"#B8102A",opacity:.45 }}/>
+            </div>
+            <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",lineHeight:1.25,marginBottom:8 }}>Fellow profile forthcoming</h3>
+            <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"#8A8884",lineHeight:1.6 }}>Additional cohort information will be added soon.</p>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article className="fellow-card" style={{ alignSelf:"start",overflow:"hidden" }}>
       <div style={{ padding:"24px 24px 20px" }}>
