@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
+import francesAgba from "./assets/frances.jpeg";
+import teganJegede from "./assets/tegan.jpeg";
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
    Founder: Fatika Umar Ibrahim
@@ -63,6 +65,12 @@ td{font-family:'Figtree',sans-serif;font-size:13.5px;padding:11px 14px;border-bo
 .faq-item{border-bottom:1px solid var(--brd);padding:18px 0;}
 .faq-item:first-child{border-top:1px solid var(--brd);}
 .step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Figtree',sans-serif;font-size:12px;font-weight:600;flex-shrink:0;line-height:1;}
+.fellow-card{border:1px solid var(--brd);background:#fff;transition:border-color .2s,box-shadow .2s,transform .2s;}
+.fellow-card:hover{border-color:var(--brd2);box-shadow:0 8px 24px rgba(0,0,0,.045);}
+.fellow-disclosure:focus-visible{outline:2px solid #B8102A;outline-offset:3px;}
+.fellow-link:focus-visible{outline:2px solid #B8102A;outline-offset:2px;}
+.fellow-details{animation:fin .28s cubic-bezier(.4,0,.2,1) both;}
+.fellow-tags{display:flex;gap:6px;flex-wrap:wrap;}
 @media(max-width:1100px){.nl{display:none!important;}.mob-btn{display:flex!important;}}
 @media(max-width:900px){.g2,.g2r{grid-template-columns:1fr!important;}.g3{grid-template-columns:1fr 1fr!important;}.rg{grid-template-columns:1fr 1fr!important;}.fg{grid-template-columns:1fr 1fr!important;}.sg{grid-template-columns:1fr 1fr!important;}.mg{grid-template-columns:1fr 1fr!important;}}
 @media(max-width:580px){.g3,.rg,.fg{grid-template-columns:1fr!important;}.mg{grid-template-columns:1fr!important;}.sg{grid-template-columns:1fr 1fr!important;}}
@@ -130,6 +138,113 @@ const MENTORS = [
     img: jeanneVincendeau,
     bio: "Jeanne is an independent researcher working at the intersection of international relations, political violence, and AI governance. Her work explores power concentration, AI geopolitics, and the use of AI in diplomatic contexts, always with a focus on ensuring AI development remains inclusive and human-centered. She is the co-founder of Horizon AGI, a French nonprofit supporting AI safety by raising awareness and empowering interdisciplinary talents. Through the fellowship, Jeanne is committed to helping fellows strengthen their political impact while building confidence in navigating the technical-governance gaps of the AI safety ecosystem.",
   },
+];
+
+const FELLOWS = [
+  {
+    id: "frances-chinaza-agba",
+    name: "Frances Chinaza Agba",
+    image: francesAgba,
+    role: "AI Governance, Risk and Assurance Specialist; Computer Science educator",
+    affiliation: "Co-founder, LumenAfri",
+    country: "UK",
+    projectTitle: "Beyond Refusal — Evaluating Culturally Grounded Public-Health AI Responses Across Nigerian Languages",
+    researchQuestion: "Does AI behave differently when culturally grounded Nigerian public-health scenarios are presented in Nigerian languages (Pidgin, Yoruba, Igbo) vs. standard English?",
+    projectSummary: "This project evaluates two frontier AI models on matched prompts—direct versus culturally contextualised—across six Nigerian-context domains: women's health and harmful practices, mental health and stigma, traditional health practices, illness recognition, outbreaks and emergencies, and endemic diseases. Responses are assessed on safety calibration, public-health quality, and cultural calibration. The scope was narrowed from biosecurity guardrails to a focused multilingual evaluation, with calibration rather than refusal rate as the core metric. A structured prompt library connecting translations, model outputs, and coding is being developed.",
+    africanContext: "TODO: Add Frances's final wording on why this research matters in the African context.",
+    researchAreas: ["AI Safety", "Multilingual AI", "Public Health", "Cultural Calibration"],
+    methodology: [
+      "Matched-prompt testing across two frontier AI models",
+      "Direct versus culturally contextualised prompt conditions",
+      "Six-domain taxonomy scoring",
+      "Structured prompt library linking translation, outputs, and coding"
+    ],
+    mentor: { name: "TODO: Mentor name", affiliation: "" },
+    status: "In Progress",
+    expectedOutput: "Research paper and a lightweight “Beyond Refusal” evaluation prototype",
+    bio: "Frances is an AI Governance, Risk and Assurance Specialist and Computer Science educator. Her work focuses on responsible AI, AI governance, multilingual AI safety, and AI education, with particular interest in AI safety and equity across African contexts. She is also co-founder of LumenAfri, a nonprofit expanding digital and AI education access for underserved communities in Nigeria.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/nazaagba",
+      website: "",
+      github: "",
+      scholar: "",
+      orcid: ""
+    },
+    outputs: []
+  },
+  {
+    id: "tegan-jegede",
+    name: "Tegan Jegede",
+    image: teganJegede,
+    role: "Empirical AI Safety Researcher",
+    affiliation: "Nile University · Computer Science master's candidate",
+    country: "Nigeria",
+    projectTitle: "Evaluating Confidence and Policy Collapse in Multimodal Agents: Towards Robust Auditing Standards for African Healthcare",
+    researchQuestion: "How reliably does a multimodal agent's confidence correspond to its correctness across healthcare domains, and how does that relationship change with degraded medical images or regionally relevant clinical questions?",
+    projectSummary: "This project audits whether multimodal AI systems are appropriately uncertain on healthcare questions in African contexts, measuring calibration, abstention, and high-confidence errors rather than treating all wrong answers as hallucinations. It tests LLaVA-1.5-7B against AfriMed-QA, with SLAKE and PathVQA as imaging controls, using accuracy, Expected Calibration Error, Brier score, abstention rate, and high-confidence error rate. Robustness is also evaluated under controlled image blur and reduced illumination. The work is framed strictly as a research auditing study rather than a clinical diagnostic system.",
+    africanContext: "AfriMed-QA provides the primary African healthcare context for the audit, supporting evaluation of multimodal systems against regionally relevant clinical questions and informing auditing standards for potential use in African healthcare settings.",
+    researchAreas: ["Uncertainty Quantification", "Multimodal AI Safety", "Healthcare AI Auditing", "Model Calibration"],
+    methodology: [
+      "Benchmark LLaVA-1.5-7B using AfriMed-QA, SLAKE, and PathVQA",
+      "Evaluate accuracy, ECE, Brier score, abstention rate, and high-confidence error rate",
+      "Test robustness under controlled image blur and reduced illumination",
+      "Estimate confidence from relative probabilities across predefined answer options"
+    ],
+    mentor: { name: "TODO: Mentor name", affiliation: "" },
+    status: "In Progress",
+    expectedOutput: "Reproducible audit pipeline, cross-domain failure-mode analysis, and preliminary recommendations for evaluating multimodal systems in African healthcare",
+    bio: "Tegan is an empirical AI safety researcher and computer science master's candidate at Nile University, building on a foundation in electrical and electronics engineering. His research focuses on Uncertainty Quantification and Hybrid Reward Architectures to mitigate confident hallucinations in multimodal agents. During the fellowship, he is extending PyTorch multi-seed evaluation pipelines published at ICML 2026 to test open-weight models for policy collapse on dual-use biological tasks.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/tegan-jegede-52b296197",
+      website: "",
+      github: "",
+      scholar: "",
+      orcid: ""
+    },
+    outputs: []
+  },
+  {
+    id: "fellow-03",
+    // TODO: Replace with final fellow information
+    name: "Fellow 3 — TODO",
+    image: null,
+    role: "TODO: Current role",
+    affiliation: "TODO: Institution / affiliation",
+    country: "TODO: Country",
+    projectTitle: "TODO: Capstone research title",
+    researchQuestion: "TODO: Research question",
+    projectSummary: "TODO: Add an 80–120 word project summary.",
+    africanContext: "TODO: Explain why this research matters in the African context.",
+    researchAreas: ["TODO: Research area"],
+    methodology: ["TODO: Methodology / approach"],
+    mentor: { name: "TODO: Mentor name", affiliation: "" },
+    status: "In Progress",
+    expectedOutput: "TODO: Expected output",
+    bio: "TODO: Add a 60–100 word fellow bio.",
+    links: { linkedin: "", website: "", github: "", scholar: "", orcid: "" },
+    outputs: []
+  },
+  {
+    id: "fellow-04",
+    // TODO: Replace with final fellow information
+    name: "Fellow 4 — TODO",
+    image: null,
+    role: "TODO: Current role",
+    affiliation: "TODO: Institution / affiliation",
+    country: "TODO: Country",
+    projectTitle: "TODO: Capstone research title",
+    researchQuestion: "TODO: Research question",
+    projectSummary: "TODO: Add an 80–120 word project summary.",
+    africanContext: "TODO: Explain why this research matters in the African context.",
+    researchAreas: ["TODO: Research area"],
+    methodology: ["TODO: Methodology / approach"],
+    mentor: { name: "TODO: Mentor name", affiliation: "" },
+    status: "In Progress",
+    expectedOutput: "TODO: Expected output",
+    bio: "TODO: Add a 60–100 word fellow bio.",
+    links: { linkedin: "", website: "", github: "", scholar: "", orcid: "" },
+    outputs: []
+  }
 ];
 
 const FAQS = [
@@ -730,6 +845,161 @@ const AboutPage = ({ go }) => (<>
   </Sec>
 </>);
 
+const FellowInitials = ({ name }) => {
+  const initials = name
+    .replace(/— TODO/g, "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0])
+    .join("")
+    .toUpperCase();
+  return <Avatar initials={initials || "AF"} color="#B8102A" size={72}/>;
+};
+
+const FellowStatusBadge = ({ status }) => {
+  const cls = status === "Completed" ? "tg" : status === "Under Review" ? "ta" : "tg";
+  return <span className={`tag ${cls}`}>{status}</span>;
+};
+
+const FellowLinks = ({ links = {}, outputs = [] }) => {
+  const linkLabels = { linkedin:"LinkedIn", website:"Website", github:"GitHub", scholar:"Google Scholar", orcid:"ORCID" };
+  const available = Object.entries(links).filter(([,url]) => Boolean(url));
+  const publishedOutputs = outputs.filter(output => output && output.url);
+  if (!available.length && !publishedOutputs.length) return null;
+  return (
+    <div style={{ display:"flex",gap:10,flexWrap:"wrap",marginTop:16 }}>
+      {available.map(([key,url]) => (
+        <a key={key} className="fellow-link" href={url} target="_blank" rel="noopener noreferrer" style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none",borderBottom:"1px solid rgba(184,16,42,.35)",paddingBottom:2 }}>
+          {linkLabels[key] || key} ↗
+        </a>
+      ))}
+      {publishedOutputs.map((output,i) => (
+        <a key={`${output.label || "Output"}-${i}`} className="fellow-link" href={output.url} target="_blank" rel="noopener noreferrer" style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none",borderBottom:"1px solid rgba(184,16,42,.35)",paddingBottom:2 }}>
+          {output.label || "Research output"} ↗
+        </a>
+      ))}
+    </div>
+  );
+};
+
+const FellowCard = ({ fellow, expanded, onToggle }) => {
+  const detailsId = `fellow-details-${fellow.id}`;
+  const isTodo = fellow.name.includes("TODO");
+  return (
+    <article className="fellow-card" style={{ alignSelf:"start",overflow:"hidden" }}>
+      <div style={{ padding:"24px 24px 20px" }}>
+        <div style={{ display:"flex",gap:18,alignItems:"flex-start",marginBottom:20 }}>
+          {fellow.image ? (
+            <div style={{ width:88,height:108,flexShrink:0,overflow:"hidden",background:"#F0EFEB",border:"1px solid var(--brd)" }}>
+              <img src={fellow.image} alt={`${fellow.name} headshot`} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
+            </div>
+          ) : (
+            <div aria-label={`Photo placeholder for ${fellow.name}`} style={{ width:88,height:108,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+              <FellowInitials name={fellow.name}/>
+            </div>
+          )}
+          <div style={{ minWidth:0,flex:1 }}>
+            <div style={{ display:"flex",justifyContent:"space-between",gap:10,alignItems:"flex-start",flexWrap:"wrap",marginBottom:6 }}>
+              <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",lineHeight:1.18 }}>{fellow.name}</h3>
+              <FellowStatusBadge status={fellow.status}/>
+            </div>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#5A5956",lineHeight:1.55,marginBottom:5 }}>{fellow.role}</div>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:600,color:"#8A8884",letterSpacing:".04em",textTransform:"uppercase" }}>{fellow.affiliation} · {fellow.country}</div>
+          </div>
+        </div>
+
+        <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.35,marginBottom:12 }}>{fellow.projectTitle}</h4>
+        <div className="fellow-tags" style={{ marginBottom:14 }}>
+          {fellow.researchAreas.map(area => <span key={area} className="tag tl">{area}</span>)}
+        </div>
+        <Txt muted s={{ fontSize:13.5,lineHeight:1.65,marginBottom:16 }}>
+          {isTodo ? fellow.projectSummary : `${fellow.projectSummary.split(". ").slice(0,2).join(". ")}${fellow.projectSummary.includes(". ") ? "." : ""}`}
+        </Txt>
+        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,paddingTop:14,borderTop:"1px solid var(--brd)",marginBottom:18 }}>
+          <div>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:9.5,fontWeight:700,color:"#9A9896",letterSpacing:".1em",textTransform:"uppercase",marginBottom:4 }}>Mentor</div>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#3A3835",lineHeight:1.45 }}>{fellow.mentor.name}</div>
+          </div>
+          <div>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:9.5,fontWeight:700,color:"#9A9896",letterSpacing:".1em",textTransform:"uppercase",marginBottom:4 }}>Expected Output</div>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#3A3835",lineHeight:1.45 }}>{fellow.expectedOutput}</div>
+          </div>
+        </div>
+        <button type="button" className="bn fellow-disclosure" aria-expanded={expanded} aria-controls={detailsId} onClick={onToggle} style={{ width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,textAlign:"left",fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".06em",textTransform:"uppercase",padding:"10px 0 2px" }}>
+          <span>{expanded ? "Hide research" : "View research"}</span>
+          <span aria-hidden="true" style={{ fontSize:16,transform:expanded?"rotate(180deg)":"none",transition:"transform .2s" }}>↓</span>
+        </button>
+      </div>
+
+      {expanded && (
+        <div id={detailsId} className="fellow-details" style={{ borderTop:"1px solid var(--brd)",background:"#F7F6F2",padding:"24px" }}>
+          <div style={{ marginBottom:22 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#B8102A",letterSpacing:".12em",textTransform:"uppercase",marginBottom:7 }}>Research Question</div>
+            <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#1A1917",lineHeight:1.45 }}>{fellow.researchQuestion}</p>
+          </div>
+          <div style={{ marginBottom:22 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:7 }}>Project Summary</div>
+            <Txt muted s={{ fontSize:13.5,lineHeight:1.72 }}>{fellow.projectSummary}</Txt>
+          </div>
+          <div style={{ marginBottom:22 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:7 }}>Why This Matters in the African Context</div>
+            <Txt muted s={{ fontSize:13.5,lineHeight:1.72 }}>{fellow.africanContext}</Txt>
+          </div>
+          <div style={{ marginBottom:22 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:9 }}>Methodology / Approach</div>
+            <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+              {fellow.methodology.map((item,i) => (
+                <div key={i} style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
+                  <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
+                  <Txt muted s={{ fontSize:13.5,lineHeight:1.6 }}>{item}</Txt>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom:22 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:9 }}>Research Areas</div>
+            <div className="fellow-tags">{fellow.researchAreas.map(area => <span key={area} className="tag tl">{area}</span>)}</div>
+          </div>
+          <div style={{ marginBottom:22 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:7 }}>Fellow Bio</div>
+            <Txt muted s={{ fontSize:13.5,lineHeight:1.72 }}>{fellow.bio}</Txt>
+          </div>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:18,paddingTop:18,borderTop:"1px solid var(--brd)" }} className="g2">
+            <div>
+              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:6 }}>Mentor</div>
+              <Txt muted s={{ fontSize:13.5 }}>{fellow.mentor.name}{fellow.mentor.affiliation ? ` · ${fellow.mentor.affiliation}` : ""}</Txt>
+            </div>
+            <div>
+              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:6 }}>Expected Output</div>
+              <Txt muted s={{ fontSize:13.5 }}>{fellow.expectedOutput}</Txt>
+              {!fellow.outputs.length && <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#8A8884",letterSpacing:".08em",textTransform:"uppercase",marginTop:7 }}>Research in progress</div>}
+            </div>
+          </div>
+          <FellowLinks links={fellow.links} outputs={fellow.outputs}/>
+        </div>
+      )}
+    </article>
+  );
+};
+
+const CurrentCohort = () => {
+  const [expandedIds,setExpandedIds] = useState({});
+  const toggleFellow = id => setExpandedIds(current => ({ ...current, [id]: !current[id] }));
+  return (
+    <div className="reveal" style={{ marginBottom:64 }}>
+      <Ey label="2026 Pilot Cohort"/>
+      <H2 s={{ marginBottom:12 }}>Current Cohort</H2>
+      <Txt muted s={{ maxWidth:760,marginBottom:32 }}>Meet the researchers in AIxBio Africa's current fellowship cohort and explore the questions they are investigating at the intersection of artificial intelligence, biosecurity, governance, public health, and emerging technologies.</Txt>
+      <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"start" }}>
+        {FELLOWS.map(fellow => (
+          <FellowCard key={fellow.id} fellow={fellow} expanded={Boolean(expandedIds[fellow.id])} onToggle={() => toggleFellow(fellow.id)}/>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /* ══════════ FELLOWSHIP PAGE ════════════════════════ */
 
 const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
@@ -818,7 +1088,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
           <div className="reveal d2">
             <div style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"28px 26px",marginBottom:16 }}>
               <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".14em",textTransform:"uppercase",marginBottom:18 }}>Fellowship Details</div>
-              {[["Duration","5 Weeks"],["Format","Remote"],["Cohort Size","5 Fellows"],["Cost","Free"],["Stipend","None (Pilot Cohort)"]].map(([k,v])=>(
+              {[["Duration","5 Weeks"],["Format","Remote"],["Cohort Size","4 Fellows"],["Cost","Free"],["Stipend","None (Pilot Cohort)"]].map(([k,v])=>(
                 <div key={k} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 0",borderBottom:"1px solid var(--brd)" }}>
                   <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"#5A5956" }}>{k}</span>
                   <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#1A1917" }}>{v}</span>
@@ -842,6 +1112,9 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
             ))}
           </div>
         </div>
+
+        {/* Current Cohort */}
+        <CurrentCohort/>
 
         {/* Research Areas */}
         <div className="reveal" style={{ marginBottom:56 }}>
