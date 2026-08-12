@@ -159,7 +159,7 @@ const FELLOWS = [
       "Six-domain taxonomy scoring",
       "Structured prompt library linking translation, outputs, and coding"
     ],
-    mentor: { name: "TODO: Mentor name", affiliation: "" },
+    mentor: { name: "Jeanne Marie Jacqueline Vincendeau: Mentor name", affiliation: "" },
     status: "In Progress",
     expectedOutput: "Research paper and a lightweight “Beyond Refusal” evaluation prototype",
     bio: "Frances is an AI Governance, Risk and Assurance Specialist and Computer Science educator. Her work focuses on responsible AI, AI governance, multilingual AI safety, and AI education, with particular interest in AI safety and equity across African contexts. She is also co-founder of LumenAfri, a nonprofit expanding digital and AI education access for underserved communities in Nigeria.",
@@ -190,7 +190,7 @@ const FELLOWS = [
       "Test robustness under controlled image blur and reduced illumination",
       "Estimate confidence from relative probabilities across predefined answer options"
     ],
-    mentor: { name: "TODO: Mentor name", affiliation: "" },
+    mentor: { name: "Jeanne Marie Jacqueline Vincendeau: Mentor name", affiliation: "" },
     status: "In Progress",
     expectedOutput: "Reproducible audit pipeline, cross-domain failure-mode analysis, and preliminary recommendations for evaluating multimodal systems in African healthcare",
     bio: "Tegan is an empirical AI safety researcher and computer science master's candidate at Nile University, building on a foundation in electrical and electronics engineering. His research focuses on Uncertainty Quantification and Hybrid Reward Architectures to mitigate confident hallucinations in multimodal agents. During the fellowship, he is extending PyTorch multi-seed evaluation pipelines published at ICML 2026 to test open-weight models for policy collapse on dual-use biological tasks.",
