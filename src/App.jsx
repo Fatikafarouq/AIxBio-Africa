@@ -204,48 +204,63 @@ const FELLOWS = [
     outputs: []
   },
   {
-    id: "fellow-03",
-    // TODO: Replace with final fellow information
-    name: "Fellow 3 — TODO",
-    image: null,
-    role: "TODO: Current role",
-    affiliation: "TODO: Institution / affiliation",
-    country: "TODO: Country",
-    projectTitle: "TODO: Capstone research title",
-    researchQuestion: "TODO: Research question",
-    projectSummary: "TODO: Add an 80–120 word project summary.",
-    africanContext: "TODO: Explain why this research matters in the African context.",
-    researchAreas: ["TODO: Research area"],
-    methodology: ["TODO: Methodology / approach"],
-    mentor: { name: "TODO: Mentor name", affiliation: "" },
-    status: "In Progress",
-    expectedOutput: "TODO: Expected output",
-    bio: "TODO: Add a 60–100 word fellow bio.",
-    links: { linkedin: "", website: "", github: "", scholar: "", orcid: "" },
-    outputs: []
+  id: "fellow-3",
+  name: "Fellow 3",
+  image: null,
+  role: "",
+  affiliation: "",
+  country: "",
+  projectTitle: "",
+  researchQuestion: "",
+  projectSummary: "",
+  africanContext: "",
+  researchAreas: [],
+  methodology: [],
+  mentor: {
+    name: "",
+    affiliation: ""
   },
+  status: "",
+  expectedOutput: "",
+  bio: "",
+  links: {
+    linkedin: "",
+    website: "",
+    github: "",
+    scholar: "",
+    orcid: ""
+  },
+  outputs: []
+},
   {
-    id: "fellow-04",
-    // TODO: Replace with final fellow information
-    name: "Fellow 4 — TODO",
-    image: null,
-    role: "TODO: Current role",
-    affiliation: "TODO: Institution / affiliation",
-    country: "TODO: Country",
-    projectTitle: "TODO: Capstone research title",
-    researchQuestion: "TODO: Research question",
-    projectSummary: "TODO: Add an 80–120 word project summary.",
-    africanContext: "TODO: Explain why this research matters in the African context.",
-    researchAreas: ["TODO: Research area"],
-    methodology: ["TODO: Methodology / approach"],
-    mentor: { name: "TODO: Mentor name", affiliation: "" },
-    status: "In Progress",
-    expectedOutput: "TODO: Expected output",
-    bio: "TODO: Add a 60–100 word fellow bio.",
-    links: { linkedin: "", website: "", github: "", scholar: "", orcid: "" },
-    outputs: []
-  }
-];
+  id: "fellow-4",
+  name: "Fellow 4",
+  image: null,
+  role: "",
+  affiliation: "",
+  country: "",
+  projectTitle: "",
+  researchQuestion: "",
+  projectSummary: "",
+  africanContext: "",
+  researchAreas: [],
+  methodology: [],
+  mentor: {
+    name: "",
+    affiliation: ""
+  },
+  status: "",
+  expectedOutput: "",
+  bio: "",
+  links: {
+    linkedin: "",
+    website: "",
+    github: "",
+    scholar: "",
+    orcid: ""
+  },
+  outputs: []
+},
 
 const FAQS = [
   {q:"How long is the fellowship?",a:"The fellowship is a 5-week intensive remote programme. All sessions are conducted online, with a combination of scheduled seminars, mentored research time, and small group work."},
