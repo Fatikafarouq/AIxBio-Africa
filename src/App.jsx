@@ -3,7 +3,7 @@ import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
 import francesAgba from "./assets/frances.jpeg";
-import teganJegede from "./assets/tegan.png";
+import teganJegede from "./assets/tegan.jpeg";
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
    Founder: Fatika Umar Ibrahim
