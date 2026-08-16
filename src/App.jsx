@@ -4,6 +4,7 @@ import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
 import francesAgba from "./assets/frances.jpeg";
 import teganJegede from "./assets/tegan.jpeg";
+import gideonAbako from "./assets/gideon-abako.jpeg";
 /* ══════════════════════════════════════════════════════
    AIxbio Africa · Institutional Website
    Founder: Fatika Umar Ibrahim
@@ -204,25 +205,29 @@ const FELLOWS = [
     outputs: []
   },
   {
-    id: "fellow-3",
-    placeholder: true,
-    name: "",
-    image: null,
-    role: "",
-    affiliation: "",
+    id: "gideon-abako",
+    name: "Gideon Abako",
+    image: gideonAbako,
+    role: "Founder, Public Interest Technology",
+    affiliation: "Neuravox Foundation",
     country: "",
-    projectTitle: "",
-    researchQuestion: "",
-    projectSummary: "",
-    africanContext: "",
-    researchAreas: [],
-    methodology: [],
-    mentor: { name: "", affiliation: "" },
-    status: "",
-    expectedOutput: "",
-    bio: "",
+    projectTitle: "Minimum Risk Management Checks for AI Decision Support Tools in Primary and Community Health Care",
+    researchQuestion: "What minimum risk management checks should health institutions apply across the deployment lifecycle of AI decision support tools used in primary and community health care?",
+    projectSummary: "This project examines how health institutions can translate high-level AI governance principles into practical, minimum risk management checks for AI decision support tools used in frontline health care. Drawing on a targeted review of global governance frameworks, digital health guidance, medical-device guidance, and emerging African deployment evidence, the research develops a practitioner-facing lifecycle framework covering the selection, local validation, deployment, monitoring, and eventual withdrawal of AI decision support systems. The work focuses primarily on primary care, while treating community health as an adjacent frontline context with additional language, referral, authority, and implementation risks.",
+    africanContext: "Primary and community health institutions in African settings may face distinct challenges when deploying AI decision support systems, including uneven infrastructure, language and local-context gaps, limited specialist support, variable documentation quality, data representativeness concerns, and limited institutional leverage over technology vendors. This research aims to translate broad AI governance principles into practical, context-sensitive checks that health institutions can use when deciding whether and how AI systems should influence frontline care.",
+    researchAreas: ["AI Governance", "Health AI", "AI Risk Management", "Primary Health Care"],
+    methodology: [
+      "Targeted literature review and source matrix covering 22 core governance, health-system, regulatory, and empirical sources",
+      "Evidence mapping of AI decision support risks and implementation evidence in primary and community health care",
+      "Development of a risk taxonomy covering clinical safety, data, human oversight, workflow, accountability, infrastructure, privacy, vendors, monitoring, and decommissioning",
+      "Development of a five-stage lifecycle framework spanning procurement, pre-deployment assessment, deployment, monitoring, and post-deployment learning"
+    ],
+    mentor: { name: "Mark Aiken", affiliation: "Policy Mentor" },
+    status: "In Progress",
+    expectedOutput: "Lifecycle risk management framework paper or practitioner report, supported by a one-page minimum risk checklist",
+    bio: "Gideon Abako is Founder of Neuravox Foundation, a public interest technology organisation working across artificial intelligence, data systems, health, language infrastructure and digital governance in Africa. His work spans government, regional and funder programmes including FCDO/Elrha-funded research on AI-enabled health supply chains in Uganda, Mozilla Common Voice language data infrastructure, and a cross-country East African Community study on AI-enabled immunization stock monitoring in Uganda and Tanzania. He has also advised UK FCDO on AI and commercialization as well as innovation ecosystems in West Africa.",
     links: {
-      linkedin: "",
+      linkedin: "https://www.linkedin.com/in/gideonluper/",
       website: "",
       github: "",
       scholar: "",
@@ -934,7 +939,7 @@ const FellowCard = ({ fellow, expanded, onToggle }) => {
               <FellowStatusBadge status={fellow.status}/>
             </div>
             <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#5A5956",lineHeight:1.55,marginBottom:5 }}>{fellow.role}</div>
-            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:600,color:"#8A8884",letterSpacing:".04em",textTransform:"uppercase" }}>{fellow.affiliation} · {fellow.country}</div>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:600,color:"#8A8884",letterSpacing:".04em",textTransform:"uppercase" }}>{[fellow.affiliation, fellow.country].filter(Boolean).join(" · ")}</div>
           </div>
         </div>
 
