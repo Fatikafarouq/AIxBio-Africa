@@ -375,16 +375,22 @@ const Avatar = ({ initials, color, size=68 }) => (
 const Nav = ({ go, page }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [programsOpen, setProgramsOpen] = useState(false);
+  const [mobileProgramsOpen, setMobileProgramsOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 24);
-    fn(); /* run once on mount to catch page loads mid-scroll */
+    fn();
     window.addEventListener("scroll", fn, { passive:true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  /* Close mobile nav on page change */
-  useEffect(() => { setMobileOpen(false); }, [page]);
+  /* Close navigation menus on page change */
+  useEffect(() => {
+    setMobileOpen(false);
+    setProgramsOpen(false);
+    setMobileProgramsOpen(false);
+  }, [page]);
 
   /* Close mobile nav on click outside */
   useEffect(() => {
@@ -396,16 +402,30 @@ const Nav = ({ go, page }) => {
     return () => { clearTimeout(t); window.removeEventListener("click", fn); };
   }, [mobileOpen]);
 
-  const mainLinks = [
+  /* Close desktop Programs dropdown on click outside */
+  useEffect(() => {
+    if (!programsOpen) return;
+    const fn = (e) => {
+      if (!e.target.closest("[data-programs-menu]")) setProgramsOpen(false);
+    };
+    const t = setTimeout(() => window.addEventListener("click", fn), 0);
+    return () => { clearTimeout(t); window.removeEventListener("click", fn); };
+  }, [programsOpen]);
+
+  const mainLinksBeforePrograms = [
     ["About","about"],
     ["Research","research"],
-    ["Fellowship","fellowship"],
+  ];
+
+  const mainLinksAfterPrograms = [
     ["Mentors","mentors"],
     ["Team","team"],
     ["Blog","blog"],
     ["FAQs","faqs"],
     ["Contact","contact"],
   ];
+
+  const programsActive = page === "fellowship" || page === "apply" || page === "courses";
 
   /*
     Colour logic:
@@ -417,6 +437,36 @@ const Nav = ({ go, page }) => {
   const textCol   = needsDark ? "#1A1917"                : "rgba(255,255,255,.88)";
   const activeCol = needsDark ? "#B8102A"                : "#ffffff";
   const logoLight = !needsDark;
+
+  const DesktopLink = ({ label, target }) => (
+    <button
+      className="nb"
+      onClick={() => go(target)}
+      style={{
+        color: page===target ? activeCol : textCol,
+        padding:"0 10px",
+        borderBottom: page===target ? `1.5px solid ${activeCol}` : "1.5px solid transparent",
+        paddingBottom:2,marginBottom:-2,
+        transition:"color .18s",
+      }}
+    >{label}</button>
+  );
+
+  const MobileLink = ({ label, target }) => (
+    <button
+      style={{
+        fontFamily:"'Figtree',sans-serif",
+        fontSize:15,
+        fontWeight: page===target ? 600 : 400,
+        color: page===target ? "#B8102A" : "#1A1917",
+        padding:"12px 0",textAlign:"left",
+        background:"none",border:"none",
+        borderBottom:"1px solid var(--brd)",
+        cursor:"pointer",letterSpacing:".01em",
+      }}
+      onClick={() => { go(target); setMobileOpen(false); }}
+    >{label}</button>
+  );
 
   return (
     <>
@@ -435,20 +485,37 @@ const Nav = ({ go, page }) => {
 
           {/* Desktop links */}
           <div className="nl" style={{ display:"flex",alignItems:"center",gap:0 }}>
-            {mainLinks.map(([l,p]) => (
+            {mainLinksBeforePrograms.map(([l,p]) => <DesktopLink key={p} label={l} target={p}/>)}
+
+            {/* Programs dropdown */}
+            <div data-programs-menu style={{ position:"relative" }}>
               <button
-                key={p}
                 className="nb"
-                onClick={() => go(p)}
+                aria-haspopup="menu"
+                aria-expanded={programsOpen}
+                onClick={() => setProgramsOpen(o => !o)}
                 style={{
-                  color: page===p ? activeCol : textCol,
+                  color: programsActive ? activeCol : textCol,
                   padding:"0 10px",
-                  borderBottom: page===p ? `1.5px solid ${activeCol}` : "1.5px solid transparent",
+                  borderBottom: programsActive ? `1.5px solid ${activeCol}` : "1.5px solid transparent",
                   paddingBottom:2,marginBottom:-2,
                   transition:"color .18s",
+                  display:"flex",alignItems:"center",gap:5,
                 }}
-              >{l}</button>
-            ))}
+              >
+                Programs
+                <span aria-hidden="true" style={{ fontSize:10,display:"inline-block",transform:programsOpen?"rotate(180deg)":"rotate(0deg)",transition:"transform .18s" }}>▼</span>
+              </button>
+
+              {programsOpen && (
+                <div className="dd" role="menu" style={{ left:0,right:"auto",minWidth:170 }}>
+                  <button role="menuitem" onClick={() => go("fellowship")}>Fellowships</button>
+                  <button role="menuitem" onClick={() => go("courses")}>Courses</button>
+                </div>
+              )}
+            </div>
+
+            {mainLinksAfterPrograms.map(([l,p]) => <DesktopLink key={p} label={l} target={p}/>)}
           </div>
 
           <div style={{ display:"flex",alignItems:"center",gap:10 }}>
@@ -488,24 +555,42 @@ const Nav = ({ go, page }) => {
             zIndex:299,padding:"16px 24px 22px",
             display:"flex",flexDirection:"column",
             boxShadow:"0 8px 28px rgba(0,0,0,.1)",
+            maxHeight:"calc(100vh - 68px)",overflowY:"auto",
           }}
         >
-          {mainLinks.map(([l,p]) => (
-            <button
-              key={p}
-              style={{
-                fontFamily:"'Figtree',sans-serif",
-                fontSize:15,
-                fontWeight: page===p ? 600 : 400,
-                color: page===p ? "#B8102A" : "#1A1917",
-                padding:"12px 0",textAlign:"left",
-                background:"none",border:"none",
-                borderBottom:"1px solid var(--brd)",
-                cursor:"pointer",letterSpacing:".01em",
-              }}
-              onClick={() => { go(p); setMobileOpen(false); }}
-            >{l}</button>
-          ))}
+          {mainLinksBeforePrograms.map(([l,p]) => <MobileLink key={p} label={l} target={p}/>)}
+
+          <button
+            aria-expanded={mobileProgramsOpen}
+            style={{
+              fontFamily:"'Figtree',sans-serif",fontSize:15,
+              fontWeight:programsActive?600:400,
+              color:programsActive?"#B8102A":"#1A1917",
+              padding:"12px 0",textAlign:"left",background:"none",border:"none",
+              borderBottom:"1px solid var(--brd)",cursor:"pointer",letterSpacing:".01em",
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+            }}
+            onClick={() => setMobileProgramsOpen(o => !o)}
+          >
+            <span>Programs</span>
+            <span aria-hidden="true" style={{ fontSize:10,transform:mobileProgramsOpen?"rotate(180deg)":"rotate(0deg)",transition:"transform .18s" }}>▼</span>
+          </button>
+
+          {mobileProgramsOpen && (
+            <div style={{ padding:"4px 0 4px 16px",borderBottom:"1px solid var(--brd)" }}>
+              <button
+                onClick={() => { go("fellowship"); setMobileOpen(false); }}
+                style={{ display:"block",width:"100%",textAlign:"left",padding:"10px 0",background:"none",border:"none",fontFamily:"'Figtree',sans-serif",fontSize:14,color:page==="fellowship"?"#B8102A":"#5A5956",cursor:"pointer" }}
+              >Fellowships</button>
+              <button
+                onClick={() => { go("courses"); setMobileOpen(false); }}
+                style={{ display:"block",width:"100%",textAlign:"left",padding:"10px 0",background:"none",border:"none",fontFamily:"'Figtree',sans-serif",fontSize:14,color:page==="courses"?"#B8102A":"#5A5956",cursor:"pointer" }}
+              >Courses</button>
+            </div>
+          )}
+
+          {mainLinksAfterPrograms.map(([l,p]) => <MobileLink key={p} label={l} target={p}/>)}
+
           <button
             className="br"
             style={{ marginTop:16,textAlign:"center" }}
@@ -1674,6 +1759,14 @@ const DonatePage = ({ go }) => (<>
   </Sec>
 </>);
 
+/* ══════════ COURSES PAGE ════════════════════════════ */
+
+const CoursesPage = () => (
+  <div style={{ minHeight:"100vh",background:"#F7F6F2",display:"flex",alignItems:"center",justifyContent:"center",padding:"100px 24px 40px" }}>
+    <h1 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(34px,5vw,64px)",fontWeight:600,color:"#1A1917",lineHeight:1.1,textAlign:"center" }}>Coming soon.</h1>
+  </div>
+);
+
 /* ══════════ STUB PAGES ══════════════════════════════ */
 
 const StubPage = ({ label,title,sub,go }) => (<>
@@ -1828,7 +1921,7 @@ const Footer = ({ go }) => (
             </a>
           </div>
         </div>
-        {[{t:"Research",ls:[["Research","research"],["About","about"],["Blog","blog"]]},{t:"Fellowship",ls:[["Overview","fellowship"],["Mentors","mentors"],["Apply","apply"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
+        {[{t:"Research",ls:[["Research","research"],["About","about"],["Blog","blog"]]},{t:"Programs",ls:[["Fellowships","fellowship"],["Courses","courses"],["Mentors","mentors"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
           <div key={t}>
             <h4 style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"rgba(255,255,255,.28)",letterSpacing:".17em",textTransform:"uppercase",marginBottom:16 }}>{t}</h4>
             <ul style={{ listStyle:"none",display:"flex",flexDirection:"column",gap:10 }}>
@@ -1882,6 +1975,7 @@ export default function App() {
       {page==="research-detail"&&<ResearchDetail slug={params.slug} go={go}/>}
       {page==="about"&&<AboutPage go={go}/>}
       {page==="fellowship"&&<FellowshipPage go={go} addApp={addApp}/>}
+      {page==="courses"&&<CoursesPage/>}
       {page==="apply"&&<FellowshipPage go={go} addApp={addApp} startTab="apply"/>}
       {page==="mentors"&&<MentorsPage go={go}/>}
       {page==="team"&&<TeamPage go={go}/>}
