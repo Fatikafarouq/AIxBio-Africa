@@ -50,6 +50,7 @@ const FacilitatorAttendance = () => {
   const [draft, setDraft] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -168,6 +169,42 @@ const FacilitatorAttendance = () => {
     setMessage("Attendance saved.");
   };
 
+  const attendanceComplete = Boolean(
+    sessionId &&
+    participants.length &&
+    participants.every(p =>
+      (group?.attendance || []).some(a => a.session_id === sessionId && a.user_id === p.user_id)
+    )
+  );
+
+  const nextModuleId = session && session.module_id < 6 ? session.module_id + 1 : null;
+  const nextModuleUnlocked = Boolean(
+    nextModuleId && (group?.unlocked_modules || [1]).includes(nextModuleId)
+  );
+
+  const unlockNext = async () => {
+    if (!groupId || !session || !nextModuleId) return;
+
+    setUnlocking(true);
+    setError("");
+    setMessage("");
+
+    const { error: e } = await supabase.rpc("unlock_next_module_for_group", {
+      p_group_id: groupId,
+      p_current_module_id: session.module_id
+    });
+
+    if (e) {
+      setError(e.message);
+      setUnlocking(false);
+      return;
+    }
+
+    await loadDashboard();
+    setUnlocking(false);
+    setMessage(`Module ${nextModuleId} is now unlocked for participants.`);
+  };
+
   return (
     <div className="reveal" style={{ marginBottom: 52, paddingTop: 8 }}>
       <Ey label="Facilitator Attendance" />
@@ -268,6 +305,33 @@ const FacilitatorAttendance = () => {
             <button className="br" onClick={save} disabled={saving} style={{ marginTop: 18, opacity: saving ? .65 : 1 }}>
               {saving ? "Saving…" : "Save attendance"}
             </button>
+          )}
+
+          {session?.module_id < 6 && attendanceComplete && (
+            <div style={{ marginTop: 18, padding: "18px 20px", border: "1px solid var(--brd)", background: "#F7F6F2" }}>
+              {nextModuleUnlocked ? (
+                <Txt s={{ fontSize: 13.5, color: "#1A6B46", fontWeight: 700 }}>
+                  Module {nextModuleId} is already unlocked for participants ✓
+                </Txt>
+              ) : (
+                <>
+                  <Txt muted s={{ fontSize: 13.5, marginBottom: 12 }}>
+                    Attendance for Module {session.module_id} is saved. When your group is ready to move forward, unlock the next module.
+                  </Txt>
+                  <button className="br" onClick={unlockNext} disabled={unlocking} style={{ opacity: unlocking ? .65 : 1 }}>
+                    {unlocking ? "Unlocking…" : `Unlock Module ${nextModuleId} for participants`}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {session?.module_id === 6 && attendanceComplete && (
+            <div style={{ marginTop: 18, padding: "18px 20px", border: "1px solid var(--brd)", background: "#F7F6F2" }}>
+              <Txt muted s={{ fontSize: 13.5 }}>
+                Module 6 attendance is saved. Capstone access is calculated automatically for each participant from attendance and pre-session exercise completion.
+              </Txt>
+            </div>
           )}
         </>
       )}
