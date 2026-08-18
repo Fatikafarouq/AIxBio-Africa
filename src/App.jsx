@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { supabase } from "./lib/supabase";
+import CourseShell from "./course/CourseShell";
+import CourseAuth from "./course/CourseAuth";
 import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
@@ -372,7 +375,7 @@ const Avatar = ({ initials, color, size=68 }) => (
 
 /* ══════════ NAV ══════════════════════════════════════ */
 
-const Nav = ({ go, page }) => {
+const Nav = ({ go, page, session, isAdmin, onSignIn, onSignOut }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [programsOpen, setProgramsOpen] = useState(false);
@@ -425,7 +428,7 @@ const Nav = ({ go, page }) => {
     ["Contact","contact"],
   ];
 
-  const programsActive = page === "fellowship" || page === "apply" || page === "courses";
+  const programsActive = page === "fellowship" || page === "apply" || page === "courses" || page === "course-apply" || page === "facilitator" || page === "facilitator-module" || page === "participant" || page === "participant-module" || page === "course-admin";
 
   /*
     Colour logic:
@@ -538,6 +541,14 @@ const Nav = ({ go, page }) => {
               <span style={{ display:"block",width:13,height:1.5,background:textCol,transition:"background .28s" }}/>
             </button>
 
+            {session ? (
+              <div data-account-menu style={{ position:"relative",display:"flex",alignItems:"center",gap:8 }}>
+                {isAdmin && <button className="nb" onClick={() => go("course-admin")} style={{ color:textCol,fontSize:12 }}>Course Admin</button>}
+                <button className="nb" onClick={onSignOut} title="Sign out" style={{ color:textCol,maxWidth:150,overflow:"hidden",textOverflow:"ellipsis" }}>{session.user.email || "Account"}</button>
+              </div>
+            ) : (
+              <button className="nb" onClick={onSignIn} style={{ color:textCol,padding:"4px 8px" }}>Sign in</button>
+            )}
             <button className="nbr" onClick={() => go("team")}>Join Our Team</button>
           </div>
         </div>
@@ -591,6 +602,14 @@ const Nav = ({ go, page }) => {
 
           {mainLinksAfterPrograms.map(([l,p]) => <MobileLink key={p} label={l} target={p}/>)}
 
+          {session ? (
+            <>
+              {isAdmin && <MobileLink label="Course Admin" target="course-admin"/>}
+              <button className="bn" onClick={()=>{onSignOut();setMobileOpen(false);}} style={{ textAlign:"left",padding:"12px 0",fontSize:14,color:"#5A5956" }}>{session.user.email || "Sign out"} · Sign out</button>
+            </>
+          ) : (
+            <button className="bn" onClick={()=>{onSignIn();setMobileOpen(false);}} style={{ textAlign:"left",padding:"12px 0",fontSize:15,color:"#B8102A",fontWeight:600 }}>Sign in</button>
+          )}
           <button
             className="br"
             style={{ marginTop:16,textAlign:"center" }}
@@ -1762,8 +1781,8 @@ const DonatePage = ({ go }) => (<>
 /* ══════════ COURSES PAGE ════════════════════════════ */
 
 const CoursesPage = () => (
-  <div style={{ minHeight:"100vh",background:"#F7F6F2",display:"flex",alignItems:"center",justifyContent:"center",padding:"100px 24px 40px" }}>
-    <h1 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(34px,5vw,64px)",fontWeight:600,color:"#1A1917",lineHeight:1.1,textAlign:"center" }}>Coming soon.</h1>
+  <div className="pat-dk" style={{ minHeight:"100vh",background:"#1C1B18",display:"flex",alignItems:"center",justifyContent:"center",padding:"100px 24px 40px" }}>
+    <h1 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(34px,5vw,64px)",fontWeight:600,color:"#fff",lineHeight:1.1,textAlign:"center" }}>Coming soon.</h1>
   </div>
 );
 
@@ -1944,14 +1963,65 @@ const Footer = ({ go }) => (
 /* ══════════ APP ══════════════════════════════════════ */
 
 export default function App() {
-  const [page,setPage]=useState("home"); const [params,setParams]=useState({});
-  const [apps,setApps]=useState([]); const [contacts,setContacts]=useState([]); const [subs,setSubs]=useState([]);
-  const [adminAuth,setAdminAuth]=useState(false);
+  const pathState=useCallback(()=>{
+    const path=window.location.pathname.replace(/\/+$/,"")||"/";
+    const map={
+      "/courses/intro-ai-biosecurity":"courses",
+      "/courses/intro-ai-biosecurity/apply":"course-apply",
+      "/courses/intro-ai-biosecurity/facilitator":"facilitator",
+      "/courses/intro-ai-biosecurity/participant":"participant",
+      "/courses/intro-ai-biosecurity/admin":"course-admin",
+    };
+    if(path.startsWith("/courses/intro-ai-biosecurity/facilitator/")) return {page:"facilitator-module",params:{slug:path.split("/").pop()}};
+    if(path.startsWith("/courses/intro-ai-biosecurity/participant/")) return {page:"participant-module",params:{slug:path.split("/").pop()}};
+    return {page:map[path]||"home",params:{}};
+  },[]);
 
-  const go=useCallback((p,ps={})=>{setPage(p);setParams(ps);setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),0);},[]);
+  const initial=pathState();
+  const [page,setPage]=useState(initial.page); const [params,setParams]=useState(initial.params);
+  const [apps,setApps]=useState([]); const [contacts,setContacts]=useState([]); const [subs,setSubs]=useState([]);
+  const [session,setSession]=useState(null); const [isAdmin,setIsAdmin]=useState(false); const [authOpen,setAuthOpen]=useState(false);
+
+  const pagePath=useCallback((p,ps={})=>{
+    const base="/courses/intro-ai-biosecurity";
+    if(p==="courses")return base;
+    if(p==="course-apply")return `${base}/apply`;
+    if(p==="facilitator")return `${base}/facilitator`;
+    if(p==="facilitator-module")return `${base}/facilitator/${ps.slug}`;
+    if(p==="participant")return `${base}/participant`;
+    if(p==="participant-module")return `${base}/participant/${ps.slug}`;
+    if(p==="course-admin")return `${base}/admin`;
+    return null;
+  },[]);
+
+  const go=useCallback((p,ps={})=>{
+    setPage(p);setParams(ps);
+    const path=pagePath(p,ps);
+    if(path) window.history.pushState({p,ps},"",path);
+    else if(window.location.pathname.startsWith("/courses/intro-ai-biosecurity")) window.history.pushState({p,ps},"","/");
+    setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),0);
+  },[pagePath]);
+
   const addSub=useCallback(email=>setSubs(s=>[...s,{email,date:new Date().toLocaleDateString("en-GB"),id:Date.now()}]),[]);
   const addApp=useCallback(d=>setApps(a=>[...a,{...d,date:new Date().toLocaleDateString("en-GB"),id:Date.now()}]),[]);
   const addContact=useCallback(d=>setContacts(c=>[...c,{...d,date:new Date().toLocaleDateString("en-GB"),id:Date.now()}]),[]);
+
+  useEffect(()=>{
+    const syncAdmin=async(nextSession)=>{
+      setSession(nextSession);
+      if(!nextSession?.user){setIsAdmin(false);return;}
+      const {data}=await supabase.from("admins").select("user_id").eq("user_id",nextSession.user.id).maybeSingle();
+      setIsAdmin(Boolean(data));
+    };
+    supabase.auth.getSession().then(({data})=>syncAdmin(data.session));
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,nextSession)=>{syncAdmin(nextSession);});
+    return()=>subscription.unsubscribe();
+  },[]);
+
+  useEffect(()=>{
+    const pop=()=>{const next=pathState();setPage(next.page);setParams(next.params);};
+    window.addEventListener("popstate",pop); return()=>window.removeEventListener("popstate",pop);
+  },[pathState]);
 
   useEffect(()=>{
     const s=document.createElement("style"); s.textContent=CSS; document.head.appendChild(s);
@@ -1967,15 +2037,18 @@ export default function App() {
     return ()=>{obs.disconnect();clearTimeout(t);};
   },[page]);
 
+  const coursePages=["courses","course-apply","facilitator","facilitator-module","participant","participant-module","course-admin"];
+  const signOut=async()=>{await supabase.auth.signOut();};
+
   return (
     <div style={{ minHeight:"100vh",fontFamily:"'Figtree',sans-serif",overflowX:"hidden",background:"#F7F6F2" }}>
-      <Nav go={go} page={page}/>
+      <Nav go={go} page={page} session={session} isAdmin={isAdmin} onSignIn={()=>setAuthOpen(true)} onSignOut={signOut}/>
       {page==="home"&&<HomePage go={go} addSub={addSub}/>}
       {page==="research"&&<ResearchPage go={go}/>}
       {page==="research-detail"&&<ResearchDetail slug={params.slug} go={go}/>}
       {page==="about"&&<AboutPage go={go}/>}
       {page==="fellowship"&&<FellowshipPage go={go} addApp={addApp}/>}
-      {page==="courses"&&<CoursesPage/>}
+      {coursePages.includes(page)&&<CourseShell page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={()=>setAuthOpen(true)}/>}
       {page==="apply"&&<FellowshipPage go={go} addApp={addApp} startTab="apply"/>}
       {page==="mentors"&&<MentorsPage go={go}/>}
       {page==="team"&&<TeamPage go={go}/>}
@@ -1990,8 +2063,9 @@ export default function App() {
       {page==="resources"&&<StubPage label="Resources" title="Resources" go={go}/>}
       {page==="policies"&&<StubPage label="Policies" title="Policies" go={go}/>}
       {page==="faqs"&&<FaqsPage go={go}/>}
-      {page==="admin"&&<AdminPage apps={apps} contacts={contacts} subs={subs} auth={adminAuth} setAuth={setAdminAuth}/>}
+      {page==="admin"&&<AdminPage apps={apps} contacts={contacts} subs={subs} auth={false} setAuth={()=>{}}/>}
       <Footer go={go}/>
+      <CourseAuth open={authOpen} onClose={()=>setAuthOpen(false)}/>
     </div>
   );
 }
