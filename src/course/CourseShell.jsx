@@ -147,8 +147,20 @@ const RoleTool = ({ role, page, params, session, isAdmin, go, openAuth }) => {
       : <FacilitatorHub go={go} courseMeta={payload.courseMeta} courseModules={payload.courseModules}/>;
   }
   return page==="participant-module"
-    ? <ParticipantModuleDetail slug={params.slug} go={go} courseModules={payload.courseModules}/>
-    : <ParticipantHub go={go} courseMeta={payload.courseMeta} courseModules={payload.courseModules}/>;
+    ? <ParticipantModuleDetail
+        slug={params.slug}
+        go={go}
+        courseModules={payload.courseModules}
+        progress={payload.progress}
+        capstone={payload.capstone}
+      />
+    : <ParticipantHub
+        go={go}
+        courseMeta={payload.courseMeta}
+        courseModules={payload.courseModules}
+        progress={payload.progress}
+        capstone={payload.capstone}
+      />;
 };
 
 const AdminDashboard = ({ go }) => {
@@ -253,4 +265,3 @@ export default function CourseShell({ page, params, session, isAdmin, go, openAu
   if(page==="participant"||page==="participant-module") return <RoleTool role="participant" page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={openAuth}/>;
   return <Landing go={go}/>;
 }
-
