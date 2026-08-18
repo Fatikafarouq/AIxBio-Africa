@@ -54,9 +54,100 @@ const Landing = ({ go }) => {
   );
 };
 
+const WEEK_DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const AVAILABILITY_PERIODS = [
+  { id:"morning", label:"Morning", time:"8:00–12:00" },
+  { id:"afternoon", label:"Afternoon", time:"12:00–17:00" },
+  { id:"evening", label:"Evening", time:"17:00–21:00" },
+];
+
+const emptyParticipantAnswers = {
+  full_name:"",
+  country:"",
+  current_role:"",
+  institution:"",
+  background:"",
+  motivation:"",
+  learning_goal:"",
+  commitment:"",
+  timezone:"",
+  additional:"",
+};
+
+const emptyFacilitatorAnswers = {
+  full_name:"",
+  country:"",
+  current_role:"",
+  institution:"",
+  background:"",
+  motivation:"",
+  facilitation_experience:"",
+  relevant_experience:"",
+  mixed_levels:"",
+  commitment:"",
+  timezone:"",
+  weekly_availability:{},
+  additional:"",
+};
+
+const answerLabel = key => ({
+  full_name:"Full name",
+  country:"Country of residence",
+  current_role:"Current role / occupation",
+  institution:"Institution / organization",
+  background:"Background / short bio",
+  motivation:"Motivation",
+  learning_goal:"What they hope to do with the course",
+  commitment:"Commitment",
+  timezone:"Timezone",
+  facilitation_experience:"Facilitation experience",
+  relevant_experience:"Relevant AI / biosecurity experience",
+  mixed_levels:"Working with mixed levels of technical knowledge",
+  weekly_availability:"Weekly availability",
+  additional:"Anything else",
+}[key] || key.replaceAll("_"," "));
+
+const AvailabilityGrid = ({ value, onChange }) => {
+  const toggle=(day,period)=>{
+    const current=value?.[day]||[];
+    const next=current.includes(period) ? current.filter(x=>x!==period) : [...current,period];
+    onChange({...value,[day]:next});
+  };
+
+  return (
+    <div style={{ marginBottom:22 }}>
+      <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,fontWeight:700,color:"#1A1917",marginBottom:7 }}>Weekly availability</div>
+      <Txt muted s={{ fontSize:13.5,marginBottom:14 }}>
+        Select all periods when you are generally available for a recurring weekly 60–90 minute session. Use your local timezone.
+      </Txt>
+      <div style={{ overflowX:"auto",border:"1px solid var(--brd)",background:"#fff" }}>
+        <div style={{ minWidth:620 }}>
+          <div style={{ display:"grid",gridTemplateColumns:"1.25fr repeat(3,1fr)",background:"#F7F6F2",borderBottom:"1px solid var(--brd)" }}>
+            <div style={{ padding:"11px 12px",fontSize:11,fontWeight:700,color:"#5A5956",textTransform:"uppercase",letterSpacing:".06em" }}>Day</div>
+            {AVAILABILITY_PERIODS.map(p=><div key={p.id} style={{ padding:"11px 12px",fontSize:11,fontWeight:700,color:"#5A5956",textAlign:"center" }}>{p.label}<div style={{ fontSize:10,fontWeight:500,marginTop:2 }}>{p.time}</div></div>)}
+          </div>
+          {WEEK_DAYS.map(day=>(
+            <div key={day} style={{ display:"grid",gridTemplateColumns:"1.25fr repeat(3,1fr)",borderBottom:day==="Sunday"?"none":"1px solid var(--brd)",alignItems:"center" }}>
+              <div style={{ padding:"12px",fontSize:13,fontWeight:600,color:"#1A1917" }}>{day}</div>
+              {AVAILABILITY_PERIODS.map(p=>{
+                const checked=(value?.[day]||[]).includes(p.id);
+                return (
+                  <label key={p.id} style={{ display:"flex",justifyContent:"center",alignItems:"center",padding:"12px",cursor:"pointer" }}>
+                    <input type="checkbox" checked={checked} onChange={()=>toggle(day,p.id)} aria-label={`${day} ${p.label}`}/>
+                  </label>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ApplicationPage = ({ session, openAuth }) => {
   const [role,setRole]=useState("");
-  const [answers,setAnswers]=useState({interest:"",background:"",commitment:""});
+  const [answers,setAnswers]=useState(emptyParticipantAnswers);
   const [status,setStatus]=useState("");
   const [error,setError]=useState("");
   const [existing,setExisting]=useState(null);
@@ -65,6 +156,12 @@ const ApplicationPage = ({ session, openAuth }) => {
     if(!session?.user) return;
     supabase.from("applications").select("id,role,status,created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(1).maybeSingle().then(({data})=>setExisting(data||null));
   },[session?.user?.id]);
+
+  const chooseRole=r=>{
+    setRole(r);
+    setError("");
+    setAnswers(r==="facilitator" ? {...emptyFacilitatorAnswers} : {...emptyParticipantAnswers});
+  };
 
   if(!session) return (
     <>
@@ -76,8 +173,32 @@ const ApplicationPage = ({ session, openAuth }) => {
   if(status==="done") return <><PageHdr label="Application" title="Thanks — you'll hear back soon."/><Sec bg="#fff"><Txt muted>Your application has been submitted for review. There is no automatic acceptance.</Txt></Sec></>;
   if(existing) return <><PageHdr label="Application" title={existing.status==="pending"?"Your application is under review.":`Application ${existing.status}.`}/><Sec bg="#fff"><Txt muted>You applied as a {existing.role}. We’ll use this account for any course access attached to your application.</Txt></Sec></>;
 
+  const update=(key,value)=>setAnswers(a=>({...a,[key]:value}));
+
   const submit=async()=>{
-    if(!role||!answers.interest.trim()||!answers.background.trim()||!answers.commitment.trim()){setError("Please answer all three questions.");return;}
+    const participantRequired=["full_name","country","current_role","background","motivation","learning_goal","commitment","timezone"];
+    const facilitatorRequired=["full_name","country","current_role","background","motivation","facilitation_experience","relevant_experience","mixed_levels","commitment","timezone"];
+    const required=role==="facilitator"?facilitatorRequired:participantRequired;
+    const missing=required.some(key=>!String(answers[key]||"").trim());
+
+    if(!role||missing){
+      setError("Please complete all required fields.");
+      return;
+    }
+    if(answers.commitment!=="Yes"){
+      setError(role==="facilitator"
+        ? "Facilitators must be able to commit to preparing for and facilitating all 6 live sessions."
+        : "Participants must be able to commit to attending at least 4 of the 6 live sessions and completing the required preparation.");
+      return;
+    }
+    if(role==="facilitator"){
+      const selected=Object.values(answers.weekly_availability||{}).flat();
+      if(selected.length===0){
+        setError("Please select at least one weekly availability period.");
+        return;
+      }
+    }
+
     const {error:e}=await supabase.from("applications").insert({user_id:session.user.id,role,answers});
     if(e){setError(e.message);return;}
     setStatus("done");
@@ -87,11 +208,11 @@ const ApplicationPage = ({ session, openAuth }) => {
     <>
       <PageHdr label="Course Application" title="Choose how you want to take part"/>
       <Sec bg="#fff">
-        <div style={{ maxWidth:760 }}>
+        <div style={{ maxWidth:820 }}>
           {!role ? (
             <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:18 }}>
               {[["facilitator","Apply as a Facilitator","Lead a small course group and guide the six facilitated sessions."],["participant","Apply as a Participant","Join a facilitated group and work through the six-module course."]].map(([r,t,d])=>(
-                <button key={r} onClick={()=>setRole(r)} style={{ textAlign:"left",background:"#F7F6F2",border:"1px solid var(--brd)",padding:"26px",cursor:"pointer" }}>
+                <button key={r} onClick={()=>chooseRole(r)} style={{ textAlign:"left",background:"#F7F6F2",border:"1px solid var(--brd)",padding:"26px",cursor:"pointer" }}>
                   <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:8 }}>{t}</h3>
                   <Txt muted s={{ fontSize:13.5 }}>{d}</Txt>
                 </button>
@@ -99,11 +220,49 @@ const ApplicationPage = ({ session, openAuth }) => {
             </div>
           ):(
             <div>
-              <button className="bn" onClick={()=>setRole("")} style={{ color:"#B8102A",fontWeight:600,fontSize:12.5,marginBottom:22 }}>← Change role</button>
-              <H2 s={{ marginBottom:22 }}>{role==="facilitator"?"Facilitator":"Participant"} application</H2>
-              <FF label="Why are you interested in this course?"><textarea value={answers.interest} onChange={e=>setAnswers(a=>({...a,interest:e.target.value}))}/></FF>
-              <FF label="What relevant background or perspective would you bring?"><textarea value={answers.background} onChange={e=>setAnswers(a=>({...a,background:e.target.value}))}/></FF>
-              <FF label="Can you commit to the course sessions and preparation?"><textarea value={answers.commitment} onChange={e=>setAnswers(a=>({...a,commitment:e.target.value}))}/></FF>
+              <button className="bn" onClick={()=>{setRole("");setError("");}} style={{ color:"#B8102A",fontWeight:600,fontSize:12.5,marginBottom:22 }}>← Change role</button>
+              <H2 s={{ marginBottom:8 }}>{role==="facilitator"?"Facilitator":"Participant"} application</H2>
+              <Txt muted s={{ fontSize:13.5,marginBottom:26 }}>Fields marked optional may be left blank.</Txt>
+
+              <FF label="Full name"><input value={answers.full_name} onChange={e=>update("full_name",e.target.value)}/></FF>
+              <FF label="Country of residence"><input value={answers.country} onChange={e=>update("country",e.target.value)}/></FF>
+              <FF label={role==="facilitator"?"Current role / position":"Current role or occupation"}><input value={answers.current_role} onChange={e=>update("current_role",e.target.value)}/></FF>
+              <FF label="Institution / organization (optional)"><input value={answers.institution} onChange={e=>update("institution",e.target.value)}/></FF>
+              <FF label="Tell us briefly about yourself and your background"><textarea value={answers.background} onChange={e=>update("background",e.target.value)} placeholder="A short bio covering where you are coming from academically, professionally, or otherwise."/></FF>
+
+              {role==="participant" ? (
+                <>
+                  <FF label="Why are you interested in AI and biosecurity, and why do you want to join this course?"><textarea value={answers.motivation} onChange={e=>update("motivation",e.target.value)}/></FF>
+                  <FF label="What do you hope to do with what you learn from the course?"><textarea value={answers.learning_goal} onChange={e=>update("learning_goal",e.target.value)}/></FF>
+                  <FF label="Can you commit to attending at least 4 of the 6 live sessions and completing the required pre-session preparation?">
+                    <select value={answers.commitment} onChange={e=>update("commitment",e.target.value)}>
+                      <option value="">Choose an answer</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </FF>
+                  <FF label="What timezone are you based in?"><input value={answers.timezone} onChange={e=>update("timezone",e.target.value)} placeholder="e.g. WAT / UTC+1"/></FF>
+                  <FF label="Is there anything else you would like us to know? (optional)"><textarea value={answers.additional} onChange={e=>update("additional",e.target.value)}/></FF>
+                </>
+              ):(
+                <>
+                  <FF label="Why are you interested in facilitating this course?"><textarea value={answers.motivation} onChange={e=>update("motivation",e.target.value)}/></FF>
+                  <FF label="What experience do you have facilitating discussions, teaching, mentoring, workshops, communities, or group learning?"><textarea value={answers.facilitation_experience} onChange={e=>update("facilitation_experience",e.target.value)}/></FF>
+                  <FF label="What experience or knowledge do you have that is relevant to AI, biosecurity, biology, public health, technology policy, governance, research, or African science and technology contexts?"><textarea value={answers.relevant_experience} onChange={e=>update("relevant_experience",e.target.value)}/></FF>
+                  <FF label="How would you handle a discussion where participants have very different levels of technical knowledge?"><textarea value={answers.mixed_levels} onChange={e=>update("mixed_levels",e.target.value)}/></FF>
+                  <FF label="Can you commit to preparing for and facilitating all 6 live sessions for your assigned group, including attendance and pre-session exercise tracking?">
+                    <select value={answers.commitment} onChange={e=>update("commitment",e.target.value)}>
+                      <option value="">Choose an answer</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </FF>
+                  <FF label="What timezone are you based in?"><input value={answers.timezone} onChange={e=>update("timezone",e.target.value)} placeholder="e.g. WAT / UTC+1"/></FF>
+                  <AvailabilityGrid value={answers.weekly_availability} onChange={value=>update("weekly_availability",value)}/>
+                  <FF label="Is there anything else you would like us to know? (optional)"><textarea value={answers.additional} onChange={e=>update("additional",e.target.value)}/></FF>
+                </>
+              )}
+
               {error&&<div className="err" style={{ marginBottom:12 }}>{error}</div>}
               <button className="br" onClick={submit}>Submit application</button>
             </div>
@@ -113,7 +272,6 @@ const ApplicationPage = ({ session, openAuth }) => {
     </>
   );
 };
-
 const AccessMessage = ({ session, openAuth, text }) => (
   <>
     <PageHdr label="Course Access" title={!session?"Sign in to continue":"Your application is still under review"}/>
@@ -244,7 +402,13 @@ const AdminDashboard = ({ go }) => {
               <div><h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600 }}>{a.full_name}</h3><Txt muted s={{ fontSize:13 }}>{a.email} · {a.role} · {new Date(a.created_at).toLocaleDateString()}</Txt></div>
               <div style={{ display:"flex",gap:8 }}><button className="br" onClick={()=>decide(a,"accepted")}>Accept & assign group</button><button className="bo" onClick={()=>decide(a,"rejected")}>Reject</button></div>
             </div>
-            <div style={{ marginTop:14,background:"#F7F6F2",padding:"14px 16px" }}>{Object.entries(a.answers||{}).map(([k,v])=><div key={k} style={{ marginBottom:8 }}><strong style={{ fontSize:12,textTransform:"capitalize" }}>{k}:</strong> <span style={{ fontSize:13.5,color:"#5A5956" }}>{v}</span></div>)}</div>
+            <div style={{ marginTop:14,background:"#F7F6F2",padding:"14px 16px" }}>{Object.entries(a.answers||{}).filter(([,v])=>v!==""&&v!=null).map(([k,v])=>{
+              if(k==="weekly_availability"){
+                const rows=Object.entries(v||{}).filter(([,periods])=>periods?.length);
+                return <div key={k} style={{ marginBottom:10 }}><strong style={{ fontSize:12 }}>{answerLabel(k)}:</strong><div style={{ marginTop:5 }}>{rows.length?rows.map(([day,periods])=><div key={day} style={{ fontSize:13.5,color:"#5A5956",marginBottom:3 }}><span style={{ fontWeight:600 }}>{day}:</span> {periods.map(p=>AVAILABILITY_PERIODS.find(x=>x.id===p)?.label||p).join(", ")}</div>):<span style={{ fontSize:13.5,color:"#5A5956" }}>None selected</span>}</div></div>;
+              }
+              return <div key={k} style={{ marginBottom:8 }}><strong style={{ fontSize:12 }}>{answerLabel(k)}:</strong> <span style={{ fontSize:13.5,color:"#5A5956" }}>{String(v)}</span></div>;
+            })}</div>
           </div>)}
         </div>}
         {tab==="cohorts"&&<div style={{ maxWidth:650 }}><H2 s={{ marginBottom:20 }}>Create cohort</H2><FF label="Cohort name"><input value={newCohort.name} onChange={e=>setNewCohort(x=>({...x,name:e.target.value}))} placeholder="Intro Course — Cohort 1"/></FF><FF label="Start date"><input type="date" value={newCohort.start_date} onChange={e=>setNewCohort(x=>({...x,start_date:e.target.value}))}/></FF><button className="br" onClick={createCohort}>Create cohort</button><div style={{ marginTop:30 }}>{cohorts.map(c=><div key={c.id} style={{ borderTop:"1px solid var(--brd)",padding:"14px 0" }}><strong>{c.name}</strong><div style={{ fontSize:12.5,color:"#5A5956" }}>{c.start_date||"No start date"} · {c.status} · ID: {c.id}</div></div>)}</div></div>}
@@ -265,3 +429,4 @@ export default function CourseShell({ page, params, session, isAdmin, go, openAu
   if(page==="participant"||page==="participant-module") return <RoleTool role="participant" page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={openAuth}/>;
   return <Landing go={go}/>;
 }
+
