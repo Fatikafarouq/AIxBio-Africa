@@ -132,9 +132,31 @@ const AvailabilityGrid = ({ value, onChange }) => {
               {AVAILABILITY_PERIODS.map(p=>{
                 const checked=(value?.[day]||[]).includes(p.id);
                 return (
-                  <label key={p.id} style={{ display:"flex",justifyContent:"center",alignItems:"center",padding:"12px",cursor:"pointer" }}>
-                    <input type="checkbox" checked={checked} onChange={()=>toggle(day,p.id)} aria-label={`${day} ${p.label}`}/>
-                  </label>
+                  <div key={p.id} style={{ display:"flex",justifyContent:"center",alignItems:"center",padding:"12px" }}>
+                    <button
+                      type="button"
+                      onClick={()=>toggle(day,p.id)}
+                      aria-pressed={checked}
+                      aria-label={`${day} ${p.label}`}
+                      style={{
+                        width:30,
+                        height:30,
+                        border:checked?"1px solid #B8102A":"1px solid #CFCBC3",
+                        background:checked?"#B8102A":"#fff",
+                        color:checked?"#fff":"transparent",
+                        display:"flex",
+                        alignItems:"center",
+                        justifyContent:"center",
+                        cursor:"pointer",
+                        fontSize:18,
+                        fontWeight:700,
+                        lineHeight:1,
+                        padding:0
+                      }}
+                    >
+                      ✓
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -176,8 +198,8 @@ const ApplicationPage = ({ session, openAuth }) => {
   const update=(key,value)=>setAnswers(a=>({...a,[key]:value}));
 
   const submit=async()=>{
-    const participantRequired=["full_name","country","current_role","background","motivation","learning_goal","commitment","timezone"];
-    const facilitatorRequired=["full_name","country","current_role","background","motivation","facilitation_experience","relevant_experience","mixed_levels","commitment","timezone"];
+    const participantRequired=["full_name","country","current_role","institution","background","motivation","learning_goal","commitment","timezone"];
+    const facilitatorRequired=["full_name","country","current_role","institution","background","motivation","facilitation_experience","relevant_experience","mixed_levels","commitment","timezone"];
     const required=role==="facilitator"?facilitatorRequired:participantRequired;
     const missing=required.some(key=>!String(answers[key]||"").trim());
 
@@ -222,12 +244,12 @@ const ApplicationPage = ({ session, openAuth }) => {
             <div>
               <button className="bn" onClick={()=>{setRole("");setError("");}} style={{ color:"#B8102A",fontWeight:600,fontSize:12.5,marginBottom:22 }}>← Change role</button>
               <H2 s={{ marginBottom:8 }}>{role==="facilitator"?"Facilitator":"Participant"} application</H2>
-              <Txt muted s={{ fontSize:13.5,marginBottom:26 }}>Fields marked optional may be left blank.</Txt>
+              <Txt muted s={{ fontSize:13.5,marginBottom:26 }}>All fields are required except the final “Anything else” question.</Txt>
 
               <FF label="Full name"><input value={answers.full_name} onChange={e=>update("full_name",e.target.value)}/></FF>
               <FF label="Country of residence"><input value={answers.country} onChange={e=>update("country",e.target.value)}/></FF>
               <FF label={role==="facilitator"?"Current role / position":"Current role or occupation"}><input value={answers.current_role} onChange={e=>update("current_role",e.target.value)}/></FF>
-              <FF label="Institution / organization (optional)"><input value={answers.institution} onChange={e=>update("institution",e.target.value)}/></FF>
+              <FF label="Institution / organization"><input value={answers.institution} onChange={e=>update("institution",e.target.value)}/></FF>
               <FF label="Tell us briefly about yourself and your background"><textarea value={answers.background} onChange={e=>update("background",e.target.value)} placeholder="A short bio covering where you are coming from academically, professionally, or otherwise."/></FF>
 
               {role==="participant" ? (
