@@ -116,7 +116,7 @@ const AvailabilityGrid = ({ value, onChange }) => {
 
   return (
     <div style={{ marginBottom:22 }}>
-      <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,fontWeight:700,color:"#1A1917",marginBottom:7 }}>Weekly availability</div>
+      <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,fontWeight:700,color:"#1A1917",marginBottom:7 }}>Weekly availability *</div>
       <Txt muted s={{ fontSize:13.5,marginBottom:14 }}>
         Select all periods when you are generally available for a recurring weekly 60–90 minute session. Use your local timezone.
       </Txt>
@@ -172,6 +172,7 @@ const ApplicationPage = ({ session, openAuth }) => {
   const [answers,setAnswers]=useState(emptyParticipantAnswers);
   const [status,setStatus]=useState("");
   const [error,setError]=useState("");
+  const [fieldErrors,setFieldErrors]=useState({});
   const [existing,setExisting]=useState(null);
 
   useEffect(()=>{
@@ -182,6 +183,7 @@ const ApplicationPage = ({ session, openAuth }) => {
   const chooseRole=r=>{
     setRole(r);
     setError("");
+    setFieldErrors({});
     setAnswers(r==="facilitator" ? {...emptyFacilitatorAnswers} : {...emptyParticipantAnswers});
   };
 
@@ -195,32 +197,64 @@ const ApplicationPage = ({ session, openAuth }) => {
   if(status==="done") return <><PageHdr label="Application" title="Thanks — you'll hear back soon."/><Sec bg="#fff"><Txt muted>Your application has been submitted for review. There is no automatic acceptance.</Txt></Sec></>;
   if(existing) return <><PageHdr label="Application" title={existing.status==="pending"?"Your application is under review.":`Application ${existing.status}.`}/><Sec bg="#fff"><Txt muted>You applied as a {existing.role}. We’ll use this account for any course access attached to your application.</Txt></Sec></>;
 
-  const update=(key,value)=>setAnswers(a=>({...a,[key]:value}));
+  const update=(key,value)=>{
+    setAnswers(a=>({...a,[key]:value}));
+    setFieldErrors(prev=>({...prev,[key]:""}));
+    setError("");
+  };
+
+  const FieldError = ({ name }) => fieldErrors[name]
+    ? <div className="err" style={{ marginTop:7,marginBottom:2 }}>{fieldErrors[name]}</div>
+    : null;
 
   const submit=async()=>{
     const participantRequired=["full_name","country","current_role","institution","background","motivation","learning_goal","commitment","timezone"];
     const facilitatorRequired=["full_name","country","current_role","institution","background","motivation","facilitation_experience","relevant_experience","mixed_levels","commitment","timezone"];
     const required=role==="facilitator"?facilitatorRequired:participantRequired;
-    const missing=required.some(key=>!String(answers[key]||"").trim());
 
-    if(!role||missing){
-      setError("Please complete all required fields.");
-      return;
-    }
-    if(answers.commitment!=="Yes"){
-      setError(role==="facilitator"
-        ? "Facilitators must be able to commit to preparing for and facilitating all 6 live sessions."
-        : "Participants must be able to commit to attending at least 4 of the 6 live sessions and completing the required preparation.");
-      return;
-    }
+    const labels={
+      full_name:"Full name",
+      country:"Country of residence",
+      current_role:role==="facilitator"?"Current role / position":"Current role or occupation",
+      institution:"Institution / organization",
+      background:"Background / short bio",
+      motivation:role==="facilitator"?"Why you want to facilitate":"Why you want to join the course",
+      learning_goal:"What you hope to do with what you learn",
+      facilitation_experience:"Facilitation experience",
+      relevant_experience:"Relevant experience or knowledge",
+      mixed_levels:"How you would handle mixed technical levels",
+      commitment:"Commitment",
+      timezone:"Timezone",
+      weekly_availability:"Weekly availability",
+    };
+
+    const nextErrors={};
+    required.forEach(key=>{
+      if(!String(answers[key]||"").trim()) nextErrors[key]=`${labels[key]} is required.`;
+    });
+
     if(role==="facilitator"){
       const selected=Object.values(answers.weekly_availability||{}).flat();
-      if(selected.length===0){
-        setError("Please select at least one weekly availability period.");
-        return;
-      }
+      if(selected.length===0) nextErrors.weekly_availability="Please select at least one weekly availability period.";
     }
 
+    if(Object.keys(nextErrors).length){
+      setFieldErrors(nextErrors);
+      setError("Please complete all required fields marked with an asterisk (*).");
+      return;
+    }
+
+    if(answers.commitment!=="Yes"){
+      const message=role==="facilitator"
+        ? "Facilitators must be able to commit to preparing for and facilitating all 6 live sessions."
+        : "Participants must be able to commit to attending at least 4 of the 6 live sessions and completing the required preparation.";
+      setFieldErrors({commitment:message});
+      setError(message);
+      return;
+    }
+
+    setFieldErrors({});
+    setError("");
     const {error:e}=await supabase.from("applications").insert({user_id:session.user.id,role,answers});
     if(e){setError(e.message);return;}
     setStatus("done");
@@ -242,46 +276,48 @@ const ApplicationPage = ({ session, openAuth }) => {
             </div>
           ):(
             <div>
-              <button className="bn" onClick={()=>{setRole("");setError("");}} style={{ color:"#B8102A",fontWeight:600,fontSize:12.5,marginBottom:22 }}>← Change role</button>
+              <button className="bn" onClick={()=>{setRole("");setError("");setFieldErrors({});}} style={{ color:"#B8102A",fontWeight:600,fontSize:12.5,marginBottom:22 }}>← Change role</button>
               <H2 s={{ marginBottom:8 }}>{role==="facilitator"?"Facilitator":"Participant"} application</H2>
-              <Txt muted s={{ fontSize:13.5,marginBottom:26 }}>All fields are required except the final “Anything else” question.</Txt>
 
-              <FF label="Full name"><input value={answers.full_name} onChange={e=>update("full_name",e.target.value)}/></FF>
-              <FF label="Country of residence"><input value={answers.country} onChange={e=>update("country",e.target.value)}/></FF>
-              <FF label={role==="facilitator"?"Current role / position":"Current role or occupation"}><input value={answers.current_role} onChange={e=>update("current_role",e.target.value)}/></FF>
-              <FF label="Institution / organization"><input value={answers.institution} onChange={e=>update("institution",e.target.value)}/></FF>
-              <FF label="Tell us briefly about yourself and your background"><textarea value={answers.background} onChange={e=>update("background",e.target.value)} placeholder="A short bio covering where you are coming from academically, professionally, or otherwise."/></FF>
+              <FF label="Full name *"><input value={answers.full_name} onChange={e=>update("full_name",e.target.value)}/><FieldError name="full_name"/></FF>
+              <FF label="Country of residence *"><input value={answers.country} onChange={e=>update("country",e.target.value)}/><FieldError name="country"/></FF>
+              <FF label={`${role==="facilitator"?"Current role / position":"Current role or occupation"} *`}><input value={answers.current_role} onChange={e=>update("current_role",e.target.value)}/><FieldError name="current_role"/></FF>
+              <FF label="Institution / organization *"><input value={answers.institution} onChange={e=>update("institution",e.target.value)}/><FieldError name="institution"/></FF>
+              <FF label="Tell us briefly about yourself and your background *"><textarea value={answers.background} onChange={e=>update("background",e.target.value)} placeholder="A short bio covering where you are coming from academically, professionally, or otherwise."/><FieldError name="background"/></FF>
 
               {role==="participant" ? (
                 <>
-                  <FF label="Why are you interested in AI and biosecurity, and why do you want to join this course?"><textarea value={answers.motivation} onChange={e=>update("motivation",e.target.value)}/></FF>
-                  <FF label="What do you hope to do with what you learn from the course?"><textarea value={answers.learning_goal} onChange={e=>update("learning_goal",e.target.value)}/></FF>
-                  <FF label="Can you commit to attending at least 4 of the 6 live sessions and completing the required pre-session preparation?">
+                  <FF label="Why are you interested in AI and biosecurity, and why do you want to join this course? *"><textarea value={answers.motivation} onChange={e=>update("motivation",e.target.value)}/><FieldError name="motivation"/></FF>
+                  <FF label="What do you hope to do with what you learn from the course? *"><textarea value={answers.learning_goal} onChange={e=>update("learning_goal",e.target.value)}/><FieldError name="learning_goal"/></FF>
+                  <FF label="Can you commit to attending at least 4 of the 6 live sessions and completing the required pre-session preparation? *">
                     <select value={answers.commitment} onChange={e=>update("commitment",e.target.value)}>
                       <option value="">Choose an answer</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
                     </select>
+                    <FieldError name="commitment"/>
                   </FF>
-                  <FF label="What timezone are you based in?"><input value={answers.timezone} onChange={e=>update("timezone",e.target.value)} placeholder="e.g. WAT / UTC+1"/></FF>
-                  <FF label="Is there anything else you would like us to know? (optional)"><textarea value={answers.additional} onChange={e=>update("additional",e.target.value)}/></FF>
+                  <FF label="What timezone are you based in? *"><input value={answers.timezone} onChange={e=>update("timezone",e.target.value)} placeholder="e.g. WAT / UTC+1"/><FieldError name="timezone"/></FF>
+                  <FF label="Is there anything else you would like us to know?"><textarea value={answers.additional} onChange={e=>update("additional",e.target.value)}/></FF>
                 </>
               ):(
                 <>
-                  <FF label="Why are you interested in facilitating this course?"><textarea value={answers.motivation} onChange={e=>update("motivation",e.target.value)}/></FF>
-                  <FF label="What experience do you have facilitating discussions, teaching, mentoring, workshops, communities, or group learning?"><textarea value={answers.facilitation_experience} onChange={e=>update("facilitation_experience",e.target.value)}/></FF>
-                  <FF label="What experience or knowledge do you have that is relevant to AI, biosecurity, biology, public health, technology policy, governance, research, or African science and technology contexts?"><textarea value={answers.relevant_experience} onChange={e=>update("relevant_experience",e.target.value)}/></FF>
-                  <FF label="How would you handle a discussion where participants have very different levels of technical knowledge?"><textarea value={answers.mixed_levels} onChange={e=>update("mixed_levels",e.target.value)}/></FF>
-                  <FF label="Can you commit to preparing for and facilitating all 6 live sessions for your assigned group, including attendance and pre-session exercise tracking?">
+                  <FF label="Why are you interested in facilitating this course? *"><textarea value={answers.motivation} onChange={e=>update("motivation",e.target.value)}/><FieldError name="motivation"/></FF>
+                  <FF label="What experience do you have facilitating discussions, teaching, mentoring, workshops, communities, or group learning? *"><textarea value={answers.facilitation_experience} onChange={e=>update("facilitation_experience",e.target.value)}/><FieldError name="facilitation_experience"/></FF>
+                  <FF label="What experience or knowledge do you have that is relevant to AI, biosecurity, biology, public health, technology policy, governance, research, or African science and technology contexts? *"><textarea value={answers.relevant_experience} onChange={e=>update("relevant_experience",e.target.value)}/><FieldError name="relevant_experience"/></FF>
+                  <FF label="How would you handle a discussion where participants have very different levels of technical knowledge? *"><textarea value={answers.mixed_levels} onChange={e=>update("mixed_levels",e.target.value)}/><FieldError name="mixed_levels"/></FF>
+                  <FF label="Can you commit to preparing for and facilitating all 6 live sessions for your assigned group, including attendance and pre-session exercise tracking? *">
                     <select value={answers.commitment} onChange={e=>update("commitment",e.target.value)}>
                       <option value="">Choose an answer</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
                     </select>
+                    <FieldError name="commitment"/>
                   </FF>
-                  <FF label="What timezone are you based in?"><input value={answers.timezone} onChange={e=>update("timezone",e.target.value)} placeholder="e.g. WAT / UTC+1"/></FF>
+                  <FF label="What timezone are you based in? *"><input value={answers.timezone} onChange={e=>update("timezone",e.target.value)} placeholder="e.g. WAT / UTC+1"/><FieldError name="timezone"/></FF>
                   <AvailabilityGrid value={answers.weekly_availability} onChange={value=>update("weekly_availability",value)}/>
-                  <FF label="Is there anything else you would like us to know? (optional)"><textarea value={answers.additional} onChange={e=>update("additional",e.target.value)}/></FF>
+                  <FieldError name="weekly_availability"/>
+                  <FF label="Is there anything else you would like us to know?"><textarea value={answers.additional} onChange={e=>update("additional",e.target.value)}/></FF>
                 </>
               )}
 
