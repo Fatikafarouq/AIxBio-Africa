@@ -2030,11 +2030,35 @@ export default function App() {
 
   useEffect(()=>{
     const obs=new IntersectionObserver(
-      entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");obs.unobserve(e.target);}}),
+      entries=>entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add("in");
+          obs.unobserve(e.target);
+        }
+      }),
       {threshold:.07,rootMargin:"0px 0px -16px 0px"}
     );
-    const t=setTimeout(()=>document.querySelectorAll(".reveal").forEach(el=>obs.observe(el)),150);
-    return ()=>{obs.disconnect();clearTimeout(t);};
+
+    const observeReveals=()=>{
+      document.querySelectorAll(".reveal").forEach(el=>{
+        if(!el.classList.contains("in")){
+          obs.observe(el);
+        }
+      });
+    };
+
+    observeReveals();
+
+    const t1=setTimeout(observeReveals,150);
+    const t2=setTimeout(observeReveals,500);
+    const t3=setTimeout(observeReveals,1200);
+
+    return ()=>{
+      obs.disconnect();
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   },[page]);
 
   const coursePages=["courses","course-apply","facilitator","facilitator-module","participant","participant-module","course-admin"];
