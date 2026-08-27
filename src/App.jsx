@@ -83,27 +83,6 @@ td{font-family:'Figtree',sans-serif;font-size:13.5px;padding:11px 14px;border-bo
 
 /* ══════════ DATA ══════════════════════════════════════ */
 
-const RESEARCH = [
-  {id:"01",slug:"ai-biosec-eval",tag:"Core",tc:"tr",title:"AI Biosecurity Evaluation",
-   short:"Systematic red-teaming of frontier AI models to assess safety guardrail consistency across African linguistic and cultural framings.",
-   body:`We test whether AI safety systems behave consistently when biosecurity-sensitive information is expressed in languages and framings that differ from standard English clinical terminology. Our initial work examined African ethnoveterinary language — comparing model behavior when the same biological agent was described using indigenous terminology versus standard clinical language.\n\nThe pattern we observed reflects a training data gap. Safety guardrails trained predominantly on English-language text show significant behavioral inconsistency when the same concept appears in African indigenous terminology. This is not a jailbreak exploit; it is a systematic gap in training data coverage with practical consequences for how AI tools perform in African biosecurity settings.\n\nWe are developing a replicable evaluation methodology for testing AI safety consistency across linguistic and cultural contexts, beginning with African language biosecurity domains. A full methods paper is in preparation.`},
-  {id:"02",slug:"pandemic-prep",tag:"Research",tc:"tb",title:"Pandemic Preparedness",
-   short:"Studying AI-assisted outbreak detection and response frameworks in African public health contexts.",
-   body:`Pandemic preparedness in Africa is shaped by infrastructure constraints, data scarcity, and systematic underrepresentation in global modeling efforts. We examine where AI tools can be applied responsibly in these settings and where current systems fall short.\n\nThis research track reviews existing early warning systems, assesses their performance in African settings, and identifies where AI-assisted approaches could most usefully improve surveillance and response. We work in collaboration with researchers in public health, epidemiology, and AI safety.`},
-  {id:"03",slug:"capacity",tag:"Programme",tc:"tg",title:"Scientific Capacity Building",
-   short:"Designing training and mentorship structures for African researchers entering biosecurity science.",
-   body:`Very few African scientists currently work in global biosecurity research. This reflects structural constraints — training infrastructure, mentorship networks, and funding pathways are sparse, and most existing biosecurity programmes are oriented toward institutional contexts outside Africa.\n\nAIxbio Africa is developing a 5-week fellowship programme, targeted workshops, and a peer network for African researchers in biosecurity, pandemic science, and AI safety. The first fellowship cohort is planned for 2026.`},
-  {id:"04",slug:"agri-biosec",tag:"Research",tc:"tb",title:"Agricultural Biosecurity",
-   short:"Examining transboundary animal disease risks and zoonotic spillover in African livestock systems.",
-   body:`Africa's livestock systems are major zoonotic spillover interfaces. Foot-and-mouth disease, Rift Valley fever, anthrax, brucellosis, and Newcastle disease all circulate in African animal populations with varying surveillance and containment. We study how biosecurity risks in agricultural settings are documented, communicated, and managed — and where AI-assisted approaches might improve surveillance.`},
-  {id:"05",slug:"ai-lifesci",tag:"Research",tc:"tb",title:"AI Safety in Life Sciences",
-   short:"Examining how large language models handle biologically sensitive information across framing conditions.",
-   body:`As AI systems become more capable in life science domains, understanding how they handle dual-use biological information becomes more consequential. We study boundary conditions of AI safety in this space — when guardrails work, when they fail, and what determines the difference. Our approach uses systematic test cases across multiple framing conditions, languages, and specificity levels, scored manually against a biosecurity rubric.`},
-  {id:"06",slug:"policy",tag:"Policy",tc:"ta",title:"Biosecurity Policy Analysis",
-   short:"Translating research findings into policy-relevant recommendations for African governments and international bodies.",
-   body:`Biosecurity policy in Africa operates across national governments, the Africa CDC, regional bodies, and international frameworks including the Biological Weapons Convention and Global Health Security Agenda. We track how AI developments intersect with these frameworks and contribute analysis where relevant. Our policy work is grounded in our research — we do not produce policy documents independently of the science.`},
-];
-
 const BLOG = [
   {slug:"guardrails-african-language",cat:"AI Safety",tc:"tr",date:"May 2026",rt:"8 min",
    title:"AI Safety Guardrails and African Language Contexts",
@@ -417,7 +396,6 @@ const Nav = ({ go, page, session, isAdmin, onSignIn, onSignOut }) => {
 
   const mainLinksBeforePrograms = [
     ["About","about"],
-    ["Research","research"],
   ];
 
   const mainLinksAfterPrograms = [
@@ -644,11 +622,10 @@ const Hero = ({ go }) => (
           We conduct research, support capacity-building, and foster interdisciplinary collaboration to better understand and manage technological and biological risks in African contexts.
         </p>
         <div className="hc" style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-          <button className="br" style={{ padding:"13px 28px" }} onClick={() => go("research")}>Explore Our Research</button>
-          <button className="bo" style={{ padding:"12px 22px" }} onClick={() => go("fellowship")}>Fellowship Programme →</button>
+          <button className="br" style={{ padding:"13px 28px" }} onClick={() => go("fellowship")}>Fellowship Programme →</button>
         </div>
         <div className="hd" style={{ display:"flex",gap:40,marginTop:48,paddingTop:32,borderTop:"1px solid var(--brd)",flexWrap:"wrap" }}>
-          {[["6","Research areas"],["5 weeks","Fellowship duration"],["2026","Launch year"]].map(([n,l]) => (
+          {[["5 weeks","Fellowship duration"],["2026","Launch year"]].map(([n,l]) => (
             <div key={l}>
               <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:700,color:"#1A1917",lineHeight:1 }}>{n}</div>
               <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,color:"#9A9896",letterSpacing:".06em",textTransform:"uppercase",marginTop:5 }}>{l}</div>
@@ -685,69 +662,6 @@ const HomeAbout = ({ go }) => (
       </div>
     </div>
   </Sec>
-);
-
-const HomeResearch = ({ go }) => (
-  <Sec id="research">
-    <div className="reveal" style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:48,flexWrap:"wrap",gap:16 }}>
-      <div><Ey label="Research"/><H2>Research Areas</H2></div>
-      <button className="bo" onClick={() => go("research")}>All Research →</button>
-    </div>
-    <div style={{ display:"flex",flexDirection:"column",gap:0 }}>
-      {RESEARCH.map(({ id,tag,tc,title,short,slug },i) => (
-        <div key={id} className="reveal lft" onClick={() => go("research-detail",{slug})}
-          style={{ display:"grid",gridTemplateColumns:"56px 1fr auto",gap:24,padding:"22px 0",borderTop:"1px solid var(--brd)",cursor:"pointer",alignItems:"center" }}>
-          <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"rgba(26,25,23,.22)" }}>{id}</span>
-          <div>
-            <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:5 }}>
-              <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917" }}>{title}</h3>
-              <span className={`tag ${tc}`}>{tag}</span>
-            </div>
-            <Txt muted s={{ fontSize:14 }}>{short}</Txt>
-          </div>
-          <span style={{ color:"#B8102A",fontSize:18,flexShrink:0 }}>→</span>
-        </div>
-      ))}
-      <div style={{ borderTop:"1px solid var(--brd)" }}/>
-    </div>
-  </Sec>
-);
-
-const Spotlight = ({ go }) => (
-  <section className="pat-dk sec-pad" style={{ background:"#1C1B18",padding:"88px 44px",position:"relative",overflow:"hidden" }}>
-    <div style={{ position:"absolute",right:"-2%",bottom:"-4%",width:"32vw",maxWidth:420,opacity:.05,pointerEvents:"none" }}>
-      <AfricaSvg style={{ width:"100%",height:"auto",color:"#fff" }}/>
-    </div>
-    <div style={{ maxWidth:1160,margin:"0 auto",position:"relative",zIndex:2 }}>
-      <Ey label="Research Spotlight"/>
-      <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:68,alignItems:"start" }}>
-        <div className="reveal">
-          <span className="tag tr" style={{ marginBottom:20,display:"inline-block" }}>Pilot Study · 2026</span>
-          <h2 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(23px,2.6vw,38px)",fontWeight:600,color:"#fff",lineHeight:1.22,letterSpacing:"-0.02em",marginBottom:20 }}>AI Safety Guardrails and African Language Contexts</h2>
-          <Txt s={{ color:"rgba(255,255,255,.6)",marginBottom:16 }}>We tested whether frontier AI models maintain consistent safety behavior when biosecurity-sensitive information is expressed in African indigenous terminology rather than standard English clinical language.</Txt>
-          <Txt s={{ color:"rgba(255,255,255,.6)",marginBottom:16 }}>The finding reflects a training data gap — not a jailbreak exploit — with practical implications for how AI biosecurity tools perform in African settings.</Txt>
-          <Txt s={{ color:"rgba(255,255,255,.48)",fontSize:14.5,fontStyle:"italic",marginBottom:30 }}>A full paper is in preparation. A preprint will be published here when available.</Txt>
-          <button className="bg" onClick={() => go("blog-post",{slug:"guardrails-african-language"})}>Read the Discussion →</button>
-        </div>
-        <div className="reveal d2" style={{ display:"flex",flexDirection:"column",gap:12 }}>
-          {[{stat:"47%",label:"Hazardous response rate",d:"of prompts using indigenous terminology produced hazardous responses, versus 67% under English clinical framing."},
-            {stat:"20%",label:"Refusal rate",d:"under ethnoveterinary framing, compared to 33% using English — a significant and reproducible behavioral shift."},
-            {stat:"0%",label:"Threat recognition",d:"of responses correctly identified the indigenous term as corresponding to a listed biological threat agent."}
-          ].map(({ stat,label,d },i) => (
-            <div key={i} style={{ background:"rgba(255,255,255,.045)",border:"1px solid rgba(255,255,255,.09)",padding:"20px 22px" }}>
-              <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:38,fontWeight:700,color:"#B8102A",lineHeight:1,flexShrink:0 }}>{stat}</div>
-                <div>
-                  <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"rgba(255,255,255,.35)",letterSpacing:".09em",textTransform:"uppercase",marginBottom:5 }}>{label}</div>
-                  <Txt s={{ fontSize:13,lineHeight:1.62,color:"rgba(255,255,255,.56)" }}>{d}</Txt>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
 );
 
 const HomeFellowship = ({ go }) => (
@@ -852,67 +766,9 @@ const HomeTeamCta = ({ go }) => (
 );
 
 const HomePage = ({ go, addSub }) => (<>
-  <Hero go={go}/><HomeAbout go={go}/><HomeResearch go={go}/>
-  <Spotlight go={go}/><HomeFellowship go={go}/><HomeBlog go={go}/>
+  <Hero go={go}/><HomeAbout go={go}/><HomeFellowship go={go}/><HomeBlog go={go}/>
   <HomeTeamCta go={go}/><HomeNewsletter addSub={addSub}/>
 </>);
-
-/* ══════════ RESEARCH PAGES ══════════════════════════ */
-
-const ResearchPage = ({ go }) => (<>
-  <PageHdr label="Research" title="Our Research Areas" sub="Six interconnected areas at the intersection of AI safety, biosecurity, and African scientific capacity."/>
-  <Sec bg="#fff">
-    <div style={{ display:"flex",flexDirection:"column" }}>
-      {RESEARCH.map(({ id,tag,tc,title,short,slug },i) => (
-        <div key={id} className="reveal lft" onClick={() => go("research-detail",{slug})}
-          style={{ display:"grid",gridTemplateColumns:"56px 1fr 100px",gap:24,padding:"26px 0",borderTop:"1px solid var(--brd)",cursor:"pointer",alignItems:"start" }}>
-          <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"rgba(26,25,23,.2)",paddingTop:3 }}>{id}</span>
-          <div>
-            <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:8 }}>
-              <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917" }}>{title}</h3>
-              <span className={`tag ${tc}`}>{tag}</span>
-            </div>
-            <Txt muted s={{ fontSize:14.5 }}>{short}</Txt>
-          </div>
-          <div style={{ textAlign:"right",paddingTop:3 }}>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,fontWeight:600,color:"#B8102A",letterSpacing:".04em",textTransform:"uppercase" }}>Read more →</span>
-          </div>
-        </div>
-      ))}
-      <div style={{ borderTop:"1px solid var(--brd)" }}/>
-    </div>
-  </Sec>
-</>);
-
-const ResearchDetail = ({ slug, go }) => {
-  const item = RESEARCH.find(r=>r.slug===slug);
-  if (!item) return <Sec><Txt>Not found.</Txt></Sec>;
-  return (<>
-    <PageHdr label={item.tag} title={item.title}/>
-    <Sec bg="#fff">
-      <div style={{ display:"grid",gridTemplateColumns:"1fr 300px",gap:60 }} className="g2r">
-        <article>
-          {item.body.split("\n\n").map((p,i)=><Txt key={i} s={{ marginBottom:20 }}>{p}</Txt>)}
-          <div style={{ marginTop:40,paddingTop:32,borderTop:"1px solid var(--brd)",display:"flex",gap:12 }}>
-            <button className="br" onClick={() => go("contact")}>Discuss This Research</button>
-            <button className="bo" onClick={() => go("research")}>All Research</button>
-          </div>
-        </article>
-        <div>
-          <div style={{ background:"#F7F6F2",padding:"22px",border:"1px solid var(--brd)",marginBottom:16 }}>
-            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:12 }}>Related Areas</div>
-            {RESEARCH.filter(r=>r.slug!==slug).slice(0,3).map(r => (
-              <div key={r.slug} onClick={()=>go("research-detail",{slug:r.slug})} style={{ padding:"10px 0",borderBottom:"1px solid var(--brd)",cursor:"pointer" }}>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#1A1917" }}>{r.title}</div>
-              </div>
-            ))}
-          </div>
-          <button className="bo" style={{ width:"100%" }} onClick={()=>go("contact")}>Collaborate →</button>
-        </div>
-      </div>
-    </Sec>
-  </>);
-};
 
 /* ══════════ ABOUT ═══════════════════════════════════ */
 
@@ -960,8 +816,7 @@ const AboutPage = ({ go }) => (<>
 
     {/* Actions */}
     <div className="reveal" style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-      <button className="br" onClick={()=>go("research")}>View Research</button>
-      <button className="bo" onClick={()=>go("contact")}>Get in Touch</button>
+      <button className="br" onClick={()=>go("contact")}>Get in Touch</button>
     </div>
   </Sec>
 </>);
@@ -1940,7 +1795,7 @@ const Footer = ({ go }) => (
             </a>
           </div>
         </div>
-        {[{t:"Research",ls:[["Research","research"],["About","about"],["Blog","blog"]]},{t:"Programs",ls:[["Fellowships","fellowship"],["Courses","courses"],["Mentors","mentors"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
+        {[{t:"Explore",ls:[["About","about"],["Blog","blog"],["FAQs","faqs"]]},{t:"Programs",ls:[["Fellowships","fellowship"],["Courses","courses"],["Mentors","mentors"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
           <div key={t}>
             <h4 style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"rgba(255,255,255,.28)",letterSpacing:".17em",textTransform:"uppercase",marginBottom:16 }}>{t}</h4>
             <ul style={{ listStyle:"none",display:"flex",flexDirection:"column",gap:10 }}>
@@ -2068,8 +1923,6 @@ export default function App() {
     <div style={{ minHeight:"100vh",fontFamily:"'Figtree',sans-serif",overflowX:"hidden",background:"#F7F6F2" }}>
       <Nav go={go} page={page} session={session} isAdmin={isAdmin} onSignIn={()=>setAuthOpen(true)} onSignOut={signOut}/>
       {page==="home"&&<HomePage go={go} addSub={addSub}/>}
-      {page==="research"&&<ResearchPage go={go}/>}
-      {page==="research-detail"&&<ResearchDetail slug={params.slug} go={go}/>}
       {page==="about"&&<AboutPage go={go}/>}
       {page==="fellowship"&&<FellowshipPage go={go} addApp={addApp}/>}
       {coursePages.includes(page)&&<CourseShell page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={()=>setAuthOpen(true)}/>}
