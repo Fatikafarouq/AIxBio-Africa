@@ -83,25 +83,6 @@ td{font-family:'Figtree',sans-serif;font-size:13.5px;padding:11px 14px;border-bo
 
 /* ══════════ DATA ══════════════════════════════════════ */
 
-const BLOG = [
-  {slug:"guardrails-african-language",cat:"AI Safety",tc:"tr",date:"May 2026",rt:"8 min",
-   title:"AI Safety Guardrails and African Language Contexts",
-   excerpt:"We tested whether frontier AI models maintain consistent safety behavior when biosecurity-sensitive information is expressed in African indigenous terminology. The results point to a training data gap.",
-   body:`Most AI safety systems are trained primarily on English-language data. When biosecurity-relevant information appears in another language — particularly one underrepresented in training data — the safety system may not recognize it as relevant.\n\nWe examined this using African ethnoveterinary language: terminology used in Africa to describe animal diseases, some of which correspond to listed biological threat agents.\n\nOur pilot study found that the same biological agent generated different AI responses depending on terminology. Standard English clinical language produced refusals and safety warnings at expected rates. African indigenous terminology for the same agent produced different, more hazardous patterns.\n\nThis is not a novel attack on AI safety systems. It is a reflection of training data composition. The practical implication: AI biosecurity tools used in African settings may behave differently from how they were evaluated. We are continuing this work with a larger set of disease agents and language contexts. A full paper is in preparation.`},
-  {slug:"risk-and-capacity",cat:"Policy",tc:"ta",date:"Apr 2026",rt:"6 min",
-   title:"Biological Risk and Scientific Capacity in Africa",
-   excerpt:"Africa carries a disproportionate share of global zoonotic spillover risk. Scientific capacity to study and respond to that risk is not proportionally distributed.",
-   body:`The relationship between biological risk and scientific capacity in Africa is well documented but rarely addressed structurally. Africa accounts for a significant fraction of globally emerging infectious disease events, hosts the most consequential wildlife-livestock-human interfaces, and carries the highest burdens of several endemic zoonotic diseases.\n\nAfrica-based biosecurity research, particularly in pandemic modeling, AI safety, and dual-use research governance, is thin. This is not simply a resource problem, though resources matter. The training pathways, mentorship networks, and publishing venues that connect young scientists to biosecurity research are mostly located outside Africa.\n\nAIxbio Africa was founded partly to work on this problem directly. We can contribute specific things: credible research, a fellowship that is genuinely useful to early-career African scientists, and a visible presence at the intersection of AI and biosecurity.`},
-  {slug:"curriculum-design",cat:"Capacity Building",tc:"tg",date:"Mar 2026",rt:"10 min",
-   title:"Designing Biosecurity Training for African Research Contexts",
-   excerpt:"What should a biosecurity training programme for African researchers include? We are thinking carefully about this as we design our 2026 fellowship.",
-   body:`Designing a biosecurity training programme is harder than it looks. The technical content is relatively clear: dual-use research governance, pandemic preparedness, AI safety concepts, biosurveillance methods. What is harder is framing the programme correctly for researchers working in African contexts.\n\nExisting biosecurity programmes are often excellent but implicitly oriented toward US or European institutional settings. Funding structures, regulatory frameworks, career pathways — these do not translate directly to African settings.\n\nFor our fellowship, we work from several design principles. Scientific content should be genuinely rigorous — not a simplified version of what is taught elsewhere. Local context should be foregrounded: biological risk in Africa has specific characteristics that should shape the curriculum. The programme should connect participants to the global biosecurity community, not only to each other.\n\nWe are still designing this. If you have experience running research training programmes and want to contribute, we would like to hear from you.`},
-  {slug:"methodology",cat:"Methodology",tc:"tb",date:"Feb 2026",rt:"7 min",
-   title:"Red-Teaming AI Systems for Biosecurity: Our Approach",
-   excerpt:"How we test AI safety systems in biosecurity contexts, and why consistent methodology matters for the validity of findings.",
-   body:`Red-teaming AI systems for biosecurity requires a specific and defensible methodology. You need to test consistently, score consistently, and interpret results in a way that is useful to researchers and AI developers.\n\nOur approach draws on the Frontier Model Forum's biological threat taxonomy, which provides a structured way of thinking about stages at which AI systems might contribute to biological harm. We test across multiple framing conditions — naive user, domain expert, operational actor — and across multiple levels of specificity.\n\nScoring is done against a rubric that distinguishes between refusals, partial responses, and full responses, and separately assesses hazardous information content. One methodological commitment we are firm about: we do not use AI systems to score AI systems. Self-preference bias is a real problem in LLM-as-judge approaches, and we avoid it by scoring manually against our rubric.`},
-];
-
 const MENTORS = [
   {
     name: "Mark Aiken",
@@ -401,7 +382,6 @@ const Nav = ({ go, page, session, isAdmin, onSignIn, onSignOut }) => {
   const mainLinksAfterPrograms = [
     ["Mentors","mentors"],
     ["Team","team"],
-    ["Blog","blog"],
     ["FAQs","faqs"],
     ["Contact","contact"],
   ];
@@ -699,28 +679,6 @@ const HomeFellowship = ({ go }) => (
   </Sec>
 );
 
-const HomeBlog = ({ go }) => (
-  <Sec id="blog">
-    <div className="reveal" style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:48,flexWrap:"wrap",gap:16 }}>
-      <div><Ey label="Insights"/><H2>Recent Writing</H2></div>
-      <button className="bo" onClick={() => go("blog")}>All Posts →</button>
-    </div>
-    <div className="g3" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20 }}>
-      {BLOG.slice(0,3).map(({ slug,cat,tc,date,rt,title,excerpt },i) => (
-        <div key={slug} className="lft reveal" onClick={() => go("blog-post",{slug})} style={{ background:"#fff",border:"1px solid var(--brd)",padding:"26px 24px",cursor:"pointer",display:"flex",flexDirection:"column",gap:12 }}>
-          <span className={`tag ${tc}`}>{cat}</span>
-          <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.35,flex:1 }}>{title}</h3>
-          <Txt muted s={{ fontSize:13.5 }}>{excerpt}</Txt>
-          <div style={{ borderTop:"1px solid var(--brd)",paddingTop:12,display:"flex",justifyContent:"space-between" }}>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,color:"#9A9896" }}>{date} · {rt}</span>
-            <span style={{ color:"#B8102A",fontWeight:600 }}>→</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  </Sec>
-);
-
 const HomeNewsletter = ({ addSub }) => {
   const [email,setEmail] = useState(""); const [done,setDone] = useState(false);
   const sub = () => { if (email.includes("@") && email.includes(".")) { addSub(email); setDone(true); } };
@@ -766,7 +724,7 @@ const HomeTeamCta = ({ go }) => (
 );
 
 const HomePage = ({ go, addSub }) => (<>
-  <Hero go={go}/><HomeAbout go={go}/><HomeFellowship go={go}/><HomeBlog go={go}/>
+  <Hero go={go}/><HomeAbout go={go}/><HomeFellowship go={go}/>
   <HomeTeamCta go={go}/><HomeNewsletter addSub={addSub}/>
 </>);
 
@@ -1460,81 +1418,6 @@ const FaqItem = ({ q,a }) => {
   );
 };
 
-/* ══════════ BLOG PAGES ══════════════════════════════ */
-
-const BlogPage = ({ go }) => {
-  const [q,setQ]=useState(""); const [cat,setCat]=useState("All");
-  const cats = ["All",...Array.from(new Set(BLOG.map(b=>b.cat)))];
-  const filtered = BLOG.filter(b=>{
-    const m=(b.title+b.excerpt).toLowerCase().includes(q.toLowerCase());
-    return m && (cat==="All"||b.cat===cat);
-  });
-
-  /* Re-observe any new .reveal elements after filter state changes */
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); obs.unobserve(e.target); } }),
-      { threshold: 0.05, rootMargin: "0px 0px -16px 0px" }
-    );
-    const t = setTimeout(() => document.querySelectorAll(".reveal:not(.in)").forEach(el => obs.observe(el)), 60);
-    return () => { obs.disconnect(); clearTimeout(t); };
-  }, [q, cat]);
-  return (<>
-    <PageHdr label="Insights" title="Insights &amp; Analysis"/>
-    <Sec bg="#fff">
-      <div style={{ display:"flex",gap:14,marginBottom:40,flexWrap:"wrap" }}>
-        <input placeholder="Search…" value={q} onChange={e=>setQ(e.target.value)} style={{ maxWidth:260,padding:"9px 14px",fontSize:13.5 }}/>
-        <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-          {cats.map(c=><button key={c} onClick={()=>setCat(c)} style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:600,letterSpacing:".04em",textTransform:"uppercase",padding:"8px 16px",cursor:"pointer",background:cat===c?"#B8102A":"transparent",color:cat===c?"#fff":"#5A5956",border:cat===c?"1px solid #B8102A":"1px solid var(--brd)",transition:"all .18s",borderRadius:0 }}>{c}</button>)}
-        </div>
-      </div>
-      {filtered.length===0 ? <Txt muted>No posts match your search.</Txt> : (
-        <div className="g3" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20 }}>
-          {filtered.map(({ slug,cat,tc,date,rt,title,excerpt },i)=>(
-            <div key={slug} className="lft" onClick={()=>go("blog-post",{slug})} style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"26px 22px",cursor:"pointer",display:"flex",flexDirection:"column",gap:12 }}>
-              <span className={`tag ${tc}`}>{cat}</span>
-              <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.34,flex:1 }}>{title}</h3>
-              <Txt muted s={{ fontSize:13.5 }}>{excerpt}</Txt>
-              <div style={{ borderTop:"1px solid var(--brd)",paddingTop:12,display:"flex",justifyContent:"space-between" }}>
-                <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,color:"#9A9896" }}>{date} · {rt}</span>
-                <span style={{ color:"#B8102A",fontWeight:600 }}>→</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </Sec>
-  </>);
-};
-
-const BlogPost = ({ slug,go }) => {
-  const post = BLOG.find(b=>b.slug===slug);
-  if (!post) return <Sec><Txt>Post not found.</Txt></Sec>;
-  return (<>
-    <PageHdr label={post.cat} title={post.title} sub={`${post.date} · ${post.rt}`}/>
-    <Sec bg="#fff">
-      <div style={{ display:"grid",gridTemplateColumns:"1fr 280px",gap:56 }} className="g2r">
-        <article>
-          {post.body.split("\n\n").map((p,i)=><Txt key={i} s={{ marginBottom:20 }}>{p}</Txt>)}
-          <div style={{ marginTop:40,paddingTop:28,borderTop:"1px solid var(--brd)" }}>
-            <button className="bo" onClick={()=>go("blog")}>← All Posts</button>
-          </div>
-        </article>
-        <aside>
-          <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:16 }}>More Posts</div>
-          {BLOG.filter(b=>b.slug!==slug).slice(0,3).map(b=>(
-            <div key={b.slug} onClick={()=>go("blog-post",{slug:b.slug})} style={{ borderBottom:"1px solid var(--brd)",paddingBottom:14,marginBottom:14,cursor:"pointer" }}>
-              <span className={`tag ${b.tc}`} style={{ marginBottom:7,display:"inline-block" }}>{b.cat}</span>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#1A1917",lineHeight:1.3 }}>{b.title}</div>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,color:"#9A9896",marginTop:4 }}>{b.date}</div>
-            </div>
-          ))}
-        </aside>
-      </div>
-    </Sec>
-  </>);
-};
-
 /* ══════════ CONTACT / SUPPORT PAGES ════════════════ */
 
 const ContactPage = ({ go, addContact }) => {
@@ -1649,7 +1532,6 @@ const StubPage = ({ label,title,sub,go }) => (<>
     <div style={{ maxWidth:560 }}>
       <Txt muted s={{ marginBottom:28 }}>This section is in development. Check back soon, or sign up for our newsletter to be notified of updates.</Txt>
       <div style={{ display:"flex",gap:12 }}>
-        <button className="br" onClick={()=>go("blog")}>Read Our Insights</button>
         <button className="bo" onClick={()=>go("contact")}>Contact Us</button>
       </div>
     </div>
@@ -1701,8 +1583,8 @@ const AdminPage = ({ apps,contacts,subs,auth,setAuth }) => {
     <Sec bg="#fff">
       {tab==="overview" && (
         <div>
-          <div className="sg" style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:36 }}>
-            {[["Applications",apps.length],["Messages",contacts.length],["Subscribers",subs.length],["Blog Posts",BLOG.length]].map(([l,n])=>(
+          <div className="sg" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:36 }}>
+            {[["Applications",apps.length],["Messages",contacts.length],["Subscribers",subs.length]].map(([l,n])=>(
               <div key={l} style={{ background:"#F7F6F2",padding:"20px",border:"1px solid var(--brd)" }}>
                 <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>{l}</div>
                 <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:34,fontWeight:700,color:"#1A1917" }}>{n}</div>
@@ -1795,7 +1677,7 @@ const Footer = ({ go }) => (
             </a>
           </div>
         </div>
-        {[{t:"Explore",ls:[["About","about"],["Blog","blog"],["FAQs","faqs"]]},{t:"Programs",ls:[["Fellowships","fellowship"],["Courses","courses"],["Mentors","mentors"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
+        {[{t:"Explore",ls:[["About","about"],["FAQs","faqs"]]},{t:"Programs",ls:[["Fellowships","fellowship"],["Courses","courses"],["Mentors","mentors"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
           <div key={t}>
             <h4 style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"rgba(255,255,255,.28)",letterSpacing:".17em",textTransform:"uppercase",marginBottom:16 }}>{t}</h4>
             <ul style={{ listStyle:"none",display:"flex",flexDirection:"column",gap:10 }}>
@@ -1929,8 +1811,6 @@ export default function App() {
       {page==="apply"&&<FellowshipPage go={go} addApp={addApp} startTab="apply"/>}
       {page==="mentors"&&<MentorsPage go={go}/>}
       {page==="team"&&<TeamPage go={go}/>}
-      {page==="blog"&&<BlogPage go={go}/>}
-      {page==="blog-post"&&<BlogPost slug={params.slug} go={go}/>}
       {page==="contact"&&<ContactPage go={go} addContact={addContact}/>}
       {page==="collaborate"&&<CollaboratePage go={go}/>}
       {page==="donate"&&<DonatePage go={go}/>}
