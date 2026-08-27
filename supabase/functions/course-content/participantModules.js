@@ -1522,3 +1522,31 @@ export const courseModules = [
   }
 ];
 
+export const capstoneMeta = {
+  title: "Capstone — Final Project",
+
+  overview:
+    "Complete a short applied project that uses what you learned in the course to examine a real AI-biosecurity problem in an African context.",
+
+  instructions:
+    "Using the research question you identified in the Module 6 pre-session exercise, complete a short final project that applies course concepts to a real African AI-biosecurity problem.",
+
+  expectedEffort: "Approximately 3–5 hours",
+
+  formats: [
+    "A short policy brief",
+    "A risk analysis",
+    "A research proposal outline",
+    "An intervention idea",
+    "A short communication piece (blog post or explainer)",
+    "A mini literature review"
+  ],
+
+  projectQuestions: [
+    "What is the opportunity or problem you are examining?",
+    "What AI-biosecurity risk or concern is involved?",
+    "How does the African context affect the issue?",
+    "What action or research direction do you recommend?"
+  ]
+};
+
