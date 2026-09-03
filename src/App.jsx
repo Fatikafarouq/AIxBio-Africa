@@ -1703,6 +1703,7 @@ export default function App() {
   const pathState=useCallback(()=>{
     const path=window.location.pathname.replace(/\/+$/,"")||"/";
     const map={
+      "/fellowship":"fellowship",
       "/courses/intro-ai-biosecurity":"courses",
       "/courses/intro-ai-biosecurity/apply":"course-apply",
       "/courses/intro-ai-biosecurity/facilitator":"facilitator",
@@ -1721,6 +1722,8 @@ export default function App() {
 
   const pagePath=useCallback((p,ps={})=>{
     const base="/courses/intro-ai-biosecurity";
+    if(p==="home")return "/";
+    if(p==="fellowship")return "/fellowship";
     if(p==="courses")return base;
     if(p==="course-apply")return `${base}/apply`;
     if(p==="facilitator")return `${base}/facilitator`;
@@ -1735,7 +1738,7 @@ export default function App() {
     setPage(p);setParams(ps);
     const path=pagePath(p,ps);
     if(path) window.history.pushState({p,ps},"",path);
-    else if(window.location.pathname.startsWith("/courses/intro-ai-biosecurity")) window.history.pushState({p,ps},"","/");
+    else if(window.location.pathname !== "/") window.history.pushState({p,ps},"","/");
     setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),0);
   },[pagePath]);
 
