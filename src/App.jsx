@@ -1701,18 +1701,30 @@ const Footer = ({ go }) => (
 
 export default function App() {
   const pathState=useCallback(()=>{
-    const path=window.location.pathname.replace(/\/+$/,"")||"/";
-    const map={
-      "/fellowship":"fellowship",
-      "/courses/intro-ai-biosecurity":"courses",
-      "/courses/intro-ai-biosecurity/apply":"course-apply",
-      "/courses/intro-ai-biosecurity/facilitator":"facilitator",
-      "/courses/intro-ai-biosecurity/participant":"participant",
-      "/courses/intro-ai-biosecurity/admin":"course-admin",
-    };
-    if(path.startsWith("/courses/intro-ai-biosecurity/facilitator/")) return {page:"facilitator-module",params:{slug:path.split("/").pop()}};
-    if(path.startsWith("/courses/intro-ai-biosecurity/participant/")) return {page:"participant-module",params:{slug:path.split("/").pop()}};
-    return {page:map[path]||"home",params:{}};
+    const rawPath=window.location.pathname.replace(/\/+$/,"" )||"/";
+    const path=decodeURIComponent(rawPath);
+    const courseBase="/courses/intro-ai-biosecurity";
+
+    // Nested course routes
+    if(path===courseBase) return {page:"courses",params:{}};
+    if(path===`${courseBase}/apply`) return {page:"course-apply",params:{}};
+    if(path===`${courseBase}/facilitator`) return {page:"facilitator",params:{}};
+    if(path===`${courseBase}/participant`) return {page:"participant",params:{}};
+    if(path===`${courseBase}/admin`) return {page:"course-admin",params:{}};
+    if(path.startsWith(`${courseBase}/facilitator/`)) return {page:"facilitator-module",params:{slug:path.split("/").pop()}};
+    if(path.startsWith(`${courseBase}/participant/`)) return {page:"participant-module",params:{slug:path.split("/").pop()}};
+
+    // Other special route
+    if(path==="/fellowship/apply") return {page:"apply",params:{}};
+
+    // Home
+    if(path==="/") return {page:"home",params:{}};
+
+    // Every normal page uses its page key as the URL.
+    // Examples: /about -> about, /mentors -> mentors, /research -> research.
+    // This means future normal pages do not require another routing-map edit.
+    const page=path.slice(1);
+    return {page,params:{}};
   },[]);
 
   const initial=pathState();
@@ -1722,23 +1734,36 @@ export default function App() {
 
   const pagePath=useCallback((p,ps={})=>{
     const base="/courses/intro-ai-biosecurity";
-    if(p==="home")return "/";
-    if(p==="fellowship")return "/fellowship";
-    if(p==="courses")return base;
-    if(p==="course-apply")return `${base}/apply`;
-    if(p==="facilitator")return `${base}/facilitator`;
-    if(p==="facilitator-module")return `${base}/facilitator/${ps.slug}`;
-    if(p==="participant")return `${base}/participant`;
-    if(p==="participant-module")return `${base}/participant/${ps.slug}`;
-    if(p==="course-admin")return `${base}/admin`;
-    return null;
+
+    // Nested course routes
+    if(p==="courses") return base;
+    if(p==="course-apply") return `${base}/apply`;
+    if(p==="facilitator") return `${base}/facilitator`;
+    if(p==="facilitator-module") return `${base}/facilitator/${ps.slug}`;
+    if(p==="participant") return `${base}/participant`;
+    if(p==="participant-module") return `${base}/participant/${ps.slug}`;
+    if(p==="course-admin") return `${base}/admin`;
+
+    // Other special route
+    if(p==="apply") return "/fellowship/apply";
+
+    // Home
+    if(p==="home") return "/";
+
+    // Every current or future normal page automatically gets /<page-key>.
+    return `/${encodeURIComponent(p)}`;
   },[]);
 
   const go=useCallback((p,ps={})=>{
-    setPage(p);setParams(ps);
     const path=pagePath(p,ps);
-    if(path) window.history.pushState({p,ps},"",path);
-    else if(window.location.pathname !== "/") window.history.pushState({p,ps},"","/");
+
+    setPage(p);
+    setParams(ps);
+
+    if(window.location.pathname!==path){
+      window.history.pushState({p,ps},"",path);
+    }
+
     setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),0);
   },[pagePath]);
 
