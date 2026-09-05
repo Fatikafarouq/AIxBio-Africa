@@ -1,8 +1,8 @@
 export const courseMeta = {
   "title": "Introduction to AI & Biosecurity in Africa",
   "subtitle": "An African Perspective — AIxBio Africa",
-  "purpose": "This course introduces participants to biosecurity, how artificial intelligence is changing the field, and what these developments mean for Africa. The course covers both: How AI can strengthen biosecurity, pandemic preparedness, surveillance, diagnostics, research, and response; How the same technologies may create new biological risks, misuse concerns, safety challenges, and governance questions. The purpose is not to make participants technical experts in a short course. The aim is to give them a strong foundation, help them think critically about AI and biological security, and prepare them to identify important problems, research questions, and opportunities in African contexts.",
-  "whoItsFor": "The course is designed for students, early career professionals, individuals looking to transition into the field, and other people interested in areas such as: biology medicine veterinary science public health computer science and AI policy security social sciences emerging technologies Participants may come from very different educational backgrounds and no prior expertise in AI or biosecurity is required.",
+  "purpose": "This course introduces participants to biosecurity, how artificial intelligence is changing the field, and what these developments mean for Africa. It explores both how AI can strengthen biosecurity, pandemic preparedness, surveillance, diagnostics, research, and response, and how the same technologies may create new biological risks, misuse concerns, safety challenges, and governance questions. The purpose is not to make participants technical experts in a short course. The aim is to give them a strong foundation, help them think critically about AI and biological security, and prepare them to identify important problems, research questions, and opportunities in African contexts.",
+  "whoItsFor": "The course is designed for students, early-career professionals, people looking to transition into the field, and others interested in biology, medicine, veterinary science, public health, computer science and AI, policy, security, social sciences, or emerging technologies. Participants may come from very different educational backgrounds, and no prior expertise in AI or biosecurity is required.",
   "outcomes": [
     "Explain what biosecurity is and why it matters in Africa.",
     "Describe how AI is becoming relevant to biology and biosecurity.",
@@ -26,7 +26,7 @@ export const courseModules = [
     "id": 1,
     "slug": "module-1",
     "title": "What is Biosecurity, and How Does It Apply to Africa?",
-    "tagline": "This module introduces biosecurity in simple, practical terms. By the end, participants should be able to explain what biosecurity means, distinguish it from related ideas such as biosafety and public health, r…",
+    "tagline": "Introduce the core concepts of biosecurity and connect them to African realities.",
     "overview": "This module introduces biosecurity in simple, practical terms. By the end, participants should be able to explain what biosecurity means, distinguish it from related ideas such as biosafety and public health, recognize the main types of biological threats, and understand why biosecurity matters in African contexts.",
     "discussionBlocks": [
       {
@@ -92,7 +92,7 @@ export const courseModules = [
         "label": "Read",
         "title": "Article: NTI — \"What is Biosecurity — Explained\"",
         "url": "https://www.nti.org/risky-business/what-is-biosecurity-explained/",
-        "purpose": "give participants a simple African institutional perspective on biosafety and biosecurity and why they matter on the continent.",
+        "purpose": "give participants a clear introduction to different definitions of biosecurity, including NTI's focus on deliberate misuse, and connect the concept to emerging technologies.",
         "note": "",
         "core": true
       },
@@ -123,7 +123,7 @@ export const courseModules = [
     "id": 2,
     "slug": "module-2",
     "title": "Where Does AI Fit Into Biosecurity?",
-    "tagline": "This module helps participants understand, in simple terms, how AI is beginning to affect biology, health, and biosecurity. The goal is not to teach the technical details of AI, but to show what AI can help peo…",
+    "tagline": "Understand what AI can do in health and biology, and why those capabilities matter for biosecurity.",
     "overview": "This module helps participants understand, in simple terms, how AI is beginning to affect biology, health, and biosecurity. The goal is not to teach the technical details of AI, but to show what AI can help people do and why those capabilities matter for biological security.",
     "discussionBlocks": [
       {
@@ -223,7 +223,7 @@ export const courseModules = [
     "id": 3,
     "slug": "module-3",
     "title": "How Can AI Strengthen Biosecurity in Africa?",
-    "tagline": "This module helps participants understand how AI can be used to prevent, detect, prepare for, and respond to biological threats in African contexts. The focus is on practical ways AI can strengthen existing bio…",
+    "tagline": "Explore practical ways AI could strengthen prevention, detection, preparedness, and response in African contexts.",
     "overview": "This module helps participants understand how AI can be used to prevent, detect, prepare for, and respond to biological threats in African contexts. The focus is on practical ways AI can strengthen existing biosecurity and public-health systems rather than treating AI as a solution on its own.",
     "discussionBlocks": [
       {
@@ -351,7 +351,7 @@ export const courseModules = [
     "id": 4,
     "slug": "module-4",
     "title": "How Could the Same AI Capabilities Create New Biosecurity Risks?",
-    "tagline": "This module looks at the same capability areas from Module 3, but from the risk side. The aim is to help participants understand that useful AI systems can also fail, be misused, or create new vulnerabilities. …",
+    "tagline": "Examine how the same AI capabilities can fail, be misused, or create new biosecurity vulnerabilities.",
     "overview": "This module looks at the same capability areas from Module 3, but from the risk side. The aim is to help participants understand that useful AI systems can also fail, be misused, or create new vulnerabilities. The central idea is dual use: the same capability can create both benefit and risk depending on how it is used, who has access to it, and what safeguards are in place.",
     "discussionBlocks": [
       {
@@ -456,7 +456,7 @@ export const courseModules = [
     "id": 5,
     "slug": "module-5",
     "title": "How Do We Reduce and Govern These Risks?",
-    "tagline": "This module helps participants understand how AI-biosecurity risks can be reduced through safeguards, responsible practices, and governance. It introduces the idea that managing these risks requires action from…",
+    "tagline": "Connect identified risks to practical safeguards, responsible actors, and governance in African contexts.",
     "overview": "This module helps participants understand how AI-biosecurity risks can be reduced through safeguards, responsible practices, and governance. It introduces the idea that managing these risks requires action from different actors, including researchers, institutions, technology companies, governments, and regional and international bodies. The module also asks what effective governance should look like in African contexts.",
     "discussionBlocks": [
       {
@@ -498,12 +498,33 @@ export const courseModules = [
     "caseStudy": {
       "title": "Africa CDC's New Five-Year Plan for Biosafety and Biosecurity",
       "purpose": [],
-      "discussion": "The Africa CDC strategy says it wants AI, synthetic biology, and digital biosurveillance to be part of Africa's biosecurity future, but does not yet specify exactly how all of these technologies should be governed in practice. Participants should come prepared with: Pick one risk discussed in Module 4, such as: Place that risk inside a realistic situation, such as: Ask: What could go wrong, concretely? Identify one practical safeguard that could reduce the risk. Then ask who should be responsible for putting that safeguard in place. This could include: The purpose of the discussion is to help participants connect: specific risks → practical safeguards → responsible actors in a real African biosecurity context.",
+      "discussion": "The Africa CDC strategy provides a real African governance context for discussing how emerging technologies, including AI, synthetic biology, and digital biosurveillance, should be used safely and responsibly. The discussion should connect a specific risk from Module 4 to a practical safeguard and the actor responsible for putting that safeguard in place.",
       "resource": {
         "label": "Article: Africa CDC — Africa's New Five-Year Plan for Biosafety and Biosecurity",
         "url": "https://africacdc.org/news-item/africas-new-five-year-plan-for-biosafety-and-biosecurity/"
-      }
+      },
+      "prepPrompts": [
+        {
+          "title": "1. One way AI could go wrong here.",
+          "detail": "Pick one risk from Module 4 — for example unreliable systems, weak oversight, cybersecurity problems, data misuse, or dependence on outside technologies — and place it in a realistic setting such as outbreak tracking, laboratory or surveillance analysis, biological sample screening, or research-risk assessment. Be ready to explain what could go wrong, concretely."
+        },
+        {
+          "title": "2. One thing that could reduce the risk — and whose job it should be.",
+          "detail": "Identify one practical safeguard that could reduce the risk, then identify who should be responsible for putting it in place: a laboratory, university or research institution, health institution, technology company, regulator, government, Africa CDC, funder, or several actors working together."
+        }
+      ]
     },
+    "resources": [
+      {
+        "type": "read",
+        "label": "Read",
+        "title": "Article: Nature Africa — What AI can do for improving health in Africa",
+        "url": "https://www.nature.com/articles/d44148-025-00371-3",
+        "purpose": "help participants connect AI's potential benefits in African health systems with the governance questions raised in Module 5, particularly what safeguards, oversight, local capacity, and institutional responsibility are needed for these tools to work safely and effectively.",
+        "note": "",
+        "core": true
+      }
+    ],
     "facilitatorNotes": [
       "Begin by briefly reminding participants that Module 4 focused on identifying risks; Module 5 is about what can be done about them.",
       "Use the Africa CDC five-year biosafety and biosecurity plan to ground the discussion in a real African governance effort.",
@@ -521,7 +542,7 @@ export const courseModules = [
     "id": 6,
     "slug": "module-6",
     "title": "What Should Africa Do Next on AI and Biosecurity?",
-    "tagline": "This module brings together the main ideas from the course and asks what they mean for Africa in practice. By the end, participants should be able to identify important priorities for AI and biosecurity in Afri…",
+    "tagline": "Bring the course together around African priorities, capability gaps, governance, and research questions.",
     "overview": "This module brings together the main ideas from the course and asks what they mean for Africa in practice. By the end, participants should be able to identify important priorities for AI and biosecurity in African contexts, recognize key capability and governance gaps, and begin thinking about practical actions and research questions for the future.",
     "discussionBlocks": [
       {
@@ -556,7 +577,7 @@ export const courseModules = [
         "title": "What Should Africa Research Next?",
         "points": [
           "What important questions about AI and biosecurity in Africa still lack good evidence?",
-          "How can learners turn the problems and gaps identified throughout the course into useful research questions?"
+          "How can participants turn the problems and gaps identified throughout the course into useful research questions?"
         ]
       }
     ],
@@ -569,6 +590,24 @@ export const courseModules = [
         "url": "https://www.peaceau.org/en/article/communique-of-the-1339th-meeting-of-the-psc-on-artificial-intelligence-governance-peace-and-security-held-on-thursday-16-april-2026"
       }
     },
+    "resources": [
+      {
+        "type": "read",
+        "label": "Read",
+        "title": "Research ICT Africa — \"African perspectives are missing from AI safety\"",
+        "url": "https://researchictafrica.net/2025/09/17/african-perspectives-are-missing-from-ai-safety/",
+        "purpose": "ground the pre-session exercise in a discussion of Africa's participation, capacity, and evidence gaps in AI safety.",
+        "note": "",
+        "core": true
+      }
+    ],
+    "preSessionPrep": [
+      "One priority: based on the course, choose one AI-biosecurity issue you would put at the top of Africa's list right now and explain why it should come before the others.",
+      "One gap: choose either weak technical capacity or weak participation in global AI safety conversations and name one concrete thing that is missing — people, institutions, funding, or seats at the table.",
+      "One open question: write one research question the course has left you curious about — something on AI and biosecurity in Africa that still lacks good evidence.",
+      "Optional: if only a minority of African states are actively engaging on AI safety, is that mainly a resourcing problem, a priority problem, or something else?"
+    ],
+    "preSessionPrepNote": "Participants should complete this exercise after reading the supporting article and before the live session.",
     "facilitatorNotes": [
       "Open by asking participants what they think Africa should prioritize on AI and biosecurity before introducing the discussion blocks.",
       "Use the five core blocks to guide the conversation rather than lecture through them.",
@@ -577,9 +616,10 @@ export const courseModules = [
       "Encourage participants to explain why they chose a priority, not just name one.",
       "Keep bringing the discussion back to African contexts, including differences between countries, institutions, sectors, and levels of capacity.",
       "Avoid pushing the group toward one \"correct\" continental priority; the aim is to compare reasoning, trade-offs, and different perspectives.",
-      "Keep the discussion practical and research-oriented rather than turning it into a broad debate about AI policy in general."
+      "Keep the discussion practical and research-oriented rather than turning it into a broad debate about AI policy in general.",
+      "Remind participants that Module 6 leads directly into the final project: a short 3–5 hour applied project based on the research question they developed in this module.",
+      "Course completion requires participation in at least 4 of the 6 live sessions, completion of the pre-session exercise for each attended module, and submission of the final project."
     ],
     "moduleLearningFlow": "Bring together priorities, capabilities, dependencies, responsibility, and research gaps → apply them in a short final project → complete the course → continue into AIxBio Africa's community, fellowship, and research pathway."
   }
 ];
-
