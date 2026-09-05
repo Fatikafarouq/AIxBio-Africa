@@ -1,8 +1,8 @@
 export const courseMeta = {
   "title": "Introduction to AI & Biosecurity in Africa",
   "subtitle": "An African Perspective — AIxBio Africa",
-  "purpose": "This course introduces you to biosecurity, how artificial intelligence is changing the field, and what these developments mean for Africa. The course covers both: How AI can strengthen biosecurity, pandemic preparedness, surveillance, diagnostics, research, and response; How the same technologies may create new biological risks, misuse concerns, safety challenges, and governance questions. The purpose is not to make you a technical expert in a short course. The aim is to give you a strong foundation, help you think critically about AI and biological security, and prepare you to identify important problems, research questions, and opportunities in African contexts.",
-  "whoItsFor": "This course is for students, early-career professionals, researchers, and others interested in areas such as: biology medicine veterinary science public health computer science and AI policy security social sciences emerging technologies You do not need prior expertise in AI or biosecurity. People from different educational and professional backgrounds are welcome.",
+  "purpose": "This course introduces you to biosecurity, how artificial intelligence is changing the field, and what these developments mean for Africa. It explores both how AI can strengthen biosecurity, pandemic preparedness, surveillance, diagnostics, research, and response, and how the same technologies may create new biological risks, misuse concerns, safety challenges, and governance questions. The purpose is not to make you a technical expert in a short course. The aim is to give you a strong foundation, help you think critically about AI and biological security, and prepare you to identify important problems, research questions, and opportunities in African contexts.",
+  "whoItsFor": "This course is for students, early-career professionals, researchers, and others interested in biology, medicine, veterinary science, public health, computer science and AI, policy, security, social sciences, or emerging technologies. You do not need prior expertise in AI or biosecurity, and people from different educational and professional backgrounds are welcome.",
   "outcomes": [
     "Explain what biosecurity is and why it matters in Africa.",
     "Describe how AI is becoming relevant to biology and biosecurity.",
@@ -21,6 +21,7 @@ export const courseMeta = {
     "Act"
   ]
 };
+
 export const coursePreviewModules = [
   {
     "id": 1,
@@ -59,4 +60,3 @@ export const coursePreviewModules = [
     "overview": "This module brings together the main ideas from the course and asks what they mean for Africa in practice. By the end, you should be able to identify important priorities for AI and biosecurity in African contexts, recognize key capability and governance gaps, and begin thinking about practical actions and research questions for the future."
   }
 ];
-
