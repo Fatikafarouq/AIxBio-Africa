@@ -443,6 +443,7 @@ const AdminDashboard = ({ go }) => {
   const [newCohort,setNewCohort]=useState({name:"",start_date:""});
   const [newGroup,setNewGroup]=useState({cohort_id:"",name:"",timezone_label:"",facilitator_user_id:"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]});
   const [groupEdits,setGroupEdits]=useState({});
+  const [groupSaveState,setGroupSaveState]=useState({});
   const [error,setError]=useState("");
 
   const load=async()=>{
@@ -517,26 +518,37 @@ const AdminDashboard = ({ go }) => {
   const updateGroupSchedule=async(groupId)=>{
     const edit=groupEdits[groupId];
     if(!edit)return;
+
     const duration=Number(edit.session_duration_minutes||60);
-    if(!Number.isFinite(duration)||duration<15||duration>240){setError("Session duration must be between 15 and 240 minutes.");return;}
-    if(edit.meeting_url.trim()&&!/^https?:\/\//i.test(edit.meeting_url.trim())){setError("Enter a valid meeting link beginning with http:// or https://.");return;}
-    if(edit.dates.some(d=>!d)){setError("All six session dates are required.");return;}
+    if(!Number.isFinite(duration)||duration<15||duration>240){
+      setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:"Session duration must be between 15 and 240 minutes."}}));
+      return;
+    }
+    if(edit.meeting_url.trim()&&!/^https?:\/\//i.test(edit.meeting_url.trim())){
+      setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:"Enter a valid meeting link beginning with http:// or https://."}}));
+      return;
+    }
+    if(edit.dates.some(d=>!d)){
+      setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:"All six session dates are required."}}));
+      return;
+    }
 
-    setError("");
-    const {error:groupError}=await supabase.from("cohort_groups").update({
-      meeting_url:edit.meeting_url.trim()||null,
-      session_duration_minutes:duration
-    }).eq("id",groupId);
-    if(groupError){setError(groupError.message);return;}
+    setGroupSaveState(x=>({...x,[groupId]:{status:"saving",message:"Saving…"}}));
 
-    const rows=edit.dates.map((d,i)=>({
-      group_id:groupId,
-      module_id:i+1,
-      session_date:new Date(d).toISOString()
-    }));
-    const {error:sessionError}=await supabase.from("group_sessions").upsert(rows,{onConflict:"group_id,module_id"});
-    if(sessionError){setError(sessionError.message);return;}
+    const {error:e}=await supabase.rpc("admin_update_group_live_settings",{
+      p_group_id:groupId,
+      p_meeting_url:edit.meeting_url.trim()||null,
+      p_session_duration_minutes:duration,
+      p_session_dates:edit.dates.map(d=>new Date(d).toISOString())
+    });
+
+    if(e){
+      setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:e.message||"Could not save live-session settings."}}));
+      return;
+    }
+
     await load();
+    setGroupSaveState(x=>({...x,[groupId]:{status:"saved",message:"Live-session settings saved."}}));
   };
 
   const selectedGroups=groups.filter(g=>g.cohort_id===selectedCohort);
@@ -690,9 +702,26 @@ const AdminDashboard = ({ go }) => {
                     </FF>
                   ))}
 
-                  <button className="bo" onClick={()=>updateGroupSchedule(g.id)}>
-                    Save live-session settings
-                  </button>
+                  <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                    <button
+                      className="bo"
+                      disabled={groupSaveState[g.id]?.status==="saving"}
+                      onClick={()=>updateGroupSchedule(g.id)}
+                      style={{ opacity:groupSaveState[g.id]?.status==="saving"?.6:1,cursor:groupSaveState[g.id]?.status==="saving"?"wait":"pointer" }}
+                    >
+                      {groupSaveState[g.id]?.status==="saving" ? "Saving…" : "Save live-session settings"}
+                    </button>
+                    {groupSaveState[g.id]?.message&&(
+                      <span style={{
+                        fontFamily:"'Figtree',sans-serif",
+                        fontSize:12.5,
+                        fontWeight:600,
+                        color:groupSaveState[g.id]?.status==="error"?"#B8102A":"#356B47"
+                      }}>
+                        {groupSaveState[g.id].message}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
