@@ -442,8 +442,11 @@ const AdminDashboard = ({ go }) => {
   const [selectedCohort,setSelectedCohort]=useState("");
   const [newCohort,setNewCohort]=useState({name:"",start_date:""});
   const [newGroup,setNewGroup]=useState({cohort_id:"",name:"",timezone_label:"",facilitator_user_id:"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]});
+  const [cohortEdits,setCohortEdits]=useState({});
+  const [cohortSaveState,setCohortSaveState]=useState({});
   const [groupEdits,setGroupEdits]=useState({});
   const [groupSaveState,setGroupSaveState]=useState({});
+  const [deleteState,setDeleteState]=useState({});
   const [error,setError]=useState("");
 
   const load=async()=>{
@@ -457,21 +460,39 @@ const AdminDashboard = ({ go }) => {
     ]);
     const first=[a,c,g,m,f].find(x=>x.error);
     if(first?.error){setError(first.error.message);return;}
+    const cohortRows=c.data||[];
     const groupRows=g.data||[];
     setApplications(a.data||[]);
-    setCohorts(c.data||[]);
+    setCohorts(cohortRows);
     setGroups(groupRows);
     setMembers(m.data||[]);
     setFacilitators(f.data||[]);
+
+    setCohortEdits(Object.fromEntries(cohortRows.map(cohort=>[
+      cohort.id,
+      {
+        name:cohort.name||"",
+        start_date:cohort.start_date||"",
+        status:cohort.status||"setup"
+      }
+    ])));
+
     setGroupEdits(Object.fromEntries(groupRows.map(group=>{
       const sessions=[...(group.group_sessions||[])].sort((x,y)=>Number(x.module_id)-Number(y.module_id));
       return [group.id,{
+        name:group.name||"",
+        timezone_label:group.timezone_label||"",
         meeting_url:group.meeting_url||"",
         session_duration_minutes:String(group.session_duration_minutes||60),
         dates:Array.from({length:6},(_,i)=>toDateTimeLocal(sessions.find(s=>Number(s.module_id)===i+1)?.session_date))
       }];
     })));
-    if(!selectedCohort && c.data?.[0]) setSelectedCohort(c.data[0].id);
+
+    if(selectedCohort && !cohortRows.some(x=>x.id===selectedCohort)){
+      setSelectedCohort(cohortRows[0]?.id||"");
+    }else if(!selectedCohort && cohortRows[0]){
+      setSelectedCohort(cohortRows[0].id);
+    }
   };
 
   useEffect(()=>{load();},[]);
@@ -492,6 +513,76 @@ const AdminDashboard = ({ go }) => {
     const {error:e}=await supabase.from("cohorts").insert({name:newCohort.name,start_date:newCohort.start_date||null,status:"setup"});
     if(e){setError(e.message);return;}
     setNewCohort({name:"",start_date:""}); await load();
+  };
+
+  const updateCohort=async(cohortId)=>{
+    const edit=cohortEdits[cohortId];
+    if(!edit?.name?.trim()){
+      setCohortSaveState(x=>({...x,[cohortId]:{status:"error",message:"Cohort name is required."}}));
+      return;
+    }
+
+    setCohortSaveState(x=>({...x,[cohortId]:{status:"saving",message:"Saving…"}}));
+
+    const {error:e}=await supabase.rpc("admin_update_cohort_settings",{
+      p_cohort_id:cohortId,
+      p_name:edit.name.trim(),
+      p_start_date:edit.start_date||null,
+      p_status:edit.status||"setup"
+    });
+
+    if(e){
+      setCohortSaveState(x=>({...x,[cohortId]:{status:"error",message:e.message||"Could not save cohort."}}));
+      return;
+    }
+
+    await load();
+    setCohortSaveState(x=>({...x,[cohortId]:{status:"saved",message:"Cohort saved."}}));
+  };
+
+  const deleteGroup=async(group)=>{
+    const affected=members.filter(m=>m.group_id===group.id&&m.status==="accepted");
+    const participantCount=affected.filter(m=>m.role==="participant").length;
+    const facilitatorCount=affected.filter(m=>m.role==="facilitator").length;
+
+    const warning=affected.length
+      ? `Delete "${group.name}"?\n\nThis group currently has ${participantCount} participant${participantCount===1?"":"s"} and ${facilitatorCount} facilitator${facilitatorCount===1?"":"s"} assigned.\n\nThey will immediately lose course access and their applications will be reset to PENDING so they can be assigned again.\n\nThe group's six-session schedule and attendance linked to those sessions will also be deleted.`
+      : `Delete "${group.name}"?\n\nThis group is empty. Its six-session schedule will also be deleted.`;
+
+    if(!window.confirm(warning))return;
+
+    setDeleteState(x=>({...x,[`group-${group.id}`]:{status:"deleting",message:"Deleting…"}}));
+
+    const {error:e}=await supabase.rpc("admin_delete_course_group",{p_group_id:group.id});
+    if(e){
+      setDeleteState(x=>({...x,[`group-${group.id}`]:{status:"error",message:e.message||"Could not delete group."}}));
+      return;
+    }
+
+    await load();
+  };
+
+  const deleteCohort=async(cohort)=>{
+    const cohortGroups=groups.filter(g=>g.cohort_id===cohort.id);
+    const groupIds=new Set(cohortGroups.map(g=>g.id));
+    const affected=members.filter(m=>groupIds.has(m.group_id)&&m.status==="accepted");
+    const participantCount=affected.filter(m=>m.role==="participant").length;
+    const facilitatorCount=affected.filter(m=>m.role==="facilitator").length;
+
+    const warning=`Delete "${cohort.name}"?\n\nThis will permanently delete ${cohortGroups.length} group${cohortGroups.length===1?"":"s"} and all of their session schedules.\n\n${participantCount} participant${participantCount===1?"":"s"} and ${facilitatorCount} facilitator${facilitatorCount===1?"":"s"} will lose course access. Their applications will be reset to PENDING so they can be assigned to another cohort later.\n\nThis action cannot be undone.`;
+
+    if(!window.confirm(warning))return;
+
+    setDeleteState(x=>({...x,[`cohort-${cohort.id}`]:{status:"deleting",message:"Deleting…"}}));
+
+    const {error:e}=await supabase.rpc("admin_delete_course_cohort",{p_cohort_id:cohort.id});
+    if(e){
+      setDeleteState(x=>({...x,[`cohort-${cohort.id}`]:{status:"error",message:e.message||"Could not delete cohort."}}));
+      return;
+    }
+
+    if(selectedCohort===cohort.id)setSelectedCohort("");
+    await load();
   };
 
   const createGroup=async()=>{
@@ -519,6 +610,11 @@ const AdminDashboard = ({ go }) => {
     const edit=groupEdits[groupId];
     if(!edit)return;
 
+    if(!edit.name?.trim()){
+      setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:"Group name is required."}}));
+      return;
+    }
+
     const duration=Number(edit.session_duration_minutes||60);
     if(!Number.isFinite(duration)||duration<15||duration>240){
       setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:"Session duration must be between 15 and 240 minutes."}}));
@@ -535,20 +631,22 @@ const AdminDashboard = ({ go }) => {
 
     setGroupSaveState(x=>({...x,[groupId]:{status:"saving",message:"Saving…"}}));
 
-    const {error:e}=await supabase.rpc("admin_update_group_live_settings",{
+    const {error:e}=await supabase.rpc("admin_update_course_group",{
       p_group_id:groupId,
+      p_name:edit.name.trim(),
+      p_timezone_label:edit.timezone_label.trim()||null,
       p_meeting_url:edit.meeting_url.trim()||null,
       p_session_duration_minutes:duration,
       p_session_dates:edit.dates.map(d=>new Date(d).toISOString())
     });
 
     if(e){
-      setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:e.message||"Could not save live-session settings."}}));
+      setGroupSaveState(x=>({...x,[groupId]:{status:"error",message:e.message||"Could not save group settings."}}));
       return;
     }
 
     await load();
-    setGroupSaveState(x=>({...x,[groupId]:{status:"saved",message:"Live-session settings saved."}}));
+    setGroupSaveState(x=>({...x,[groupId]:{status:"saved",message:"Group settings saved."}}));
   };
 
   const selectedGroups=groups.filter(g=>g.cohort_id===selectedCohort);
@@ -584,7 +682,115 @@ const AdminDashboard = ({ go }) => {
             })}</div>
           </div>)}
         </div>}
-        {tab==="cohorts"&&<div style={{ maxWidth:650 }}><H2 s={{ marginBottom:20 }}>Create cohort</H2><FF label="Cohort name"><input value={newCohort.name} onChange={e=>setNewCohort(x=>({...x,name:e.target.value}))} placeholder="Intro Course — Cohort 1"/></FF><FF label="Start date"><input type="date" value={newCohort.start_date} onChange={e=>setNewCohort(x=>({...x,start_date:e.target.value}))}/></FF><button className="br" onClick={createCohort}>Create cohort</button><div style={{ marginTop:30 }}>{cohorts.map(c=><div key={c.id} style={{ borderTop:"1px solid var(--brd)",padding:"14px 0" }}><strong>{c.name}</strong><div style={{ fontSize:12.5,color:"#5A5956" }}>{c.start_date||"No start date"} · {c.status} · ID: {c.id}</div></div>)}</div></div>}
+        {tab==="cohorts"&&<div style={{ maxWidth:760 }}>
+          <H2 s={{ marginBottom:20 }}>Create cohort</H2>
+          <FF label="Cohort name">
+            <input value={newCohort.name} onChange={e=>setNewCohort(x=>({...x,name:e.target.value}))} placeholder="Intro Course — Cohort 1"/>
+          </FF>
+          <FF label="Start date">
+            <input type="date" value={newCohort.start_date} onChange={e=>setNewCohort(x=>({...x,start_date:e.target.value}))}/>
+          </FF>
+          <button className="br" onClick={createCohort}>Create cohort</button>
+
+          <div style={{ marginTop:46 }}>
+            <Ey label="Existing Cohorts"/>
+            <H2 s={{ marginBottom:8 }}>Manage cohorts</H2>
+            <Txt muted s={{ fontSize:13.5,marginBottom:20 }}>
+              Edit cohort details or remove a test cohort. Deleting a cohort removes its groups and schedules; assigned users lose access and their applications return to pending.
+            </Txt>
+
+            {cohorts.length===0 ? (
+              <Txt muted>No cohorts have been created yet.</Txt>
+            ) : cohorts.map(c=>{
+              const edit=cohortEdits[c.id]||{name:c.name||"",start_date:c.start_date||"",status:c.status||"setup"};
+              const cohortGroups=groups.filter(g=>g.cohort_id===c.id);
+              const groupIds=new Set(cohortGroups.map(g=>g.id));
+              const assigned=members.filter(m=>groupIds.has(m.group_id)&&m.status==="accepted");
+              const participantCount=assigned.filter(m=>m.role==="participant").length;
+              const facilitatorCount=assigned.filter(m=>m.role==="facilitator").length;
+              const deleting=deleteState[`cohort-${c.id}`]?.status==="deleting";
+
+              return (
+                <div key={c.id} style={{ borderTop:"1px solid var(--brd)",padding:"24px 0" }}>
+                  <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
+                    <FF label="Cohort name">
+                      <input
+                        value={edit.name}
+                        onChange={e=>setCohortEdits(x=>({...x,[c.id]:{...edit,name:e.target.value}}))}
+                      />
+                    </FF>
+                    <FF label="Start date">
+                      <input
+                        type="date"
+                        value={edit.start_date||""}
+                        onChange={e=>setCohortEdits(x=>({...x,[c.id]:{...edit,start_date:e.target.value}}))}
+                      />
+                    </FF>
+                  </div>
+
+                  <FF label="Status">
+                    <select
+                      value={edit.status}
+                      onChange={e=>setCohortEdits(x=>({...x,[c.id]:{...edit,status:e.target.value}}))}
+                    >
+                      <option value="setup">Setup</option>
+                      <option value="active">Active</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </FF>
+
+                  <div style={{ fontSize:12.5,color:"#5A5956",marginBottom:16 }}>
+                    {cohortGroups.length} group{cohortGroups.length===1?"":"s"} · {participantCount} participant{participantCount===1?"":"s"} · {facilitatorCount} facilitator{facilitatorCount===1?"":"s"} · ID: {c.id}
+                  </div>
+
+                  <div style={{ display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
+                    <button
+                      className="bo"
+                      disabled={cohortSaveState[c.id]?.status==="saving"||deleting}
+                      onClick={()=>updateCohort(c.id)}
+                    >
+                      {cohortSaveState[c.id]?.status==="saving"?"Saving…":"Save cohort"}
+                    </button>
+
+                    <button
+                      onClick={()=>deleteCohort(c)}
+                      disabled={deleting}
+                      style={{
+                        border:"1px solid #B8102A",
+                        background:"transparent",
+                        color:"#B8102A",
+                        padding:"10px 16px",
+                        fontFamily:"'Figtree',sans-serif",
+                        fontSize:12.5,
+                        fontWeight:700,
+                        cursor:deleting?"wait":"pointer"
+                      }}
+                    >
+                      {deleting?"Deleting…":"Delete cohort"}
+                    </button>
+
+                    {cohortSaveState[c.id]?.message&&(
+                      <span style={{
+                        fontFamily:"'Figtree',sans-serif",
+                        fontSize:12.5,
+                        fontWeight:600,
+                        color:cohortSaveState[c.id]?.status==="error"?"#B8102A":"#356B47"
+                      }}>
+                        {cohortSaveState[c.id].message}
+                      </span>
+                    )}
+
+                    {deleteState[`cohort-${c.id}`]?.status==="error"&&(
+                      <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,fontWeight:600,color:"#B8102A" }}>
+                        {deleteState[`cohort-${c.id}`].message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>}
         {tab==="groups"&&<div style={{ maxWidth:820 }}>
           <H2 s={{ marginBottom:20 }}>Create group &amp; six-session schedule</H2>
           <Txt muted s={{ fontSize:13.5,marginBottom:22 }}>
@@ -647,22 +853,43 @@ const AdminDashboard = ({ go }) => {
 
           <div style={{ marginTop:46 }}>
             <Ey label="Existing Groups"/>
-            <H2 s={{ marginBottom:8 }}>Live-session settings</H2>
+            <H2 s={{ marginBottom:8 }}>Manage groups &amp; live sessions</H2>
             <Txt muted s={{ fontSize:13.5,marginBottom:20 }}>
-              Add or change the meeting link, duration, or session dates for an existing group.
+              Edit the group name, timezone, meeting link, duration, or session dates. Deleting a group removes its schedule; assigned users lose access and their applications return to pending.
             </Txt>
 
             {groups.length===0 ? (
               <Txt muted>No groups have been created yet.</Txt>
             ) : groups.map(g=>{
-              const edit=groupEdits[g.id]||{meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]};
+              const edit=groupEdits[g.id]||{name:g.name||"",timezone_label:g.timezone_label||"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]};
+              const affected=members.filter(m=>m.group_id===g.id&&m.status==="accepted");
+              const participantCount=affected.filter(m=>m.role==="participant").length;
+              const facilitatorCount=affected.filter(m=>m.role==="facilitator").length;
+              const deleting=deleteState[`group-${g.id}`]?.status==="deleting";
+
               return (
                 <div key={g.id} style={{ borderTop:"1px solid var(--brd)",padding:"24px 0" }}>
                   <div style={{ marginBottom:16 }}>
                     <strong style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"#1A1917" }}>{g.name}</strong>
                     <div style={{ fontSize:12.5,color:"#5A5956",marginTop:3 }}>
-                      {g.timezone_label||"No timezone label"} · ID: {g.id}
+                      {participantCount} participant{participantCount===1?"":"s"} · {facilitatorCount} facilitator{facilitatorCount===1?"":"s"} · ID: {g.id}
                     </div>
+                  </div>
+
+                  <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
+                    <FF label="Group name">
+                      <input
+                        value={edit.name}
+                        onChange={e=>setGroupEdits(x=>({...x,[g.id]:{...edit,name:e.target.value}}))}
+                      />
+                    </FF>
+                    <FF label="Timezone label">
+                      <input
+                        value={edit.timezone_label}
+                        onChange={e=>setGroupEdits(x=>({...x,[g.id]:{...edit,timezone_label:e.target.value}}))}
+                        placeholder="WAT / UTC+1"
+                      />
+                    </FF>
                   </div>
 
                   <div className="g2" style={{ display:"grid",gridTemplateColumns:"1.4fr .6fr",gap:14 }}>
@@ -702,15 +929,33 @@ const AdminDashboard = ({ go }) => {
                     </FF>
                   ))}
 
-                  <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                  <div style={{ display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
                     <button
                       className="bo"
-                      disabled={groupSaveState[g.id]?.status==="saving"}
+                      disabled={groupSaveState[g.id]?.status==="saving"||deleting}
                       onClick={()=>updateGroupSchedule(g.id)}
                       style={{ opacity:groupSaveState[g.id]?.status==="saving"?.6:1,cursor:groupSaveState[g.id]?.status==="saving"?"wait":"pointer" }}
                     >
-                      {groupSaveState[g.id]?.status==="saving" ? "Saving…" : "Save live-session settings"}
+                      {groupSaveState[g.id]?.status==="saving" ? "Saving…" : "Save group settings"}
                     </button>
+
+                    <button
+                      onClick={()=>deleteGroup(g)}
+                      disabled={deleting}
+                      style={{
+                        border:"1px solid #B8102A",
+                        background:"transparent",
+                        color:"#B8102A",
+                        padding:"10px 16px",
+                        fontFamily:"'Figtree',sans-serif",
+                        fontSize:12.5,
+                        fontWeight:700,
+                        cursor:deleting?"wait":"pointer"
+                      }}
+                    >
+                      {deleting?"Deleting…":"Delete group"}
+                    </button>
+
                     {groupSaveState[g.id]?.message&&(
                       <span style={{
                         fontFamily:"'Figtree',sans-serif",
@@ -719,6 +964,12 @@ const AdminDashboard = ({ go }) => {
                         color:groupSaveState[g.id]?.status==="error"?"#B8102A":"#356B47"
                       }}>
                         {groupSaveState[g.id].message}
+                      </span>
+                    )}
+
+                    {deleteState[`group-${g.id}`]?.status==="error"&&(
+                      <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,fontWeight:600,color:"#B8102A" }}>
+                        {deleteState[`group-${g.id}`].message}
                       </span>
                     )}
                   </div>
