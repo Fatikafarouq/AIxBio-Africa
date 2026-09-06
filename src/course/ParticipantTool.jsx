@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { PageHdr, Sec, Ey, H2, Txt, FF } from "./CoursePrimitives";
+import LiveSessionsPanel from "./LiveSessionsPanel";
 
 const Item = ({ item }) => {
   if (item.type === "subsection") {
@@ -68,6 +69,8 @@ export const ParticipantHub = ({ go, courseMeta, courseModules, progress, capsto
           {(courseMeta.learningJourney || []).map((step,i)=><span key={step} className="tag tb">{i+1}. {step}</span>)}
         </div>
       </div>
+
+      <LiveSessionsPanel courseModules={courseModules}/>
 
       <ProgressStrip progress={progress}/>
 
