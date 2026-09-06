@@ -130,7 +130,24 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
     courseModules.find(m => Number(m.id) === Number(moduleId))?.title || `Module ${moduleId}`;
 
   const now = Date.now();
-  const nextSession = sessions.find(s => new Date(s.session_date).getTime() >= now) || null;
+  const durationMs = (Number(group?.session_duration_minutes) || 60) * 60 * 1000;
+  const joinLeadMs = 15 * 60 * 1000;
+
+  const nextSession = sessions.find(s => {
+    const start = new Date(s.session_date).getTime();
+    const end = start + durationMs;
+    return end >= now;
+  }) || null;
+
+  const nextSessionStart = nextSession ? new Date(nextSession.session_date).getTime() : null;
+  const nextSessionEnd = nextSessionStart !== null ? nextSessionStart + durationMs : null;
+  const nextSessionJoinOpen = nextSessionStart !== null
+    ? now >= nextSessionStart - joinLeadMs && now <= nextSessionEnd
+    : false;
+  const nextSessionLive = nextSessionStart !== null
+    ? now >= nextSessionStart && now <= nextSessionEnd
+    : false;
+
   const tz = localTimeZone();
 
   // Admin previews and unassigned accounts should not get a distracting empty block.
@@ -161,7 +178,7 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
               textTransform:"uppercase",
               marginBottom:8
             }}>
-              {nextSession ? "Next Live Session" : "Live Session Schedule"}
+              {nextSession ? (nextSessionLive ? "Live Now" : "Next Live Session") : "Live Session Schedule"}
             </div>
 
             {nextSession ? (
@@ -199,28 +216,42 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
                   {group.session_duration_minutes ? ` · ${group.session_duration_minutes} minutes` : ""}
                 </div>
 
-                <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
-                  {group.meeting_url ? (
-                    <a
-                      href={group.meeting_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="br"
-                      style={{ textDecoration:"none",display:"inline-block",padding:"11px 18px" }}
-                    >
-                      Join Live Session →
-                    </a>
+                <div style={{ display:"flex",gap:10,flexWrap:"wrap",alignItems:"center" }}>
+                  {nextSessionJoinOpen ? (
+                    group.meeting_url ? (
+                      <a
+                        href={group.meeting_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="br"
+                        style={{ textDecoration:"none",display:"inline-block",padding:"11px 18px" }}
+                      >
+                        Join Live Session →
+                      </a>
+                    ) : (
+                      <span style={{
+                        display:"inline-flex",
+                        alignItems:"center",
+                        padding:"11px 16px",
+                        border:"1px solid rgba(255,255,255,.14)",
+                        color:"rgba(255,255,255,.55)",
+                        fontFamily:"'Figtree',sans-serif",
+                        fontSize:12.5
+                      }}>
+                        Meeting link will be added soon
+                      </span>
+                    )
                   ) : (
                     <span style={{
                       display:"inline-flex",
                       alignItems:"center",
                       padding:"11px 16px",
                       border:"1px solid rgba(255,255,255,.14)",
-                      color:"rgba(255,255,255,.55)",
+                      color:"rgba(255,255,255,.62)",
                       fontFamily:"'Figtree',sans-serif",
                       fontSize:12.5
                     }}>
-                      Meeting link will be added soon
+                      Join opens 15 minutes before the session
                     </span>
                   )}
 
@@ -303,7 +334,10 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
               <div style={{ marginTop:12 }}>
                 {sessions.map((session, index) => {
                   const start = new Date(session.session_date).getTime();
-                  const isPast = start < now;
+                  const end = start + durationMs;
+                  const joinOpen = now >= start - joinLeadMs && now <= end;
+                  const isLive = now >= start && now <= end;
+                  const isPast = now > end;
                   const isNext = nextSession?.id === session.id;
 
                   return (
@@ -333,8 +367,9 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
                           }}>
                             Module {session.module_id}
                           </strong>
-                          {isNext && <span className="tag tr">Next</span>}
-                          {isPast && !isNext && <span className="tag tb">Past</span>}
+                          {isLive && <span className="tag tr">Live now</span>}
+                          {!isLive && isNext && !isPast && <span className="tag tr">Next</span>}
+                          {isPast && <span className="tag tb">Past</span>}
                         </div>
 
                         <div style={{
@@ -356,9 +391,10 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
                         display:"flex",
                         gap:8,
                         flexWrap:"wrap",
-                        justifyContent:"flex-end"
+                        justifyContent:"flex-end",
+                        alignItems:"center"
                       }}>
-                        {!isPast && group.meeting_url && (
+                        {!isPast && joinOpen && group.meeting_url && (
                           <a
                             href={group.meeting_url}
                             target="_blank"
@@ -369,6 +405,18 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
                             Join →
                           </a>
                         )}
+
+                        {!isPast && !joinOpen && (
+                          <span style={{
+                            fontFamily:"'Figtree',sans-serif",
+                            fontSize:11.5,
+                            color:"#8A8884",
+                            whiteSpace:"nowrap"
+                          }}>
+                            Join opens 15 min before
+                          </span>
+                        )}
+
                         {!isPast && (
                           <a
                             href={googleCalendarUrl({
