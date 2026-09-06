@@ -17,8 +17,27 @@ const ComingSoon = () => (
   </div>
 );
 
-const Landing = ({ go }) => {
+const Landing = ({ go, session }) => {
   const [open,setOpen]=useState(false);
+  const [existing,setExisting]=useState(null);
+
+  useEffect(()=>{
+    let alive=true;
+    if(!session?.user){setExisting(null);return;}
+    supabase
+      .from("applications")
+      .select("id,role,status,created_at")
+      .eq("user_id",session.user.id)
+      .order("created_at",{ascending:false})
+      .limit(1)
+      .maybeSingle()
+      .then(({data})=>{if(alive)setExisting(data||null);});
+    return()=>{alive=false;};
+  },[session?.user?.id]);
+
+  const accepted=existing?.status==="accepted";
+  const applicationExists=Boolean(existing);
+
   return (
     <>
       <PageHdr label="Course" title={courseMeta.title} sub={courseMeta.purpose}/>
@@ -37,10 +56,29 @@ const Landing = ({ go }) => {
             </div>
           </div>
           <aside className="reveal d2" style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"26px" }}>
-            <Ey label="Applications"/>
-            <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:10 }}>Join the course</h3>
-            <Txt muted s={{ fontSize:14,marginBottom:20 }}>Choose whether to apply as a participant or facilitator after signing in.</Txt>
-            <button className="br" style={{ width:"100%" }} onClick={()=>go("course-apply")}>Apply</button>
+            <Ey label={accepted?"Course Access":"Applications"}/>
+            <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:10 }}>
+              {accepted ? "Continue your course" : applicationExists ? "Your application" : "Join the course"}
+            </h3>
+            <Txt muted s={{ fontSize:14,marginBottom:20 }}>
+              {accepted
+                ? `Your ${existing.role} application has been accepted. Continue to your course dashboard.`
+                : applicationExists
+                  ? existing.status==="pending"
+                    ? "Your application is currently under review."
+                    : `Your application status is ${existing.status}.`
+                  : "Choose whether to apply as a participant or facilitator after signing in."}
+            </Txt>
+            <button
+              className="br"
+              style={{ width:"100%" }}
+              onClick={()=>{
+                if(accepted) go(existing.role==="facilitator"?"facilitator":"participant");
+                else go("course-apply");
+              }}
+            >
+              {accepted ? "Continue Course →" : applicationExists ? "View Application →" : "Apply"}
+            </button>
           </aside>
         </div>
         <div className="reveal" style={{ marginTop:54,borderTop:"1px solid var(--brd)",paddingTop:30 }}>
@@ -167,7 +205,7 @@ const AvailabilityGrid = ({ value, onChange }) => {
   );
 };
 
-const ApplicationPage = ({ session, openAuth }) => {
+const ApplicationPage = ({ session, openAuth, go }) => {
   const [role,setRole]=useState("");
   const [answers,setAnswers]=useState(emptyParticipantAnswers);
   const [status,setStatus]=useState("");
@@ -179,6 +217,12 @@ const ApplicationPage = ({ session, openAuth }) => {
     if(!session?.user) return;
     supabase.from("applications").select("id,role,status,created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(1).maybeSingle().then(({data})=>setExisting(data||null));
   },[session?.user?.id]);
+
+  useEffect(()=>{
+    if(existing?.status==="accepted"){
+      go(existing.role==="facilitator" ? "facilitator" : "participant");
+    }
+  },[existing?.status,existing?.role,go]);
 
   const chooseRole=r=>{
     setRole(r);
@@ -195,6 +239,7 @@ const ApplicationPage = ({ session, openAuth }) => {
   );
 
   if(status==="done") return <><PageHdr label="Application" title="Thanks — you'll hear back soon."/><Sec bg="#fff"><Txt muted>Your application has been submitted for review. There is no automatic acceptance.</Txt></Sec></>;
+  if(existing?.status==="accepted") return <><PageHdr label="Course Access" title="Opening your course…"/><Sec bg="#fff"><Txt muted>Your application has been accepted. Taking you to your course dashboard.</Txt></Sec></>;
   if(existing) return <><PageHdr label="Application" title={existing.status==="pending"?"Your application is under review.":`Application ${existing.status}.`}/><Sec bg="#fff"><Txt muted>You applied as a {existing.role}. We’ll use this account for any course access attached to your application.</Txt></Sec></>;
 
   const update=(key,value)=>{
@@ -480,11 +525,10 @@ const AdminDashboard = ({ go }) => {
 
 export default function CourseShell({ page, params, session, isAdmin, go, openAuth }) {
   if(!COURSE_LAUNCHED && !isAdmin) return <ComingSoon/>;
-  if(page==="courses") return <Landing go={go}/>;
-  if(page==="course-apply") return <ApplicationPage session={session} openAuth={openAuth}/>;
+  if(page==="courses") return <Landing go={go} session={session}/>;
+  if(page==="course-apply") return <ApplicationPage session={session} openAuth={openAuth} go={go}/>;
   if(page==="course-admin") return isAdmin?<AdminDashboard go={go}/>:<AccessMessage session={session} openAuth={openAuth} text="Admin access is required."/>;
   if(page==="facilitator"||page==="facilitator-module") return <RoleTool role="facilitator" page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={openAuth}/>;
   if(page==="participant"||page==="participant-module") return <RoleTool role="participant" page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={openAuth}/>;
-  return <Landing go={go}/>;
+  return <Landing go={go} session={session}/>;
 }
-
