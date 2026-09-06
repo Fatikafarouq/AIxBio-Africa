@@ -424,6 +424,14 @@ const RoleTool = ({ role, page, params, session, isAdmin, go, openAuth }) => {
       />;
 };
 
+
+const toDateTimeLocal = value => {
+  if(!value) return "";
+  const d=new Date(value);
+  const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+  return local.toISOString().slice(0,16);
+};
+
 const AdminDashboard = ({ go }) => {
   const [tab,setTab]=useState("applications");
   const [applications,setApplications]=useState([]);
@@ -433,7 +441,8 @@ const AdminDashboard = ({ go }) => {
   const [facilitators,setFacilitators]=useState([]);
   const [selectedCohort,setSelectedCohort]=useState("");
   const [newCohort,setNewCohort]=useState({name:"",start_date:""});
-  const [newGroup,setNewGroup]=useState({cohort_id:"",name:"",timezone_label:"",facilitator_user_id:"",dates:["","","","","",""]});
+  const [newGroup,setNewGroup]=useState({cohort_id:"",name:"",timezone_label:"",facilitator_user_id:"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]});
+  const [groupEdits,setGroupEdits]=useState({});
   const [error,setError]=useState("");
 
   const load=async()=>{
@@ -447,7 +456,20 @@ const AdminDashboard = ({ go }) => {
     ]);
     const first=[a,c,g,m,f].find(x=>x.error);
     if(first?.error){setError(first.error.message);return;}
-    setApplications(a.data||[]); setCohorts(c.data||[]); setGroups(g.data||[]); setMembers(m.data||[]); setFacilitators(f.data||[]);
+    const groupRows=g.data||[];
+    setApplications(a.data||[]);
+    setCohorts(c.data||[]);
+    setGroups(groupRows);
+    setMembers(m.data||[]);
+    setFacilitators(f.data||[]);
+    setGroupEdits(Object.fromEntries(groupRows.map(group=>{
+      const sessions=[...(group.group_sessions||[])].sort((x,y)=>Number(x.module_id)-Number(y.module_id));
+      return [group.id,{
+        meeting_url:group.meeting_url||"",
+        session_duration_minutes:String(group.session_duration_minutes||60),
+        dates:Array.from({length:6},(_,i)=>toDateTimeLocal(sessions.find(s=>Number(s.module_id)===i+1)?.session_date))
+      }];
+    })));
     if(!selectedCohort && c.data?.[0]) setSelectedCohort(c.data[0].id);
   };
 
@@ -473,12 +495,48 @@ const AdminDashboard = ({ go }) => {
 
   const createGroup=async()=>{
     if(!newGroup.cohort_id||!newGroup.name.trim()||newGroup.dates.some(d=>!d)){setError("Choose a cohort, name the group, and enter all six session dates.");return;}
-    const {data:g,error:e}=await supabase.from("cohort_groups").insert({cohort_id:newGroup.cohort_id,name:newGroup.name,timezone_label:newGroup.timezone_label||null,facilitator_user_id:newGroup.facilitator_user_id||null}).select().single();
+    const duration=Number(newGroup.session_duration_minutes||60);
+    if(!Number.isFinite(duration)||duration<15||duration>240){setError("Session duration must be between 15 and 240 minutes.");return;}
+    if(newGroup.meeting_url.trim()&&!/^https?:\/\//i.test(newGroup.meeting_url.trim())){setError("Enter a valid meeting link beginning with http:// or https://.");return;}
+    const {data:g,error:e}=await supabase.from("cohort_groups").insert({
+      cohort_id:newGroup.cohort_id,
+      name:newGroup.name,
+      timezone_label:newGroup.timezone_label||null,
+      facilitator_user_id:newGroup.facilitator_user_id||null,
+      meeting_url:newGroup.meeting_url.trim()||null,
+      session_duration_minutes:duration
+    }).select().single();
     if(e){setError(e.message);return;}
     const rows=newGroup.dates.map((d,i)=>({group_id:g.id,module_id:i+1,session_date:new Date(d).toISOString()}));
     const {error:se}=await supabase.from("group_sessions").insert(rows);
     if(se){setError(se.message);return;}
-    setNewGroup({cohort_id:"",name:"",timezone_label:"",facilitator_user_id:"",dates:["","","","","",""]}); await load();
+    setNewGroup({cohort_id:"",name:"",timezone_label:"",facilitator_user_id:"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]});
+    await load();
+  };
+
+  const updateGroupSchedule=async(groupId)=>{
+    const edit=groupEdits[groupId];
+    if(!edit)return;
+    const duration=Number(edit.session_duration_minutes||60);
+    if(!Number.isFinite(duration)||duration<15||duration>240){setError("Session duration must be between 15 and 240 minutes.");return;}
+    if(edit.meeting_url.trim()&&!/^https?:\/\//i.test(edit.meeting_url.trim())){setError("Enter a valid meeting link beginning with http:// or https://.");return;}
+    if(edit.dates.some(d=>!d)){setError("All six session dates are required.");return;}
+
+    setError("");
+    const {error:groupError}=await supabase.from("cohort_groups").update({
+      meeting_url:edit.meeting_url.trim()||null,
+      session_duration_minutes:duration
+    }).eq("id",groupId);
+    if(groupError){setError(groupError.message);return;}
+
+    const rows=edit.dates.map((d,i)=>({
+      group_id:groupId,
+      module_id:i+1,
+      session_date:new Date(d).toISOString()
+    }));
+    const {error:sessionError}=await supabase.from("group_sessions").upsert(rows,{onConflict:"group_id,module_id"});
+    if(sessionError){setError(sessionError.message);return;}
+    await load();
   };
 
   const selectedGroups=groups.filter(g=>g.cohort_id===selectedCohort);
@@ -515,7 +573,131 @@ const AdminDashboard = ({ go }) => {
           </div>)}
         </div>}
         {tab==="cohorts"&&<div style={{ maxWidth:650 }}><H2 s={{ marginBottom:20 }}>Create cohort</H2><FF label="Cohort name"><input value={newCohort.name} onChange={e=>setNewCohort(x=>({...x,name:e.target.value}))} placeholder="Intro Course — Cohort 1"/></FF><FF label="Start date"><input type="date" value={newCohort.start_date} onChange={e=>setNewCohort(x=>({...x,start_date:e.target.value}))}/></FF><button className="br" onClick={createCohort}>Create cohort</button><div style={{ marginTop:30 }}>{cohorts.map(c=><div key={c.id} style={{ borderTop:"1px solid var(--brd)",padding:"14px 0" }}><strong>{c.name}</strong><div style={{ fontSize:12.5,color:"#5A5956" }}>{c.start_date||"No start date"} · {c.status} · ID: {c.id}</div></div>)}</div></div>}
-        {tab==="groups"&&<div style={{ maxWidth:760 }}><H2 s={{ marginBottom:20 }}>Create group & six-session schedule</H2><FF label="Cohort"><select value={newGroup.cohort_id} onChange={e=>setNewGroup(x=>({...x,cohort_id:e.target.value}))}><option value="">Choose cohort</option>{cohorts.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></FF><FF label="Group name"><input value={newGroup.name} onChange={e=>setNewGroup(x=>({...x,name:e.target.value}))} placeholder="West/Central Africa"/></FF><FF label="Timezone label"><input value={newGroup.timezone_label} onChange={e=>setNewGroup(x=>({...x,timezone_label:e.target.value}))} placeholder="WAT / UTC+1"/></FF><FF label="Facilitator (optional until accepted)"><select value={newGroup.facilitator_user_id} onChange={e=>setNewGroup(x=>({...x,facilitator_user_id:e.target.value}))}><option value="">Unassigned</option>{facilitators.map(f=><option key={f.user_id} value={f.user_id}>{f.full_name} — {f.email}</option>)}</select></FF>{newGroup.dates.map((d,i)=><FF key={i} label={`Module ${i+1} session`}><input type="datetime-local" value={d} onChange={e=>setNewGroup(x=>({...x,dates:x.dates.map((v,j)=>j===i?e.target.value:v)}))}/></FF>)}<button className="br" onClick={createGroup}>Create group & schedule</button><div style={{ marginTop:30 }}>{groups.map(g=><div key={g.id} style={{ borderTop:"1px solid var(--brd)",padding:"14px 0" }}><strong>{g.name}</strong><div style={{ fontSize:12.5,color:"#5A5956" }}>{g.timezone_label||"No timezone"} · ID: {g.id}</div></div>)}</div></div>}
+        {tab==="groups"&&<div style={{ maxWidth:820 }}>
+          <H2 s={{ marginBottom:20 }}>Create group &amp; six-session schedule</H2>
+          <Txt muted s={{ fontSize:13.5,marginBottom:22 }}>
+            Session times are entered in your current browser timezone. Participants and facilitators will see them converted automatically to their own local timezone.
+          </Txt>
+
+          <FF label="Cohort">
+            <select value={newGroup.cohort_id} onChange={e=>setNewGroup(x=>({...x,cohort_id:e.target.value}))}>
+              <option value="">Choose cohort</option>
+              {cohorts.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </FF>
+
+          <FF label="Group name">
+            <input value={newGroup.name} onChange={e=>setNewGroup(x=>({...x,name:e.target.value}))} placeholder="West/Central Africa"/>
+          </FF>
+
+          <FF label="Timezone label">
+            <input value={newGroup.timezone_label} onChange={e=>setNewGroup(x=>({...x,timezone_label:e.target.value}))} placeholder="WAT / UTC+1"/>
+          </FF>
+
+          <FF label="Facilitator (optional until accepted)">
+            <select value={newGroup.facilitator_user_id} onChange={e=>setNewGroup(x=>({...x,facilitator_user_id:e.target.value}))}>
+              <option value="">Unassigned</option>
+              {facilitators.map(f=><option key={f.user_id} value={f.user_id}>{f.full_name} — {f.email}</option>)}
+            </select>
+          </FF>
+
+          <FF label="Live session link">
+            <input
+              type="url"
+              value={newGroup.meeting_url}
+              onChange={e=>setNewGroup(x=>({...x,meeting_url:e.target.value}))}
+              placeholder="https://meet.google.com/..."
+            />
+          </FF>
+
+          <FF label="Session duration (minutes)">
+            <input
+              type="number"
+              min="15"
+              max="240"
+              step="15"
+              value={newGroup.session_duration_minutes}
+              onChange={e=>setNewGroup(x=>({...x,session_duration_minutes:e.target.value}))}
+            />
+          </FF>
+
+          {newGroup.dates.map((d,i)=>(
+            <FF key={i} label={`Module ${i+1} session`}>
+              <input
+                type="datetime-local"
+                value={d}
+                onChange={e=>setNewGroup(x=>({...x,dates:x.dates.map((v,j)=>j===i?e.target.value:v)}))}
+              />
+            </FF>
+          ))}
+
+          <button className="br" onClick={createGroup}>Create group &amp; schedule</button>
+
+          <div style={{ marginTop:46 }}>
+            <Ey label="Existing Groups"/>
+            <H2 s={{ marginBottom:8 }}>Live-session settings</H2>
+            <Txt muted s={{ fontSize:13.5,marginBottom:20 }}>
+              Add or change the meeting link, duration, or session dates for an existing group.
+            </Txt>
+
+            {groups.length===0 ? (
+              <Txt muted>No groups have been created yet.</Txt>
+            ) : groups.map(g=>{
+              const edit=groupEdits[g.id]||{meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]};
+              return (
+                <div key={g.id} style={{ borderTop:"1px solid var(--brd)",padding:"24px 0" }}>
+                  <div style={{ marginBottom:16 }}>
+                    <strong style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"#1A1917" }}>{g.name}</strong>
+                    <div style={{ fontSize:12.5,color:"#5A5956",marginTop:3 }}>
+                      {g.timezone_label||"No timezone label"} · ID: {g.id}
+                    </div>
+                  </div>
+
+                  <div className="g2" style={{ display:"grid",gridTemplateColumns:"1.4fr .6fr",gap:14 }}>
+                    <FF label="Live session link">
+                      <input
+                        type="url"
+                        value={edit.meeting_url}
+                        onChange={e=>setGroupEdits(x=>({...x,[g.id]:{...edit,meeting_url:e.target.value}}))}
+                        placeholder="https://meet.google.com/..."
+                      />
+                    </FF>
+                    <FF label="Duration (minutes)">
+                      <input
+                        type="number"
+                        min="15"
+                        max="240"
+                        step="15"
+                        value={edit.session_duration_minutes}
+                        onChange={e=>setGroupEdits(x=>({...x,[g.id]:{...edit,session_duration_minutes:e.target.value}}))}
+                      />
+                    </FF>
+                  </div>
+
+                  {edit.dates.map((d,i)=>(
+                    <FF key={i} label={`Module ${i+1} session`}>
+                      <input
+                        type="datetime-local"
+                        value={d}
+                        onChange={e=>setGroupEdits(x=>({
+                          ...x,
+                          [g.id]:{
+                            ...edit,
+                            dates:edit.dates.map((v,j)=>j===i?e.target.value:v)
+                          }
+                        }))}
+                      />
+                    </FF>
+                  ))}
+
+                  <button className="bo" onClick={()=>updateGroupSchedule(g.id)}>
+                    Save live-session settings
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>}
         {tab==="oversight"&&<div><div style={{ display:"flex",justifyContent:"space-between",gap:16,alignItems:"end",marginBottom:24,flexWrap:"wrap" }}><H2>Oversight</H2><select style={{ maxWidth:320 }} value={selectedCohort} onChange={e=>setSelectedCohort(e.target.value)}><option value="">Choose cohort</option>{cohorts.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div><div className="g3" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16 }}>{selectedGroups.map(g=>{const sessions=[...(g.group_sessions||[])].sort((a,b)=>new Date(a.session_date)-new Date(b.session_date));const passed=sessions.filter(s=>new Date(s.session_date).getTime()<=now).length;const next=sessions.find(s=>new Date(s.session_date).getTime()>now);const count=members.filter(m=>m.group_id===g.id&&m.role==="participant"&&m.status==="accepted").length;return <div key={g.id} style={{ border:"1px solid var(--brd)",background:"#F7F6F2",padding:"20px" }}><h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,marginBottom:10 }}>{g.name}</h3><Txt muted s={{ fontSize:13 }}>Facilitator: {facilitatorName(g.facilitator_user_id)}</Txt><Txt muted s={{ fontSize:13 }}>Participants: {count}</Txt><Txt muted s={{ fontSize:13 }}>Current week: {passed}</Txt><Txt muted s={{ fontSize:13 }}>Next session: {next?new Date(next.session_date).toLocaleString():"None"}</Txt></div>})}</div></div>}
         {tab==="preview"&&<div><H2 s={{ marginBottom:12 }}>View as</H2><Txt muted s={{ marginBottom:20 }}>Admin preview uses your admin account; no second account is required.</Txt><div style={{ display:"flex",gap:10,flexWrap:"wrap" }}><button className="br" onClick={()=>go("facilitator")}>View as facilitator</button><button className="bo" onClick={()=>go("participant")}>View as participant</button></div></div>}
       </Sec>
