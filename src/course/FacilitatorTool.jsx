@@ -13,6 +13,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Sec, PageHdr, Ey, H2, Txt } from "./CoursePrimitives";
+import LiveSessionsPanel from "./LiveSessionsPanel";
 
 /* These primitives already exist in App.jsx — this file assumes
    they're imported/in-scope wherever it's used, exactly like every
@@ -370,6 +371,8 @@ export const FacilitatorHub = ({ go, courseMeta, courseModules }) => (
           </div>
         </div>
       </div>
+
+      <LiveSessionsPanel courseModules={courseModules} />
 
       <FacilitatorAttendance />
 
