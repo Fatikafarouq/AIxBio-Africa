@@ -9,7 +9,7 @@ import francesAgba from "./assets/frances.jpeg";
 import teganJegede from "./assets/tegan.jpeg";
 import gideonAbako from "./assets/gideon-abako.jpeg";
 /* ══════════════════════════════════════════════════════
-   AIxbio Africa · Institutional Website
+   AIxBio Africa · Institutional Website
    Founder: Fatika Umar Ibrahim
    ══════════════════════════════════════════════════════ */
 
@@ -248,23 +248,6 @@ const SCHEDULE = [
 
 /* ══════════ TEAM / FOUNDING TEAM DATA ═══════════════ */
 
-const FOUNDING_ROLES = [
-  {title:"Founding Partnerships & Grants Associate",desc:"Help build strategic partnerships, recruit mentors, identify funding opportunities, and support grant development."},
-  {title:"Founding Communications & LinkedIn Manager",desc:"Lead our communications strategy and help grow AIxBio Africa's online presence."},
-  {title:"Founding Executive & Operations Assistant",desc:"Support the Founder in coordinating day-to-day operations and helping the organization run efficiently."},
-  {title:"Founding Director of Research",desc:"Help shape and lead AIxBio Africa's research agenda, guiding methodology, quality, and rigor across our biosecurity and AI safety research areas."},
-  {title:"Founding Operations Lead",desc:"Own the operational backbone of AIxBio Africa, building the systems and processes that keep the organization running smoothly as it grows."},
-];
-
-const FOUNDING_BENEFITS = [
-  "Build systems and programs from the ground up.",
-  "Take ownership of projects with real responsibility.",
-  "Work closely with the Founder and other founding team members.",
-  "Collaborate with researchers, mentors, and professionals.",
-  "Develop leadership and operational experience.",
-  "Help shape the culture and future direction of AIxBio Africa.",
-];
-
 const TEAM_APPLY_URL = "https://airtable.com/appkjlP1PITnNuUqa/pagMJQXa2k8jLZlQX/form";
 
 /* ══════════ PRIMITIVES ══════════════════════════════ */
@@ -280,7 +263,7 @@ const Logo = ({ size = 21, onClick, light = false }) => (
   <div onClick={onClick} style={{ display:"flex",alignItems:"center",gap:9,cursor:"pointer",userSelect:"none" }}>
     <AfricaSvg style={{ width:size*1.05,height:size*1.22,color:"#B8102A",flexShrink:0 }}/>
     <div style={{ fontFamily:"'Cormorant Garamond',serif",fontWeight:700,fontSize:size,color:light?"#ffffff":"#1A1917",letterSpacing:"-0.02em",lineHeight:1 }}>
-      AIxbio<span style={{ fontFamily:"'Figtree',sans-serif",fontSize:size*.43,fontWeight:400,letterSpacing:".14em",textTransform:"uppercase",color:light?"rgba(255,255,255,.5)":"rgba(26,25,23,.38)",marginLeft:size*.28 }}>Africa</span>
+      AIxBio<span style={{ fontFamily:"'Figtree',sans-serif",fontSize:size*.43,fontWeight:400,letterSpacing:".14em",textTransform:"uppercase",color:light?"rgba(255,255,255,.5)":"rgba(26,25,23,.38)",marginLeft:size*.28 }}>Africa</span>
     </div>
   </div>
 );
@@ -596,7 +579,7 @@ const Hero = ({ go }) => (
           Advancing Research on<br/><em style={{ fontStyle:"italic" }}>Biosecurity, AI, and</em><br/>Emerging Technologies in Africa
         </h1>
         <p className="hb" style={{ fontFamily:"'Figtree',sans-serif",fontSize:17,color:"#5A5956",lineHeight:1.76,maxWidth:510,marginBottom:12 }}>
-          AIxbio Africa is an independent research initiative working at the intersection of biosecurity, artificial intelligence, and emerging technology governance.
+          AIxBio Africa is an independent research initiative working at the intersection of biosecurity, artificial intelligence, and emerging technology governance.
         </p>
         <p className="hb" style={{ fontFamily:"'Figtree',sans-serif",fontSize:17,color:"#5A5956",lineHeight:1.76,maxWidth:510,marginBottom:36 }}>
           We conduct research, support capacity-building, and foster interdisciplinary collaboration to better understand and manage technological and biological risks in African contexts.
@@ -625,9 +608,9 @@ const HomeAbout = ({ go }) => (
       <div className="reveal">
         <Ey label="About"/>
         <H2 s={{ marginBottom:22 }}>Work in Africa, Relevant to the World</H2>
-        <Txt s={{ marginBottom:16 }}>AIxbio Africa was founded on a straightforward observation: biological and technological risks do not align with the distribution of scientific capacity. Africa carries a disproportionate share of emerging biological risk and is underrepresented in global biosecurity research, pandemic preparedness, and emerging technology governance.</Txt>
+        <Txt s={{ marginBottom:16 }}>AIxBio Africa was founded on a straightforward observation: biological and technological risks do not align with the distribution of scientific capacity. Africa carries a disproportionate share of emerging biological risk and is underrepresented in global biosecurity research, pandemic preparedness, and emerging technology governance.</Txt>
         <Txt s={{ marginBottom:28 }}>Our work spans research, training, and policy engagement. We study biosecurity challenges in African contexts, examine how emerging technologies intersect with biological risks, and build research capacity among African scientists and practitioners.</Txt>
-        <button className="bo" onClick={() => go("about")}>About AIxbio Africa →</button>
+        <button className="bo" onClick={() => go("about")}>About AIxBio Africa →</button>
       </div>
       <div>
         {[["01","Research","We investigate biosecurity challenges, emerging biological risks, and how advanced technologies interact with biological systems in African contexts."],["02","Train","We design fellowship programmes, workshops, and mentorship structures for African researchers entering biosecurity and emerging technology fields."],["03","Advise","Where our research has policy implications, we communicate findings clearly to relevant institutions and decision-makers."]].map(([n,t,d],i)=>(
@@ -731,7 +714,7 @@ const HomePage = ({ go, addSub }) => (<>
 /* ══════════ ABOUT ═══════════════════════════════════ */
 
 const AboutPage = ({ go }) => (<>
-  <PageHdr label="About" title="About AIxbio Africa" sub="An independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies."/>
+  <PageHdr label="About" title="About AIxBio Africa" sub="An independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies."/>
   <Sec bg="#fff">
     {/* Mission and trajectory */}
     <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,marginBottom:60 }}>
@@ -752,7 +735,7 @@ const AboutPage = ({ go }) => (<>
     {/* Pull quote */}
     <div className="reveal" style={{ borderLeft:"2.5px solid #B8102A",paddingLeft:26,marginBottom:56 }}>
       <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(18px,2vw,25px)",fontStyle:"italic",color:"#1A1917",lineHeight:1.5,maxWidth:720 }}>
-        AIxbio Africa is an independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies.
+        AIxBio Africa is an independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies.
       </p>
     </div>
 
@@ -766,8 +749,8 @@ const AboutPage = ({ go }) => (<>
           <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:3,lineHeight:1.2 }}>Fatika Umar Ibrahim</h3>
           <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".08em",textTransform:"uppercase",marginBottom:18 }}>Founder &amp; Executive Director</div>
           <Txt s={{ marginBottom:13 }}>Fatika Umar Ibrahim is an independent biosecurity and AI researcher and a final-year Doctor of Veterinary Medicine (DVM) student at Ahmadu Bello University, Zaria, Nigeria.</Txt>
-          <Txt s={{ marginBottom:13 }}>He founded AIxbio Africa to strengthen African capacity at the intersection of biosecurity, artificial intelligence, and emerging technology governance. His work focuses on how advanced technologies intersect with biological risks in African contexts, with particular attention to the role of language, indigenous knowledge, and local ecological conditions in shaping research questions and policy responses.</Txt>
-          <Txt muted s={{ fontSize:14.5 }}>Through AIxbio Africa, he aims to support rigorous research, responsible innovation, and accessible pathways for African researchers entering the biosecurity and emerging technology fields.</Txt>
+          <Txt s={{ marginBottom:13 }}>He founded AIxBio Africa to strengthen African capacity at the intersection of biosecurity, artificial intelligence, and emerging technology governance. His work focuses on how advanced technologies intersect with biological risks in African contexts, with particular attention to the role of language, indigenous knowledge, and local ecological conditions in shaping research questions and policy responses.</Txt>
+          <Txt muted s={{ fontSize:14.5 }}>Through AIxBio Africa, he aims to support rigorous research, responsible innovation, and accessible pathways for African researchers entering the biosecurity and emerging technology fields.</Txt>
         </div>
       </div>
     </div>
@@ -1222,7 +1205,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
             Apply to Mentor →
           </a>
           <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#9A9896",lineHeight:1.6 }}>
-            Questions about your fellowship application? Contact us at <span style={{ color:"#1A1917" }}>contact@aixbio.africa</span>
+            Questions about your fellowship application? Contact us at <a href="mailto:contact@aixbioafrica.org" style={{ color:"#1A1917",textDecoration:"none",borderBottom:"1px solid rgba(26,25,23,.25)" }}>contact@aixbioafrica.org</a>
           </p>
         </div>
       </Sec>
@@ -1284,121 +1267,32 @@ const MentorsPage = ({ go }) => (<>
 
 /* ══════════ FOUNDING TEAM PAGE ══════════════════════ */
 
-const TeamPage = ({ go }) => (<>
-  <PageHdr label="Join Our Founding Team" title="Help Build AIxBio Africa" sub="We're assembling a small founding team of passionate individuals who want to help build AIxBio Africa from the ground up."/>
+const TeamPage = () => (<>
+  <PageHdr
+    label="Team"
+    title="Join AIxBio Africa"
+    sub="We're building a small volunteer founding team to help strengthen AIxBio Africa's research, programmes, operations, communications, and partnerships."
+  />
 
   <Sec bg="#fff">
-    <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,alignItems:"start",marginBottom:56 }}>
-      <div className="reveal">
-        <Txt s={{ marginBottom:16 }}>These are volunteer founding team opportunities for people excited about creating meaningful impact through AI safety, biosecurity, and scientific capacity in Africa. If you're looking to take ownership, contribute your skills, and grow alongside an ambitious organization, we'd love to hear from you.</Txt>
-        <Txt muted s={{ marginBottom:28 }}>As AIxBio Africa grows and secures funding, we intend to prioritize outstanding founding team members for future funded opportunities where suitable roles and funding become available. While we cannot guarantee future paid positions, we're committed to growing with the people who help build this organization.</Txt>
-        <a href={TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply Now →</a>
-      </div>
-      <div>
-        <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:16 }}>Why We're Building a Founding Team</div>
-        <Txt s={{ marginBottom:14 }}>Every impactful organization begins with a small group of people who believe in the mission and are willing to help build it.</Txt>
-        <Txt s={{ marginBottom:14 }}>As AIxBio Africa grows, we're looking for people who want to contribute beyond volunteering for isolated tasks. We're looking for collaborators who are excited about shaping programs, building systems, creating partnerships, supporting our community, and helping define what AIxBio Africa becomes.</Txt>
-        <Txt muted>If you're excited by the challenge of building something meaningful from the beginning, this is an opportunity to make a lasting contribution.</Txt>
-      </div>
-    </div>
-
-    {/* What it means to be a founding team member */}
-    <div className="reveal" style={{ marginBottom:56 }}>
-      <Ey label="What It Means"/>
-      <H2 s={{ marginBottom:20 }}>Being a Founding Team Member</H2>
-      <Txt s={{ marginBottom:24 }}>Being part of the founding team means taking ownership of meaningful work while helping shape the future of AIxBio Africa. As a founding team member, you'll have the opportunity to:</Txt>
-      <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
-        {FOUNDING_BENEFITS.map((b,i) => (
-          <div key={i} style={{ display:"flex",gap:12,padding:"16px 18px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-            <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
-            <Txt muted s={{ fontSize:14,lineHeight:1.6 }}>{b}</Txt>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* Current opportunities */}
-    <div className="reveal" style={{ marginBottom:56 }}>
-      <Ey label="Current Opportunities"/>
-      <H2 s={{ marginBottom:32 }}>Founding Team Roles</H2>
-      <div style={{ display:"flex",flexDirection:"column" }}>
-        {FOUNDING_ROLES.map((r,i) => (
-          <div key={r.title} style={{ display:"grid",gridTemplateColumns:"1fr auto",gap:24,padding:"24px 0",borderTop:"1px solid var(--brd)",alignItems:"center" }}>
-            <div>
-              <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917",marginBottom:6 }}>{r.title}</h3>
-              <Txt muted s={{ fontSize:14 }}>{r.desc}</Txt>
-              <span className="chip cg" style={{ marginTop:10,display:"inline-block" }}>Volunteer</span>
-            </div>
-            <a href={TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="bo" style={{ textDecoration:"none",whiteSpace:"nowrap" }}>Apply →</a>
-          </div>
-        ))}
-        <div style={{ borderTop:"1px solid var(--brd)" }}/>
-      </div>
-    </div>
-
-    {/* Who we're looking for */}
-    <div className="reveal" style={{ marginBottom:56 }}>
-      <Ey label="Who We're Looking For"/>
-      <H2 s={{ marginBottom:20 }}>Fit Over Résumé</H2>
-      <Txt s={{ marginBottom:24 }}>We care more about your commitment, initiative, and willingness to learn than checking every box on a job description. We're looking for people who are:</Txt>
-      <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
-        {["Passionate about meaningful impact.","Proactive and reliable.","Comfortable working in a remote environment.","Strong communicators and team players.","Excited to help build an organization from the ground up."].map((t,i)=>(
-          <div key={i} style={{ display:"flex",gap:10,padding:"14px 0" }}>
-            <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
-            <Txt muted s={{ fontSize:14.5,lineHeight:1.58 }}>{t}</Txt>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* Commitment */}
-    <div className="reveal" style={{ marginBottom:56 }}>
-      <Ey label="Commitment"/>
-      <H2 s={{ marginBottom:20 }}>Time &amp; Structure</H2>
-      <div style={{ display:"flex",gap:18,padding:"22px 24px",background:"#F7F6F2",border:"1px solid var(--brd)",marginBottom:16,flexWrap:"wrap" }}>
-        <div>
-          <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#B8102A",letterSpacing:".1em",textTransform:"uppercase",marginBottom:4 }}>Time Commitment</div>
-          <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917" }}>5–10 hours per week</div>
-        </div>
-      </div>
-      <Txt muted s={{ fontSize:14.5 }}>These are volunteer founding team positions. We understand that everyone has different schedules, but we're looking for people who can contribute consistently and take ownership of their responsibilities.</Txt>
-    </div>
-
-    {/* Why join */}
-    <div className="reveal" style={{ marginBottom:56 }}>
-      <Ey label="Why Join?"/>
-      <H2 s={{ marginBottom:20 }}>A Unique Opportunity</H2>
-      <Txt s={{ marginBottom:24 }}>Joining AIxBio Africa at this stage offers a unique opportunity to help shape an organization from its earliest days. As a founding team member, you'll have the opportunity to:</Txt>
-      <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
-        {["Make a meaningful contribution to an emerging nonprofit.","Work directly with the organization's leadership.","Build leadership and project management experience.","Expand your professional network.","Collaborate with experts, mentors, and researchers.","Grow alongside the organization and be considered for future funded opportunities where available."].map((t,i)=>(
-          <div key={i} style={{ display:"flex",gap:10,padding:"14px 0" }}>
-            <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
-            <Txt muted s={{ fontSize:14.5,lineHeight:1.58 }}>{t}</Txt>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* Application process */}
-    <div className="reveal" style={{ marginBottom:56 }}>
-      <Ey label="Application Process"/>
-      <H2 s={{ marginBottom:28 }}>How to Apply</H2>
-      <div style={{ display:"flex",flexDirection:"column",gap:0 }}>
-        {["Submit your application.","Applications are reviewed on a rolling basis.","Shortlisted applicants will be invited for an interview.","Successful applicants will join the AIxBio Africa Founding Team."].map((step,i,arr) => (
-          <div key={i} style={{ display:"flex",alignItems:"center",gap:18,padding:"16px 0",borderBottom:i<arr.length-1?"1px solid var(--brd)":"none" }}>
-            <div className="step-dot" style={{ background:"rgba(184,16,42,.09)",color:"#B8102A" }}>{i+1}</div>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:14.5,color:"#3A3835" }}>{step}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* Closing CTA */}
-    <div className="reveal" style={{ textAlign:"center",padding:"48px 24px",background:"#1C1B18" }}>
-      <p style={{ fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",fontSize:19,color:"rgba(255,255,255,.6)",marginBottom:6 }}>Every organization starts somewhere.</p>
-      <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:600,color:"#fff",marginBottom:22 }}>This is ours.</h3>
-      <Txt s={{ color:"rgba(255,255,255,.55)",marginBottom:26,maxWidth:480,marginLeft:"auto",marginRight:"auto" }}>If you're excited about helping build AIxBio Africa and contributing to our mission, we'd love to hear from you.</Txt>
-      <a href={TEAM_APPLY_URL} target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 34px",fontSize:13,letterSpacing:".05em" }}>Apply to Join Our Founding Team →</a>
+    <div className="reveal" style={{ maxWidth:760,margin:"0 auto" }}>
+      <Ey label="Founding Team"/>
+      <H2 s={{ marginBottom:18 }}>Help Build AIxBio Africa</H2>
+      <Txt s={{ marginBottom:16 }}>
+        AIxBio Africa is building a small volunteer founding team across research, programmes, operations, communications, and partnerships. We're looking for people who can take ownership of meaningful work and help strengthen the systems behind our research and programmes.
+      </Txt>
+      <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>
+        Applications are reviewed on a rolling basis. As the organisation grows and secures funding, future paid opportunities may become available, but participation in the founding team does not guarantee a paid role.
+      </Txt>
+      <a
+        href={TEAM_APPLY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="br"
+        style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}
+      >
+        Apply to Join Our Founding Team →
+      </a>
     </div>
   </Sec>
 </>);
@@ -1456,10 +1350,14 @@ const ContactPage = ({ go, addContact }) => {
               ))}
             </div>
             <div style={{ border:"1px solid var(--brd)",padding:"20px 22px" }}>
-              {[["Email","contact@aixbio.africa"],["LinkedIn","AIxbio Africa"]].map(([k,v])=>(
+              {[["Email","contact@aixbioafrica.org"],["LinkedIn","AIxBio Africa"]].map(([k,v])=>(
                 <div key={k} style={{ display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:"1px solid var(--brd)" }}>
                   <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"#5A5956" }}>{k}</span>
-                  <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"#1A1917",fontWeight:500 }}>{v}</span>
+                  {k === "Email" ? (
+                    <a href={`mailto:${v}`} style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"#1A1917",fontWeight:500,textDecoration:"none",borderBottom:"1px solid rgba(26,25,23,.25)" }}>{v}</a>
+                  ) : (
+                    <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"#1A1917",fontWeight:500 }}>{v}</span>
+                  )}
                 </div>
               ))}
             </div>
@@ -1477,7 +1375,7 @@ const CollaboratePage = ({ go }) => (<>
       <div className="reveal">
         <Ey label="Work with us"/>
         <H2 s={{ marginBottom:20 }}>We welcome serious collaboration</H2>
-        <Txt s={{ marginBottom:16 }}>AIxbio Africa is actively building a network of research collaborators across African universities, international biosecurity institutions, and AI safety organisations.</Txt>
+        <Txt s={{ marginBottom:16 }}>AIxBio Africa is actively building a network of research collaborators across African universities, international biosecurity institutions, and AI safety organisations.</Txt>
         <Txt muted s={{ marginBottom:28 }}>If you are interested in joint research, co-authorship, dataset sharing, or any form of substantive collaboration, please use the contact form to reach us with a brief description of your interests.</Txt>
         <button className="br" onClick={()=>go("contact")}>Contact Us →</button>
       </div>
@@ -1494,10 +1392,10 @@ const CollaboratePage = ({ go }) => (<>
 </>);
 
 const DonatePage = ({ go }) => (<>
-  <PageHdr label="Donate" title="Support AIxbio Africa"/>
+  <PageHdr label="Donate" title="Support AIxBio Africa"/>
   <Sec bg="#fff">
     <div style={{ maxWidth:640 }}>
-      <Txt s={{ marginBottom:18 }}>AIxbio Africa is currently funded through research grants and institutional support. We are developing a formal process for individual and organisational donations.</Txt>
+      <Txt s={{ marginBottom:18 }}>AIxBio Africa is currently funded through research grants and institutional support. We are developing a formal process for individual and organisational donations.</Txt>
       <Txt muted s={{ marginBottom:28 }}>If you are interested in supporting our work financially, please contact us directly. We can discuss unrestricted support, project-specific funding, or fellowship programme sponsorship.</Txt>
       <div style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"24px",marginBottom:28 }}>
         <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Funding priorities</h4>
@@ -1553,7 +1451,7 @@ const AdminLogin = ({ setAuth }) => {
       <div style={{ width:"100%",maxWidth:360,padding:"36px 32px",border:"1px solid var(--brd)",background:"#fff" }}>
         <AfricaSvg style={{ width:26,height:30,color:"#B8102A",marginBottom:14 }}/>
         <h2 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Admin Access</h2>
-        <Txt muted s={{ fontSize:14,marginBottom:22 }}>AIxbio Africa internal dashboard.</Txt>
+        <Txt muted s={{ fontSize:14,marginBottom:22 }}>AIxBio Africa internal dashboard.</Txt>
         <FF label="Password" error={err?"Incorrect password":null}>
           <input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="Enter password"/>
         </FF>
@@ -1668,7 +1566,7 @@ const Footer = ({ go }) => (
         <div>
           {/* light=true so logo text is readable on dark footer background */}
           <div style={{ marginBottom:18 }}><Logo size={19} onClick={()=>go("home")} light={true}/></div>
-          <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"rgba(255,255,255,.42)",maxWidth:252,marginBottom:22,lineHeight:1.72 }}>AIxbio Africa is an independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies.</p>
+          <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"rgba(255,255,255,.42)",maxWidth:252,marginBottom:22,lineHeight:1.72 }}>AIxBio Africa is an independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies.</p>
           <div style={{ display:"flex",gap:8 }}>
             <a href="https://www.linkedin.com/company/aixbioafrica/about/?viewAsMember=true" target="_blank" rel="noopener noreferrer"
               style={{ background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.09)",color:"rgba(255,255,255,.45)",padding:"5px 11px",fontFamily:"'Figtree',sans-serif",fontSize:11,fontWeight:500,cursor:"pointer",textDecoration:"none",display:"inline-block",transition:"all .15s" }}
@@ -1690,7 +1588,7 @@ const Footer = ({ go }) => (
         ))}
       </div>
       <div style={{ borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:22,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10 }}>
-        <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,color:"rgba(255,255,255,.22)" }}>© 2026 AIxbio Africa</span>
+        <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,color:"rgba(255,255,255,.22)" }}>© 2026 AIxBio Africa</span>
         <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:12,color:"rgba(255,255,255,.22)" }}>Founded by Fatika Umar Ibrahim</span>
       </div>
     </div>
