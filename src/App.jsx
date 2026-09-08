@@ -8,6 +8,7 @@ import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
 import francesAgba from "./assets/frances.jpeg";
 import teganJegede from "./assets/tegan.jpeg";
 import gideonAbako from "./assets/gideon-abako.jpeg";
+import fatikaIbrahim from "./assets/fatika-ibrahim.png";
 /* ══════════════════════════════════════════════════════
    AIxBio Africa · Institutional Website
    Founder: Fatika Umar Ibrahim
@@ -744,13 +745,17 @@ const AboutPage = ({ go }) => (<>
       <Ey label="Founder"/>
       <H2 s={{ marginBottom:24 }}>About the Founder</H2>
       <div style={{ display:"flex",gap:26,alignItems:"flex-start",padding:"28px 30px",background:"#F7F6F2",border:"1px solid var(--brd)",flexWrap:"wrap" }}>
-        <Avatar initials="FI" color="#B8102A" size={76}/>
+        <img
+          src={fatikaIbrahim}
+          alt="Fatika Umar Ibrahim"
+          style={{ width:116,height:116,objectFit:"cover",objectPosition:"center 24%",borderRadius:"50%",border:"1px solid var(--brd)",flexShrink:0 }}
+        />
         <div style={{ flex:1,minWidth:240 }}>
           <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:3,lineHeight:1.2 }}>Fatika Umar Ibrahim</h3>
           <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".08em",textTransform:"uppercase",marginBottom:18 }}>Founder &amp; Executive Director</div>
-          <Txt s={{ marginBottom:13 }}>Fatika Umar Ibrahim is an independent biosecurity and AI researcher and a final-year Doctor of Veterinary Medicine (DVM) student at Ahmadu Bello University, Zaria, Nigeria.</Txt>
-          <Txt s={{ marginBottom:13 }}>He founded AIxBio Africa to strengthen African capacity at the intersection of biosecurity, artificial intelligence, and emerging technology governance. His work focuses on how advanced technologies intersect with biological risks in African contexts, with particular attention to the role of language, indigenous knowledge, and local ecological conditions in shaping research questions and policy responses.</Txt>
-          <Txt muted s={{ fontSize:14.5 }}>Through AIxBio Africa, he aims to support rigorous research, responsible innovation, and accessible pathways for African researchers entering the biosecurity and emerging technology fields.</Txt>
+          <Txt s={{ marginBottom:13 }}>Fatika Umar Ibrahim is an independent AI safety researcher and Founder of AIxBio Africa, with a background in veterinary medicine and ongoing clinical training towards a Doctor of Veterinary Medicine (DVM).</Txt>
+          <Txt s={{ marginBottom:13 }}>His research focuses on computational drug discovery and the intersection of AI safety and biosecurity, with particular interest in evaluating AI biosecurity guardrails in African contexts.</Txt>
+          <Txt muted s={{ fontSize:14.5 }}>He founded AIxBio Africa to strengthen African participation and research capacity in AI safety and biosecurity, create pathways for emerging researchers to enter these fields, and support work grounded in the realities and priorities of the continent.</Txt>
         </div>
       </div>
     </div>
