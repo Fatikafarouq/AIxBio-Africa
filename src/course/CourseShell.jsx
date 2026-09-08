@@ -36,6 +36,7 @@ const Landing = ({ go, session }) => {
   },[session?.user?.id]);
 
   const accepted=existing?.status==="accepted";
+  const rejected=existing?.status==="rejected";
   const applicationExists=Boolean(existing);
 
   return (
@@ -58,16 +59,18 @@ const Landing = ({ go, session }) => {
           <aside className="reveal d2" style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"26px" }}>
             <Ey label={accepted?"Course Access":"Applications"}/>
             <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:10 }}>
-              {accepted ? "Continue your course" : applicationExists ? "Your application" : "Join the course"}
+              {accepted ? "Continue your course" : rejected ? "Apply again" : applicationExists ? "Your application" : "Join the course"}
             </h3>
             <Txt muted s={{ fontSize:14,marginBottom:20 }}>
               {accepted
                 ? `Your ${existing.role} application has been accepted. Continue to your course dashboard.`
-                : applicationExists
-                  ? existing.status==="pending"
-                    ? "Your application is currently under review."
-                    : `Your application status is ${existing.status}.`
-                  : "Choose whether to apply as a participant or facilitator after signing in."}
+                : rejected
+                  ? "Your previous application was not successful. You’re welcome to submit a new application."
+                  : applicationExists
+                    ? existing.status==="pending"
+                      ? "Your application is currently under review."
+                      : `Your application status is ${existing.status}.`
+                    : "Choose whether to apply as a participant or facilitator after signing in."}
             </Txt>
             <button
               className="br"
@@ -77,7 +80,7 @@ const Landing = ({ go, session }) => {
                 else go("course-apply");
               }}
             >
-              {accepted ? "Continue Course →" : applicationExists ? "View Application →" : "Apply"}
+              {accepted ? "Continue Course →" : rejected ? "Apply Again →" : applicationExists ? "View Application →" : "Apply"}
             </button>
           </aside>
         </div>
@@ -240,7 +243,7 @@ const ApplicationPage = ({ session, openAuth, go }) => {
 
   if(status==="done") return <><PageHdr label="Application" title="Thanks — you'll hear back soon."/><Sec bg="#fff"><Txt muted>Your application has been submitted for review. There is no automatic acceptance.</Txt></Sec></>;
   if(existing?.status==="accepted") return <><PageHdr label="Course Access" title="Opening your course…"/><Sec bg="#fff"><Txt muted>Your application has been accepted. Taking you to your course dashboard.</Txt></Sec></>;
-  if(existing) return <><PageHdr label="Application" title={existing.status==="pending"?"Your application is under review.":`Application ${existing.status}.`}/><Sec bg="#fff"><Txt muted>You applied as a {existing.role}. We’ll use this account for any course access attached to your application.</Txt></Sec></>;
+  if(existing?.status==="pending") return <><PageHdr label="Application" title="Your application is under review."/><Sec bg="#fff"><Txt muted>You applied as a {existing.role}. We’ll use this account for any course access attached to your application.</Txt></Sec></>;
 
   const update=(key,value)=>{
     setAnswers(a=>({...a,[key]:value}));
@@ -310,6 +313,13 @@ const ApplicationPage = ({ session, openAuth, go }) => {
       <PageHdr label="Course Application" title="Choose how you want to take part"/>
       <Sec bg="#fff">
         <div style={{ maxWidth:820 }}>
+          {existing?.status==="rejected"&&(
+            <div style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"16px 18px",marginBottom:24 }}>
+              <Txt muted s={{ fontSize:13.5 }}>
+                Your previous application was not successful. You’re welcome to submit a new application.
+              </Txt>
+            </div>
+          )}
           {!role ? (
             <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:18 }}>
               {[["facilitator","Apply as a Facilitator","Lead a small course group and guide the six facilitated sessions."],["participant","Apply as a Participant","Join a facilitated group and work through the six-module course."]].map(([r,t,d])=>(
