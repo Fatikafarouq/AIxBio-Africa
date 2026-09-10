@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "./lib/supabase";
 import CourseShell from "./course/CourseShell";
 import CourseAuth from "./course/CourseAuth";
+import CertificateVerificationPage from "./course/CertificateVerificationPage";
+import FellowCertificateControls from "./FellowCertificateControls";
 import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
@@ -805,7 +807,7 @@ const FellowLinks = ({ links = {}, outputs = [] }) => {
   );
 };
 
-const FellowCard = ({ fellow, expanded, onToggle }) => {
+const FellowCard = ({ fellow, expanded, onToggle, session, isAdmin }) => {
   const detailsId = `fellow-details-${fellow.id}`;
   const isTodo = fellow.name.includes("TODO");
 
@@ -916,13 +918,14 @@ const FellowCard = ({ fellow, expanded, onToggle }) => {
             </div>
           </div>
           <FellowLinks links={fellow.links} outputs={fellow.outputs}/>
+          <FellowCertificateControls profileKey={fellow.id} session={session} isAdmin={isAdmin}/>
         </div>
       )}
     </article>
   );
 };
 
-const CurrentCohort = () => {
+const CurrentCohort = ({ session, isAdmin }) => {
   const [expandedIds,setExpandedIds] = useState({});
   const toggleFellow = id => setExpandedIds(current => ({ ...current, [id]: !current[id] }));
   return (
@@ -932,7 +935,7 @@ const CurrentCohort = () => {
       <Txt muted s={{ maxWidth:760,marginBottom:32 }}>Meet the researchers in AIxBio Africa's current fellowship cohort and explore the questions they are investigating at the intersection of artificial intelligence, biosecurity, governance, public health, and emerging technologies.</Txt>
       <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"start" }}>
         {FELLOWS.map(fellow => (
-          <FellowCard key={fellow.id} fellow={fellow} expanded={Boolean(expandedIds[fellow.id])} onToggle={() => toggleFellow(fellow.id)}/>
+          <FellowCard key={fellow.id} fellow={fellow} expanded={Boolean(expandedIds[fellow.id])} onToggle={() => toggleFellow(fellow.id)} session={session} isAdmin={isAdmin}/>
         ))}
       </div>
     </div>
@@ -941,7 +944,7 @@ const CurrentCohort = () => {
 
 /* ══════════ FELLOWSHIP PAGE ════════════════════════ */
 
-const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
+const FellowshipPage = ({ go, addApp, startTab = "overview", session, isAdmin }) => {
   const [tab,setTab] = useState(startTab);
   const [step,setStep] = useState(1);
   const [fd,setFd] = useState({ name:"",email:"",country:"",institution:"",stage:"",area:"",background:"",statement:"",question:"",ref1name:"",ref1email:"",terms:false,draft:false });
@@ -1053,7 +1056,7 @@ const FellowshipPage = ({ go, addApp, startTab = "overview" }) => {
         </div>
 
         {/* Current Cohort */}
-        <CurrentCohort/>
+        <CurrentCohort session={session} isAdmin={isAdmin}/>
 
         {/* Research Areas */}
         <div className="reveal" style={{ marginBottom:56 }}>
@@ -1614,6 +1617,7 @@ export default function App() {
     if(path===`${courseBase}/facilitator`) return {page:"facilitator",params:{}};
     if(path===`${courseBase}/participant`) return {page:"participant",params:{}};
     if(path===`${courseBase}/admin`) return {page:"course-admin",params:{}};
+    if(path.startsWith("/certificates/verify/")) return {page:"certificate-verify",params:{code:path.split("/").pop()}};
     if(path.startsWith(`${courseBase}/facilitator/`)) return {page:"facilitator-module",params:{slug:path.split("/").pop()}};
     if(path.startsWith(`${courseBase}/participant/`)) return {page:"participant-module",params:{slug:path.split("/").pop()}};
 
@@ -1646,6 +1650,7 @@ export default function App() {
     if(p==="participant") return `${base}/participant`;
     if(p==="participant-module") return `${base}/participant/${ps.slug}`;
     if(p==="course-admin") return `${base}/admin`;
+    if(p==="certificate-verify") return `/certificates/verify/${encodeURIComponent(ps.code||"")}`;
 
     // Other special route
     if(p==="apply") return "/fellowship/apply";
@@ -1737,9 +1742,10 @@ export default function App() {
       <Nav go={go} page={page} session={session} isAdmin={isAdmin} onSignIn={()=>setAuthOpen(true)} onSignOut={signOut}/>
       {page==="home"&&<HomePage go={go} addSub={addSub}/>}
       {page==="about"&&<AboutPage go={go}/>}
-      {page==="fellowship"&&<FellowshipPage go={go} addApp={addApp}/>}
+      {page==="fellowship"&&<FellowshipPage go={go} addApp={addApp} session={session} isAdmin={isAdmin}/>}
       {coursePages.includes(page)&&<CourseShell page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={()=>setAuthOpen(true)}/>}
-      {page==="apply"&&<FellowshipPage go={go} addApp={addApp} startTab="apply"/>}
+      {page==="certificate-verify"&&<CertificateVerificationPage code={params.code} go={go}/>}
+      {page==="apply"&&<FellowshipPage go={go} addApp={addApp} startTab="apply" session={session} isAdmin={isAdmin}/>}
       {page==="mentors"&&<MentorsPage go={go}/>}
       {page==="team"&&<TeamPage go={go}/>}
       {page==="contact"&&<ContactPage go={go} addContact={addContact}/>}
