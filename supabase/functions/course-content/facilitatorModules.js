@@ -618,7 +618,7 @@ export const courseModules = [
       "Avoid pushing the group toward one \"correct\" continental priority; the aim is to compare reasoning, trade-offs, and different perspectives.",
       "Keep the discussion practical and research-oriented rather than turning it into a broad debate about AI policy in general.",
       "Remind participants that Module 6 leads directly into the final project: a short 3–5 hour applied project based on the research question they developed in this module.",
-      "Course completion requires participation in at least 4 of the 6 live sessions, completion of the pre-session exercise for each attended module, and submission of the final project."
+      "Course completion requires participation in at least 4 of the 6 live sessions, completion of the pre-session exercise for each attended module, and AIxBio Africa approval of the Capstone final project."
     ],
     "moduleLearningFlow": "Bring together priorities, capabilities, dependencies, responsibility, and research gaps → apply them in a short final project → complete the course → continue into AIxBio Africa's community, fellowship, and research pathway."
   }
