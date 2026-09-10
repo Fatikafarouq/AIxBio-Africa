@@ -13,322 +13,213 @@ import {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+type Membership = {
+  id: string;
+  role: "participant" | "facilitator";
+  status: "accepted" | "completed";
+  group_id: string;
+  joined_at: string | null;
+  completed_at: string | null;
+  cohort_groups: any;
+};
+
+const membershipSummary = (m: Membership) => ({
+  id: m.id,
+  role: m.role,
+  status: m.status,
+  group_id: m.group_id,
+  joined_at: m.joined_at,
+  completed_at: m.completed_at,
+  group_name: m.cohort_groups?.name ?? null,
+  cohort_id: m.cohort_groups?.cohort_id ?? null,
+  cohort_name: m.cohort_groups?.cohorts?.name ?? null,
+  cohort_status: m.cohort_groups?.cohorts?.status ?? null,
+});
+
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const authHeader = req.headers.get("Authorization");
-
   if (!authHeader) {
-    return Response.json(
-      { error: "Sign in required." },
-      { status: 401, headers: corsHeaders }
-    );
+    return Response.json({ error: "Sign in required." }, { status: 401, headers: corsHeaders });
   }
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_ANON_KEY")!,
-    {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    }
+    { global: { headers: { Authorization: authHeader } } },
   );
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
-    return Response.json(
-      { error: "Invalid session." },
-      { status: 401, headers: corsHeaders }
-    );
+    return Response.json({ error: "Invalid session." }, { status: 401, headers: corsHeaders });
   }
 
-  const body =
-    req.method === "POST"
-      ? await req.json().catch(() => ({}))
-      : {};
+  const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+  const requestedRole = body?.role === "facilitator" ? "facilitator" : "participant";
+  const requestedMembershipId = typeof body?.membershipId === "string" ? body.membershipId : null;
 
-  const requestedRole =
-    body?.role === "facilitator"
-      ? "facilitator"
-      : "participant";
-
-  const [
-    { data: adminRow },
-    { data: membership },
-  ] = await Promise.all([
-    supabase
-      .from("admins")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .maybeSingle(),
-
+  const [{ data: adminRow }, { data: membershipRows, error: membershipError }] = await Promise.all([
+    supabase.from("admins").select("user_id").eq("user_id", user.id).maybeSingle(),
     supabase
       .from("cohort_members")
       .select(`
+        id,
         role,
         status,
         group_id,
+        joined_at,
+        completed_at,
         cohort_groups(
           id,
           name,
           timezone_label,
+          meeting_url,
+          session_duration_minutes,
+          delivery_status,
+          delivery_completed_at,
           cohort_id,
-          cohorts(
-            id,
-            name,
-            start_date,
-            status
-          ),
-          group_sessions(
-            id,
-            module_id,
-            session_date
-          )
+          cohorts(id,name,start_date,status),
+          group_sessions(id,module_id,session_date)
         )
       `)
       .eq("user_id", user.id)
-      .eq("status", "accepted")
-      .maybeSingle(),
+      .in("status", ["accepted", "completed"])
+      .order("joined_at", { ascending: false }),
   ]);
 
   const isAdmin = Boolean(adminRow);
-
-  if (!isAdmin && !membership) {
-    return Response.json(
-      {
-        error: "Your application is still under review.",
-        code: "UNDER_REVIEW",
-      },
-      {
-        status: 403,
-        headers: corsHeaders,
-      }
-    );
+  if (membershipError && !isAdmin) {
+    return Response.json({ error: "We could not load your course access." }, { status: 500, headers: corsHeaders });
   }
 
-  if (
-    !isAdmin &&
-    requestedRole !== membership?.role
-  ) {
-    return Response.json(
-      {
-        error:
-          "You do not have access to this course role.",
-      },
-      {
-        status: 403,
-        headers: corsHeaders,
-      }
-    );
+  const allMemberships = (membershipRows ?? []) as Membership[];
+  const roleMemberships = allMemberships
+    .filter((m) => m.role === requestedRole)
+    .sort((a, b) => {
+      if (a.status !== b.status) return a.status === "accepted" ? -1 : 1;
+      return new Date(b.joined_at ?? 0).getTime() - new Date(a.joined_at ?? 0).getTime();
+    });
+
+  let membership: Membership | null = null;
+  if (!isAdmin) {
+    // A membership id is cached in sessionStorage by the browser. If the user
+    // signs out and another test account signs in, that cached id may belong to
+    // the previous account. Never turn that harmless stale cache into an access
+    // failure: fall back to this user's current/most-recent membership.
+    membership = requestedMembershipId
+      ? roleMemberships.find((m) => m.id === requestedMembershipId) ?? roleMemberships[0] ?? null
+      : roleMemberships[0] ?? null;
+
+    if (!membership) {
+      const hasAnyMembership = allMemberships.length > 0;
+      return Response.json(
+        {
+          error: hasAnyMembership
+            ? "You do not have access to this course role."
+            : "Your application is still under review.",
+          code: hasAnyMembership ? "ROLE_NOT_AVAILABLE" : "UNDER_REVIEW",
+        },
+        { status: 403, headers: corsHeaders },
+      );
+    }
   }
 
-  const effectiveRole = isAdmin
-    ? requestedRole
-    : membership!.role;
-
-  /*
-   * FACILITATOR
-   *
-   * Facilitators receive their complete facilitator guide.
-   * Attendance and module unlocking are handled by the
-   * existing secure RPC functions.
-   */
-  if (effectiveRole === "facilitator") {
+  if (requestedRole === "facilitator") {
     return Response.json(
       {
         role: "facilitator",
         courseMeta: facilitatorMeta,
         courseModules: facilitatorModules,
-        group: isAdmin
-          ? null
-          : membership?.cohort_groups ?? null,
+        group: isAdmin ? null : membership?.cohort_groups ?? null,
+        memberships: roleMemberships.map(membershipSummary),
+        selected_membership_id: membership?.id ?? null,
         preview: isAdmin,
       },
-      {
-        headers: {
-          ...corsHeaders,
-          "Cache-Control": "private, no-store",
-        },
-      }
+      { headers: { ...corsHeaders, "Cache-Control": "private, no-store" } },
     );
   }
 
-  /*
-   * ADMIN PARTICIPANT PREVIEW
-   *
-   * Admins can preview the entire participant course
-   * without needing to belong to a participant group.
-   */
   if (isAdmin) {
-    const previewModules =
-      participantModules.map((module) => ({
-        ...module,
-        locked: false,
-      }));
-
     return Response.json(
       {
         role: "participant",
         courseMeta: participantMeta,
-        courseModules: previewModules,
-
+        courseModules: participantModules.map((module) => ({ ...module, locked: false })),
         progress: {
-          sessions_present: 0,
-          exercises_required: 0,
-          exercises_completed: 0,
+          membership_id: null,
+          membership_status: "preview",
+          sessions_present: 6,
+          sessions_total: 6,
+          attendance_required: 4,
+          attendance_requirement_met: true,
+          exercises_required: 6,
+          exercises_completed: 6,
+          exercise_requirement_met: true,
+          module6_attendance_recorded: true,
           capstone_unlocked: true,
-          capstone_submission: null,
+          capstone: null,
+          course_completed: false,
+          certificate: null,
+          preview: true,
         },
-
-        capstone: {
-          ...participantCapstone,
-          locked: false,
-        },
-
+        capstone: { ...participantCapstone, locked: false },
         group: null,
+        memberships: [],
+        selected_membership_id: null,
         preview: true,
       },
-      {
-        headers: {
-          ...corsHeaders,
-          "Cache-Control": "private, no-store",
-        },
-      }
+      { headers: { ...corsHeaders, "Cache-Control": "private, no-store" } },
     );
   }
 
-  /*
-   * PARTICIPANT COURSE STATE
-   *
-   * Supabase determines which modules are unlocked,
-   * participant attendance/exercise progress, and
-   * Capstone eligibility.
-   */
-  const {
-    data: courseState,
-    error: stateError,
-  } = await supabase.rpc("get_my_course_state");
+  const { data: courseState, error: stateError } = await supabase.rpc("get_my_course_state", {
+    p_membership_id: membership!.id,
+  });
 
   if (stateError || !courseState) {
-    console.error(
-      "Could not load participant course state:",
-      stateError
-    );
-
+    console.error("Could not load participant course state:", stateError);
     return Response.json(
-      {
-        error:
-          "We could not load your course progress. Please try again.",
-      },
-      {
-        status: 500,
-        headers: corsHeaders,
-      }
+      { error: "We could not load your course progress. Please try again." },
+      { status: 500, headers: corsHeaders },
     );
   }
 
   const unlockedModules = new Set(
-    (courseState.unlocked_modules ?? [1]).map(
-      (id: number | string) => Number(id)
-    )
+    (courseState.unlocked_modules ?? [1]).map((id: number | string) => Number(id)),
   );
 
-  /*
-   * IMPORTANT:
-   *
-   * Do not send the contents of locked modules to the browser.
-   *
-   * Locked modules only receive enough information for the
-   * participant dashboard to display their title and status.
-   */
-  const protectedModules =
-    participantModules.map((module) => {
-      const unlocked =
-        unlockedModules.has(module.id);
+  const protectedModules = participantModules.map((module) => {
+    if (unlockedModules.has(module.id)) return { ...module, locked: false };
+    return {
+      id: module.id,
+      slug: module.slug,
+      title: module.title,
+      overview: module.overview,
+      locked: true,
+    };
+  });
 
-      if (unlocked) {
-        return {
-          ...module,
-          locked: false,
-        };
-      }
-
-      return {
-        id: module.id,
-        slug: module.slug,
-        title: module.title,
-        overview: module.overview,
-        locked: true,
-      };
-    });
-
-  const capstoneUnlocked = Boolean(
-    courseState.capstone_unlocked
-  );
-
-  /*
-   * Just like modules, don't send the full Capstone
-   * instructions until the participant is eligible.
-   */
+  const capstoneUnlocked = Boolean(courseState.capstone_unlocked);
   const capstone = capstoneUnlocked
-    ? {
-        ...participantCapstone,
-        locked: false,
-      }
-    : {
-        title: participantCapstone.title,
-        overview: participantCapstone.overview,
-        locked: true,
-      };
-
-  const progress = {
-    sessions_present:
-      courseState.sessions_present ?? 0,
-
-    exercises_required:
-      courseState.exercises_required ?? 0,
-
-    exercises_completed:
-      courseState.exercises_completed ?? 0,
-
-    capstone_unlocked:
-      capstoneUnlocked,
-
-    capstone_submission:
-      courseState.capstone_submission ?? null,
-  };
+    ? { ...participantCapstone, locked: false }
+    : { title: participantCapstone.title, overview: participantCapstone.overview, locked: true };
 
   return Response.json(
     {
       role: "participant",
       courseMeta: participantMeta,
       courseModules: protectedModules,
-      progress,
+      progress: courseState,
       capstone,
-
-      group:
-        membership?.cohort_groups ?? null,
-
+      group: membership?.cohort_groups ?? null,
+      memberships: roleMemberships.map(membershipSummary),
+      selected_membership_id: membership?.id ?? null,
       preview: false,
     },
-    {
-      headers: {
-        ...corsHeaders,
-        "Cache-Control": "private, no-store",
-      },
-    }
+    { headers: { ...corsHeaders, "Cache-Control": "private, no-store" } },
   );
 });
