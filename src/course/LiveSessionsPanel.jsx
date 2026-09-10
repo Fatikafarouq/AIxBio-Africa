@@ -57,8 +57,8 @@ const googleCalendarUrl = ({ session, group, moduleTitle }) => {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 };
 
-export default function LiveSessionsPanel({ courseModules = [] }) {
-  const [group, setGroup] = useState(null);
+export default function LiveSessionsPanel({ courseModules = [], group: groupOverride = null }) {
+  const [group, setGroup] = useState(groupOverride);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -66,6 +66,10 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
     let alive = true;
 
     const load = async () => {
+      if (groupOverride) {
+        if (alive) { setGroup(groupOverride); setLoading(false); setLoadError(""); }
+        return;
+      }
       setLoading(true);
       setLoadError("");
 
@@ -100,7 +104,9 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
           )
         `)
         .eq("user_id", user.id)
-        .eq("status", "accepted")
+        .in("status", ["accepted","completed"])
+        .order("joined_at",{ascending:false})
+        .limit(1)
         .maybeSingle();
 
       if (!alive) return;
@@ -117,7 +123,7 @@ export default function LiveSessionsPanel({ courseModules = [] }) {
 
     load();
     return () => { alive = false; };
-  }, []);
+  }, [groupOverride]);
 
   const sessions = useMemo(
     () => [...(group?.group_sessions || [])].sort(
