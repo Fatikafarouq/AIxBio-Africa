@@ -303,7 +303,22 @@ const ApplicationPage = ({ session, openAuth, go }) => {
 
     setFieldErrors({});
     setError("");
-    const {error:e}=await supabase.from("applications").insert({user_id:session.user.id,role,answers});
+
+    let e=null;
+    if(existing?.status==="rejected"){
+      const result=await supabase.rpc("resubmit_my_course_application",{
+        p_application_id:existing.id,
+        p_role:role,
+        p_answers:answers
+      });
+      e=result.error;
+    }else{
+      const result=await supabase
+        .from("applications")
+        .insert({user_id:session.user.id,role,answers});
+      e=result.error;
+    }
+
     if(e){setError(e.message);return;}
     setStatus("done");
   };
@@ -457,6 +472,7 @@ const AdminDashboard = ({ go }) => {
   const [groupEdits,setGroupEdits]=useState({});
   const [groupSaveState,setGroupSaveState]=useState({});
   const [deleteState,setDeleteState]=useState({});
+  const [applicationGroupSelections,setApplicationGroupSelections]=useState({});
   const [error,setError]=useState("");
 
   const load=async()=>{
@@ -510,11 +526,24 @@ const AdminDashboard = ({ go }) => {
   const decide=async(app,status)=>{
     let groupId=null;
     if(status==="accepted"){
-      groupId=window.prompt("Paste the cohort group ID to assign this person to:");
-      if(!groupId)return;
+      groupId=applicationGroupSelections[app.id]||"";
+      if(!groupId){
+        setError(`Choose a group before accepting ${app.full_name||"this applicant"}.`);
+        return;
+      }
+      if(!groups.some(g=>g.id===groupId)){
+        setError("That group no longer exists. Refresh the page and choose an existing group.");
+        return;
+      }
     }
+    setError("");
     const {error:e}=await supabase.rpc("admin_decide_application",{p_application_id:app.id,p_status:status,p_group_id:groupId});
     if(e){setError(e.message);return;}
+    setApplicationGroupSelections(x=>{
+      const next={...x};
+      delete next[app.id];
+      return next;
+    });
     await load();
   };
 
@@ -681,7 +710,25 @@ const AdminDashboard = ({ go }) => {
           {applications.filter(a=>a.status==="pending").length===0?<Txt muted>No pending applications.</Txt>:applications.filter(a=>a.status==="pending").map(a=><div key={a.id} style={{ border:"1px solid var(--brd)",padding:"20px 22px",marginBottom:12 }}>
             <div style={{ display:"flex",justifyContent:"space-between",gap:18,flexWrap:"wrap" }}>
               <div><h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600 }}>{a.full_name}</h3><Txt muted s={{ fontSize:13 }}>{a.email} · {a.role} · {new Date(a.created_at).toLocaleDateString()}</Txt></div>
-              <div style={{ display:"flex",gap:8 }}><button className="br" onClick={()=>decide(a,"accepted")}>Accept & assign group</button><button className="bo" onClick={()=>decide(a,"rejected")}>Reject</button></div>
+              <div style={{ display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end" }}>
+                <select
+                  aria-label={`Group for ${a.full_name||"applicant"}`}
+                  value={applicationGroupSelections[a.id]||""}
+                  onChange={e=>{
+                    setApplicationGroupSelections(x=>({...x,[a.id]:e.target.value}));
+                    setError("");
+                  }}
+                  style={{ minWidth:220,maxWidth:320 }}
+                >
+                  <option value="">Choose group</option>
+                  {groups.map(g=>{
+                    const cohort=cohorts.find(c=>c.id===g.cohort_id);
+                    return <option key={g.id} value={g.id}>{cohort?.name?`${cohort.name} — `:""}{g.name}</option>;
+                  })}
+                </select>
+                <button className="br" disabled={groups.length===0} onClick={()=>decide(a,"accepted")}>Accept & assign group</button>
+                <button className="bo" onClick={()=>decide(a,"rejected")}>Reject</button>
+              </div>
             </div>
             <div style={{ marginTop:14,background:"#F7F6F2",padding:"14px 16px" }}>{Object.entries(a.answers||{}).filter(([,v])=>v!==""&&v!=null).map(([k,v])=>{
               if(k==="weekly_availability"){
