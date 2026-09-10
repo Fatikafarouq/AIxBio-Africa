@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { courseMeta, coursePreviewModules } from "./courseMeta";
 import { PageHdr, Sec, Ey, H2, Txt, FF } from "./CoursePrimitives";
@@ -201,7 +201,7 @@ const AdminDashboard=({go})=>{
   const [tab,setTab]=useState("applications"); const [error,setError]=useState(""); const [notice,setNotice]=useState("");
   const [applications,setApplications]=useState([]); const [cohorts,setCohorts]=useState([]); const [groups,setGroups]=useState([]); const [members,setMembers]=useState([]);
   const [returning,setReturning]=useState([]); const [capstones,setCapstones]=useState([]); const [certificates,setCertificates]=useState([]); const [fellowRecords,setFellowRecords]=useState([]); const [settings,setSettings]=useState(EMPTY_SETTINGS);
-  const [selectedCohort,setSelectedCohort]=useState(""); const [appStatus,setAppStatus]=useState("pending"); const [appRole,setAppRole]=useState("all"); const [capStatus,setCapStatus]=useState("all"); const [capGroup,setCapGroup]=useState("all"); const [capSort,setCapSort]=useState("recent");
+  const [selectedCohort,setSelectedCohort]=useState(""); const [appStatus,setAppStatus]=useState("pending"); const [appRole,setAppRole]=useState("all"); const [appSearch,setAppSearch]=useState(""); const [appPage,setAppPage]=useState(1); const [expandedApp,setExpandedApp]=useState(""); const [capStatus,setCapStatus]=useState("all"); const [capGroup,setCapGroup]=useState("all"); const [capSort,setCapSort]=useState("recent");
   const [appGroups,setAppGroups]=useState({}); const [returnGroups,setReturnGroups]=useState({});
   const [newCohort,setNewCohort]=useState({name:"",start_date:""}); const [newGroup,setNewGroup]=useState({cohort_id:"",name:"",timezone_label:"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]});
   const [groupEdits,setGroupEdits]=useState({}); const [cohortEdits,setCohortEdits]=useState({});
@@ -230,13 +230,34 @@ const AdminDashboard=({go})=>{
   useEffect(()=>{load();},[]);
 
   const activeGroups=groups.filter(g=>g.delivery_status!=="completed"&&g.delivery_status!=="archived");
-  const filteredApps=applications.filter(a=>(appStatus==="all"||a.status===appStatus)&&(appRole==="all"||a.role===appRole));
+  const APP_PAGE_SIZE=20;
+  const normalizedAppSearch=appSearch.trim().toLowerCase();
+  const filteredApps=applications.filter(a=>{
+    if(appStatus!=="all"&&a.status!==appStatus)return false;
+    if(appRole!=="all"&&a.role!==appRole)return false;
+    if(!normalizedAppSearch)return true;
+    return [a.full_name,a.email,a.role,a.status].some(v=>String(v||"").toLowerCase().includes(normalizedAppSearch));
+  });
+  const appPageCount=Math.max(1,Math.ceil(filteredApps.length/APP_PAGE_SIZE));
+  const safeAppPage=Math.min(appPage,appPageCount);
+  const pagedApps=filteredApps.slice((safeAppPage-1)*APP_PAGE_SIZE,safeAppPage*APP_PAGE_SIZE);
   const cohortGroups=groups.filter(g=>g.cohort_id===selectedCohort);
   const capstoneScope=capstones.filter(r=>(!selectedCohort||r.cohort_id===selectedCohort)&&(capGroup==="all"||r.group_id===capGroup));
   const capCounts={not_submitted:capstoneScope.filter(r=>!r.capstone_id).length,awaiting_review:capstoneScope.filter(r=>r.capstone_status==="awaiting_review").length,revision_requested:capstoneScope.filter(r=>r.capstone_status==="revision_requested").length,approved:capstoneScope.filter(r=>r.capstone_status==="approved").length};
   const cohortCapstones=capstoneScope.filter(r=>capStatus==="all"||(capStatus==="not_submitted"?!r.capstone_id:r.capstone_status===capStatus)).sort((a,b)=>capSort==="name"?String(a.participant_name||"").localeCompare(String(b.participant_name||"")):capSort==="oldest"?new Date(a.submitted_at||"9999-12-31").getTime()-new Date(b.submitted_at||"9999-12-31").getTime():new Date(b.submitted_at||0).getTime()-new Date(a.submitted_at||0).getTime());
 
   const decide=async(app,status)=>{const groupId=status==="accepted"?appGroups[app.id]:null;if(status==="accepted"&&!groupId){setError("Choose an active group before approving the application.");return;}const {error:e}=await supabase.rpc("admin_decide_application",{p_application_id:app.id,p_status:status,p_group_id:groupId});if(e){setError(e.message);return;}await load();};
+  const deleteApplication=async(app)=>{
+    setError("");setNotice("");
+    const label=`${app.full_name||app.email} (${app.role})`;
+    if(!confirm(`Permanently delete the unused/test application for ${label}?\n\nThis does not delete the person’s login account. Supabase will refuse the deletion if the application has real course activity or credential history.`))return;
+    const {data,error:e}=await supabase.rpc("admin_delete_course_application",{p_application_id:app.id});
+    if(e){setError(e.message);return;}
+    if(!data?.deleted){setError(data?.reason||"This application cannot be deleted because it has programme history.");return;}
+    setExpandedApp("");
+    setNotice(`Deleted the unused/test ${app.role} application for ${app.full_name||app.email}.`);
+    await load();
+  };
   const createCohort=async()=>{if(!newCohort.name.trim())return;const {error:e}=await supabase.from("cohorts").insert({name:newCohort.name.trim(),start_date:newCohort.start_date||null,status:"setup"});if(e){setError(e.message);return;}setNewCohort({name:"",start_date:""});await load();};
   const saveCohort=async(id)=>{const x=cohortEdits[id];const {error:e}=await supabase.rpc("admin_update_cohort_settings",{p_cohort_id:id,p_name:x.name.trim(),p_start_date:x.start_date||null,p_status:x.status});if(e){setError(e.message);return;}await load();};
   const deleteCohort=async(c)=>{const related=groups.filter(g=>g.cohort_id===c.id);const ids=new Set(related.map(g=>g.id));const hasHistory=members.some(m=>ids.has(m.group_id));if(hasHistory){setError("This cohort has membership history and is protected from deletion.");return;}if(!confirm(`Delete empty test cohort “${c.name}”?`))return;const {error:e}=await supabase.rpc("admin_delete_course_cohort",{p_cohort_id:c.id});if(e){setError(e.message);return;}await load();};
@@ -281,7 +302,49 @@ const AdminDashboard=({go})=>{
     <div style={{background:"#1C1B18",padding:"128px 44px 0"}}><div style={{maxWidth:1160,margin:"0 auto"}}><Ey label="Course Admin"/><h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(26px,3vw,40px)",fontWeight:600,color:"#fff"}}>Introduction to AI &amp; Biosecurity in Africa</h1><div style={{display:"flex",marginTop:24,borderBottom:"1px solid rgba(255,255,255,.08)",overflowX:"auto"}}>{[["applications","Applications"],["returning","Returning Facilitators"],["cohorts","Cohorts"],["groups","Groups"],["capstones","Capstones & Completion"],["certificates","Certificates"],["settings","Course Settings"],["preview","View as"]].map(([id,l])=><button key={id} className="nb" onClick={()=>setTab(id)} style={{color:tab===id?"#fff":"rgba(255,255,255,.38)",borderBottom:tab===id?"2px solid #B8102A":"2px solid transparent",padding:"11px 16px",fontSize:12.5,marginBottom:-1,whiteSpace:"nowrap"}}>{l}</button>)}</div></div></div>
     <Sec bg="#fff">{error&&<div className="err" style={{marginBottom:18}}>{error}</div>}{notice&&<div style={{marginBottom:18,padding:"11px 13px",border:"1px solid #B8D9C8",background:"#F5FBF7",fontSize:13,color:"#1A6B46",fontWeight:700}}>{notice}</div>}
 
-    {tab==="applications"&&<div><div style={{display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap",alignItems:"end",marginBottom:20}}><div><Ey label="Applications"/><H2>Application archive</H2></div><div style={{display:"flex",gap:8}}><select value={appStatus} onChange={e=>setAppStatus(e.target.value)}><option value="pending">Pending</option><option value="accepted">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select><select value={appRole} onChange={e=>setAppRole(e.target.value)}><option value="all">All roles</option><option value="participant">Participants</option><option value="facilitator">Facilitators</option></select></div></div>{!filteredApps.length?<Txt muted>No applications match these filters.</Txt>:filteredApps.map(a=><div key={a.id} style={{border:"1px solid var(--brd)",padding:"20px 22px",marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",gap:18,flexWrap:"wrap"}}><div><h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600}}>{a.full_name}</h3><Txt muted s={{fontSize:13}}>{a.email} · {a.role} · {new Date(a.created_at).toLocaleDateString()}</Txt><div style={{marginTop:7}}><StatusTag status={a.status}/></div></div>{a.status==="pending"&&<div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}><select value={appGroups[a.id]||""} onChange={e=>setAppGroups(x=>({...x,[a.id]:e.target.value}))}><option value="">Choose active group</option>{activeGroups.filter(g=>a.role!=="facilitator"||!g.facilitator_user_id).map(g=><option key={g.id} value={g.id}>{cohorts.find(c=>c.id===g.cohort_id)?.name} — {g.name}</option>)}</select><button className="br" onClick={()=>decide(a,"accepted")}>Approve & assign</button><button className="bo" onClick={()=>decide(a,"rejected")}>Reject</button></div>}</div><div style={{marginTop:14,background:"#F7F6F2",padding:"14px 16px"}}>{Object.entries(a.answers||{}).filter(([,v])=>v!==""&&v!=null).map(([k,v])=><div key={k} style={{marginBottom:7}}><strong style={{fontSize:12}}>{answerLabel(k)}:</strong> <span style={{fontSize:13.5,color:"#5A5956"}}>{typeof v==="object"?JSON.stringify(v):String(v)}</span></div>)}</div>{a.membership_history?.length>0&&<div style={{marginTop:14}}><strong style={{fontSize:12}}>Cohort history</strong>{a.membership_history.map(h=><div key={h.membership_id} style={{fontSize:13,color:"#5A5956",marginTop:5}}>{h.cohort_name} — {h.group_name} · {h.status}</div>)}</div>}</div>)}</div>}
+    {tab==="applications"&&<div>
+      <div style={{display:"flex",justifyContent:"space-between",gap:16,flexWrap:"wrap",alignItems:"end",marginBottom:18}}>
+        <div><Ey label="Applications"/><H2>Application archive</H2><Txt muted s={{fontSize:13.5,marginTop:6}}>Compact archive for reviewing applications. Permanent deletion is available only for unused/test records; real programme history is protected.</Txt></div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+          <input value={appSearch} onChange={e=>{setAppSearch(e.target.value);setAppPage(1);}} placeholder="Search name or email" style={{minWidth:220}}/>
+          <select value={appStatus} onChange={e=>{setAppStatus(e.target.value);setAppPage(1);}}><option value="pending">Pending</option><option value="accepted">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select>
+          <select value={appRole} onChange={e=>{setAppRole(e.target.value);setAppPage(1);}}><option value="all">All roles</option><option value="participant">Participants</option><option value="facilitator">Facilitators</option></select>
+        </div>
+      </div>
+      <Txt muted s={{fontSize:12.5,marginBottom:12}}>{filteredApps.length} application{filteredApps.length===1?"":"s"}{filteredApps.length>APP_PAGE_SIZE?` · Page ${safeAppPage} of ${appPageCount}`:""}</Txt>
+      {!filteredApps.length?<Txt muted>No applications match these filters.</Txt>:<>
+        <div style={{overflowX:"auto",border:"1px solid var(--brd)"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:880}}>
+            <thead><tr style={{background:"#F7F6F2",textAlign:"left"}}>{["Applicant","Role","Status","Applied","Assignment",""].map(h=><th key={h} style={{padding:"11px 13px",fontSize:10.5,textTransform:"uppercase",letterSpacing:".08em",color:"#6C6A66",borderBottom:"1px solid var(--brd)"}}>{h}</th>)}</tr></thead>
+            <tbody>{pagedApps.map(a=>{const history=a.membership_history||[];const latest=history[0];const open=expandedApp===a.id;return <Fragment key={a.id}>
+              <tr style={{borderBottom:open?"none":"1px solid var(--brd)"}}>
+                <td style={{padding:"13px"}}><strong style={{fontSize:13.5}}>{a.full_name}</strong><div style={{fontSize:12,color:"#77746F",marginTop:2}}>{a.email}</div></td>
+                <td style={{padding:"13px",fontSize:13,textTransform:"capitalize"}}>{a.role}</td>
+                <td style={{padding:"13px"}}><StatusTag status={a.status}/></td>
+                <td style={{padding:"13px",fontSize:12.5,color:"#5A5956"}}>{new Date(a.created_at).toLocaleDateString()}</td>
+                <td style={{padding:"13px",fontSize:12.5,color:"#5A5956"}}>{latest?`${latest.cohort_name} — ${latest.group_name} · ${latest.status}`:"—"}</td>
+                <td style={{padding:"13px",textAlign:"right"}}><button className="bo" onClick={()=>setExpandedApp(open?"":a.id)}>{open?"Close":"View application"}</button></td>
+              </tr>
+              {open&&<tr style={{borderBottom:"1px solid var(--brd)"}}><td colSpan={6} style={{padding:"0 13px 18px"}}>
+                <div style={{background:"#F7F6F2",padding:"18px 20px"}}>
+                  {a.status==="pending"&&<div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:18,paddingBottom:18,borderBottom:"1px solid var(--brd)"}}>
+                    <select value={appGroups[a.id]||""} onChange={e=>setAppGroups(x=>({...x,[a.id]:e.target.value}))}><option value="">Choose active group</option>{activeGroups.filter(g=>a.role!=="facilitator"||!g.facilitator_user_id).map(g=><option key={g.id} value={g.id}>{cohorts.find(c=>c.id===g.cohort_id)?.name} — {g.name}</option>)}</select>
+                    <button className="br" onClick={()=>decide(a,"accepted")}>Approve & assign</button><button className="bo" onClick={()=>decide(a,"rejected")}>Reject</button>
+                  </div>}
+                  <div>{Object.entries(a.answers||{}).filter(([,v])=>v!==""&&v!=null).map(([k,v])=><div key={k} style={{marginBottom:7}}><strong style={{fontSize:12}}>{answerLabel(k)}:</strong> <span style={{fontSize:13.5,color:"#5A5956"}}>{typeof v==="object"?JSON.stringify(v):String(v)}</span></div>)}</div>
+                  {history.length>0&&<div style={{marginTop:18,paddingTop:14,borderTop:"1px solid var(--brd)"}}><strong style={{fontSize:12}}>Cohort history</strong>{history.map(h=><div key={h.membership_id} style={{fontSize:13,color:"#5A5956",marginTop:5}}>{h.cohort_name} — {h.group_name} · {h.status}</div>)}</div>}
+                  <div style={{marginTop:20,paddingTop:14,borderTop:"1px solid var(--brd)",display:"flex",justifyContent:"space-between",gap:14,alignItems:"center",flexWrap:"wrap"}}>
+                    <Txt muted s={{fontSize:12.5,maxWidth:650}}>Delete is intended for test or unused applications. If this record has attendance, progress, Capstone, completed delivery, certificate, or returning-facilitator history, Supabase will block deletion.</Txt>
+                    <button className="bn" onClick={()=>deleteApplication(a)} style={{color:"#B8102A",fontWeight:700,fontSize:12.5}}>Delete unused/test application</button>
+                  </div>
+                </div>
+              </td></tr>}
+            </Fragment>;})}</tbody>
+          </table>
+        </div>
+        {appPageCount>1&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginTop:16}}><button className="bo" disabled={safeAppPage<=1} onClick={()=>setAppPage(p=>Math.max(1,p-1))}>← Previous</button><Txt muted s={{fontSize:12.5}}>Page {safeAppPage} of {appPageCount}</Txt><button className="bo" disabled={safeAppPage>=appPageCount} onClick={()=>setAppPage(p=>Math.min(appPageCount,p+1))}>Next →</button></div>}
+      </>}
+    </div>}
 
     {tab==="returning"&&<div><Ey label="Returning Facilitators"/><H2 s={{marginBottom:8}}>Facilitate another cohort</H2><Txt muted s={{fontSize:13.5,marginBottom:22}}>These facilitators have already been vetted. Assignment creates a new cohort membership and keeps their original application and prior cohort history.</Txt>{!returning.length?<Txt muted>No returning facilitator interest has been registered.</Txt>:returning.map(r=><div key={r.interest_id} style={{borderTop:"1px solid var(--brd)",padding:"18px 0"}}><div style={{display:"flex",justifyContent:"space-between",gap:18,flexWrap:"wrap"}}><div><strong>{r.full_name}</strong><Txt muted s={{fontSize:13}}>{r.email} · {r.interest_status}</Txt>{(r.prior_groups||[]).map(g=><div key={g.group_id} style={{fontSize:12.5,color:"#5A5956",marginTop:4}}>Previously: {g.cohort_name} — {g.group_name}</div>)}</div>{r.interest_status!=="assigned"&&<div style={{display:"flex",gap:8}}><select value={returnGroups[r.interest_id]||""} onChange={e=>setReturnGroups(x=>({...x,[r.interest_id]:e.target.value}))}><option value="">Choose unassigned group</option>{activeGroups.filter(g=>!g.facilitator_user_id).map(g=><option key={g.id} value={g.id}>{cohorts.find(c=>c.id===g.cohort_id)?.name} — {g.name}</option>)}</select><button className="br" onClick={()=>assignReturning(r)}>Assign</button></div>}</div></div>)}</div>}
 
