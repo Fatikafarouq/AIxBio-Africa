@@ -1,34 +1,13 @@
-/* ══════════════════════════════════════════════════════
-   Facilitator Tool — matches the design system already
-   defined in App.jsx (Sec, PageHdr, Ey, H2, Txt, .tag,
-   .chip, .tab-b, etc.). Import these components into
-   App.jsx and wire into the `page` state / `go()` router
-   the rest of the site already uses.
-
-   Expects: import { courseMeta, courseModules } from "./facilitatorModules";
-   (the data file already generated — 6 modules, full
-   facilitator content, no participant split needed here.)
-   ══════════════════════════════════════════════════════ */
-
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Sec, PageHdr, Ey, H2, Txt } from "./CoursePrimitives";
 import LiveSessionsPanel from "./LiveSessionsPanel";
 
-/* These primitives already exist in App.jsx — this file assumes
-   they're imported/in-scope wherever it's used, exactly like every
-   other page component in App.jsx does. If you split this into its
-   own module, export Sec/PageHdr/Ey/H2/Txt/AfricaSvg from App.jsx
-   (or a shared primitives file) and import them here instead of
-   redefining them. */
-
-
-/* ══════════ FACILITATOR ATTENDANCE ═══════════════════ */
-
-const AttendanceButton = ({ active, children, onClick }) => (
+const AttendanceButton = ({ active, children, onClick, disabled=false }) => (
   <button
     type="button"
     onClick={onClick}
+    disabled={disabled}
     style={{
       border: active ? "1px solid #B8102A" : "1px solid var(--brd)",
       background: active ? "rgba(184,16,42,.08)" : "#fff",
@@ -37,7 +16,8 @@ const AttendanceButton = ({ active, children, onClick }) => (
       fontSize: 11.5,
       fontWeight: 700,
       padding: "8px 10px",
-      cursor: "pointer"
+      cursor: disabled ? "default" : "pointer",
+      opacity: disabled ? .62 : 1
     }}
   >
     {children}
@@ -52,6 +32,7 @@ const FacilitatorAttendance = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [returning, setReturning] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -72,14 +53,13 @@ const FacilitatorAttendance = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
+  useEffect(() => { loadDashboard(); }, []);
 
   const group = useMemo(
     () => dashboard.groups?.find(g => g.id === groupId) || null,
     [dashboard, groupId]
   );
+  const readOnly = group?.delivery_status === "completed" || group?.delivery_status === "archived" || group?.membership_status === "completed";
 
   const sessions = useMemo(
     () => [...(group?.sessions || [])].sort((a, b) => new Date(a.session_date) - new Date(b.session_date)),
@@ -87,10 +67,7 @@ const FacilitatorAttendance = () => {
   );
 
   useEffect(() => {
-    if (!sessions.length) {
-      setSessionId("");
-      return;
-    }
+    if (!sessions.length) { setSessionId(""); return; }
     setSessionId(current => current && sessions.some(s => s.id === current) ? current : sessions[0].id);
   }, [groupId, sessions.length]);
 
@@ -98,10 +75,7 @@ const FacilitatorAttendance = () => {
   const participants = group?.participants || [];
 
   useEffect(() => {
-    if (!group || !sessionId) {
-      setDraft({});
-      return;
-    }
+    if (!group || !sessionId) { setDraft({}); return; }
     const next = {};
     participants.forEach(p => {
       const saved = (group.attendance || []).find(a => a.session_id === sessionId && a.user_id === p.user_id);
@@ -114,42 +88,31 @@ const FacilitatorAttendance = () => {
   }, [groupId, sessionId, dashboard]);
 
   const setAttendance = (userId, status) => {
+    if (readOnly) return;
     setDraft(d => ({
       ...d,
       [userId]: {
         status,
-        exercise_status:
-          status === "present"
-            ? (d[userId]?.exercise_status === "completed" ? "completed" : "not_completed")
-            : "not_applicable"
+        exercise_status: status === "present"
+          ? (d[userId]?.exercise_status === "completed" ? "completed" : "not_completed")
+          : "not_applicable"
       }
     }));
     setMessage("");
   };
 
   const setExercise = (userId, exercise_status) => {
-    setDraft(d => ({
-      ...d,
-      [userId]: {
-        status: d[userId]?.status || "present",
-        exercise_status
-      }
-    }));
+    if (readOnly) return;
+    setDraft(d => ({ ...d, [userId]: { status: d[userId]?.status || "present", exercise_status } }));
     setMessage("");
   };
 
   const save = async () => {
-    if (!sessionId) return;
+    if (!sessionId || readOnly) return;
     const incomplete = participants.find(p => !draft[p.user_id]?.status);
-    if (incomplete) {
-      setError("Mark attendance for every participant before saving.");
-      return;
-    }
+    if (incomplete) { setError("Mark attendance for every participant before saving."); return; }
 
-    setSaving(true);
-    setError("");
-    setMessage("");
-
+    setSaving(true); setError(""); setMessage("");
     for (const participant of participants) {
       const row = draft[participant.user_id];
       const { error: e } = await supabase.rpc("mark_session_attendance", {
@@ -158,252 +121,153 @@ const FacilitatorAttendance = () => {
         p_status: row.status,
         p_exercise_status: row.status === "present" ? row.exercise_status : "not_applicable"
       });
-      if (e) {
-        setError(e.message);
+      if (e) { setError(e.message); setSaving(false); return; }
+    }
+
+    if (session?.module_id === 6) {
+      const { error: completeError } = await supabase.rpc("complete_course_group_delivery", { p_group_id: groupId });
+      if (completeError) {
+        await loadDashboard();
         setSaving(false);
+        setError(`Attendance was saved, but the group could not be closed: ${completeError.message}`);
         return;
       }
     }
 
     await loadDashboard();
     setSaving(false);
-    setMessage("Attendance saved.");
+    setMessage(session?.module_id === 6 ? "Course delivery completed." : "Attendance saved.");
   };
 
   const attendanceComplete = Boolean(
-    sessionId &&
-    participants.length &&
-    participants.every(p =>
+    sessionId && participants.length && participants.every(p =>
       (group?.attendance || []).some(a => a.session_id === sessionId && a.user_id === p.user_id)
     )
   );
-
   const nextModuleId = session && session.module_id < 6 ? session.module_id + 1 : null;
-  const nextModuleUnlocked = Boolean(
-    nextModuleId && (group?.unlocked_modules || [1]).includes(nextModuleId)
-  );
+  const nextModuleUnlocked = Boolean(nextModuleId && (group?.unlocked_modules || [1]).includes(nextModuleId));
 
   const unlockNext = async () => {
-    if (!groupId || !session || !nextModuleId) return;
-
-    setUnlocking(true);
-    setError("");
-    setMessage("");
-
+    if (!groupId || !session || !nextModuleId || readOnly) return;
+    setUnlocking(true); setError(""); setMessage("");
     const { error: e } = await supabase.rpc("unlock_next_module_for_group", {
       p_group_id: groupId,
       p_current_module_id: session.module_id
     });
-
-    if (e) {
-      setError(e.message);
-      setUnlocking(false);
-      return;
-    }
-
+    if (e) { setError(e.message); setUnlocking(false); return; }
     await loadDashboard();
     setUnlocking(false);
     setMessage(`Module ${nextModuleId} is now unlocked for participants.`);
   };
 
+  const registerReturnInterest = async () => {
+    setReturning(true); setError(""); setMessage("");
+    const { error: e } = await supabase.rpc("register_facilitator_return_interest");
+    if (e) { setError(e.message); setReturning(false); return; }
+    await loadDashboard();
+    setReturning(false);
+    setMessage("Your interest in facilitating another cohort has been registered.");
+  };
+
+  const eligibleCount = useMemo(() => participants.filter(p => {
+    const rows=(group?.attendance||[]).filter(a=>a.user_id===p.user_id);
+    const present=rows.filter(a=>a.status==="present");
+    const module6=sessions.find(s=>Number(s.module_id)===6);
+    const module6Recorded=module6 ? rows.some(a=>a.session_id===module6.id) : false;
+    return present.length>=4 && present.every(a=>a.exercise_status==="completed") && module6Recorded;
+  }).length, [participants, group?.attendance, sessions]);
+
   return (
-    <div className="reveal" style={{ marginBottom: 52, paddingTop: 8 }}>
+    <div className="reveal" style={{ marginBottom:52, paddingTop:8 }}>
       <Ey label="Facilitator Attendance" />
-      <H2 s={{ marginBottom: 10 }}>Live session register</H2>
-      <Txt muted s={{ maxWidth: 760, fontSize: 13.5, marginBottom: 22 }}>
+      <H2 s={{ marginBottom:10 }}>Live session register</H2>
+      <Txt muted s={{ maxWidth:760,fontSize:13.5,marginBottom:22 }}>
         Record attendance after each live session and confirm whether each present participant completed the pre-session exercise.
       </Txt>
 
-      {loading ? (
-        <Txt muted>Loading your assigned group…</Txt>
-      ) : error && !dashboard.groups?.length ? (
-        <div className="err">{error}</div>
-      ) : !dashboard.groups?.length ? (
-        <div style={{ border: "1px solid var(--brd)", background: "#F7F6F2", padding: "18px 20px" }}>
-          <Txt muted s={{ fontSize: 13.5 }}>
-            No facilitator group is assigned to this account yet. Attendance controls will appear once a cohort group is assigned to you.
-          </Txt>
+      {loading ? <Txt muted>Loading your assigned group…</Txt> : !dashboard.groups?.length ? (
+        <div style={{border:"1px solid var(--brd)",background:"#F7F6F2",padding:"18px 20px"}}>
+          {error&&<div className="err" style={{marginBottom:10}}>{error}</div>}
+          <Txt muted s={{fontSize:13.5}}>No facilitator group is assigned to this account yet. Attendance controls will appear once a cohort group is assigned to you.</Txt>
         </div>
-      ) : (
-        <>
-          <div className="g2" style={{ display: "grid", gridTemplateColumns: dashboard.groups.length > 1 ? "1fr 1fr" : "1fr", gap: 14, marginBottom: 20 }}>
-            {dashboard.groups.length > 1 && (
-              <div>
-                <div style={{ fontFamily: "'Figtree',sans-serif", fontSize: 10.5, fontWeight: 700, color: "#5A5956", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 7 }}>Group</div>
-                <select value={groupId} onChange={e => setGroupId(e.target.value)}>
-                  {dashboard.groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                </select>
-              </div>
-            )}
-            <div>
-              <div style={{ fontFamily: "'Figtree',sans-serif", fontSize: 10.5, fontWeight: 700, color: "#5A5956", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 7 }}>Live session</div>
-              <select value={sessionId} onChange={e => setSessionId(e.target.value)}>
-                {sessions.map(s => (
-                  <option key={s.id} value={s.id}>
-                    Module {s.module_id} · {new Date(s.session_date).toLocaleString()}
-                  </option>
-                ))}
-              </select>
-            </div>
+      ) : <>
+        <div className="g2" style={{display:"grid",gridTemplateColumns:dashboard.groups.length>1?"1fr 1fr":"1fr",gap:14,marginBottom:20}}>
+          {dashboard.groups.length>1&&<div>
+            <div style={{fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".1em",textTransform:"uppercase",marginBottom:7}}>Group / cohort record</div>
+            <select value={groupId} onChange={e=>setGroupId(e.target.value)}>
+              {dashboard.groups.map(g=><option key={g.id} value={g.id}>{g.name}{g.delivery_status==="completed"?" · Completed":""}</option>)}
+            </select>
+          </div>}
+          <div>
+            <div style={{fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".1em",textTransform:"uppercase",marginBottom:7}}>Live session</div>
+            <select value={sessionId} onChange={e=>setSessionId(e.target.value)}>
+              {sessions.map(s=><option key={s.id} value={s.id}>Module {s.module_id} · {new Date(s.session_date).toLocaleString()}</option>)}
+            </select>
           </div>
+        </div>
 
-          {group && (
-            <div style={{ marginBottom: 14, fontSize: 12.5, color: "#5A5956" }}>
-              <strong style={{ color: "#1A1917" }}>{group.name}</strong>
-              {group.timezone_label ? ` · ${group.timezone_label}` : ""}
-              {session ? ` · Module ${session.module_id}` : ""}
-            </div>
-          )}
+        {group&&<div style={{marginBottom:14,fontSize:12.5,color:"#5A5956"}}>
+          <strong style={{color:"#1A1917"}}>{group.name}</strong>{group.timezone_label?` · ${group.timezone_label}`:""}{session?` · Module ${session.module_id}`:""}
+          {readOnly&&<span className="tag tr" style={{marginLeft:8}}>Completed · read only</span>}
+        </div>}
 
-          {!sessions.length ? (
-            <Txt muted>No live sessions have been scheduled for this group yet.</Txt>
-          ) : !participants.length ? (
-            <Txt muted>No accepted participants are assigned to this group yet.</Txt>
-          ) : (
-            <div style={{ borderTop: "1px solid var(--brd)" }}>
-              {participants.map(participant => {
-                const row = draft[participant.user_id] || { status: "", exercise_status: "not_applicable" };
-                return (
-                  <div key={participant.user_id} style={{ padding: "18px 0", borderBottom: "1px solid var(--brd)" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(180px,1fr) minmax(260px,1.35fr) minmax(210px,1fr)", gap: 18, alignItems: "center" }}>
-                      <div>
-                        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 600, color: "#1A1917" }}>
-                          {participant.full_name || participant.email || "Participant"}
-                        </div>
-                        {participant.email && <div style={{ fontSize: 11.5, color: "#8A8884", marginTop: 2 }}>{participant.email}</div>}
-                      </div>
+        {!sessions.length ? <Txt muted>No live sessions have been scheduled for this group yet.</Txt> : !participants.length ? <Txt muted>No accepted participants are assigned to this group yet.</Txt> : (
+          <div style={{borderTop:"1px solid var(--brd)"}}>
+            {participants.map(participant=>{
+              const row=draft[participant.user_id]||{status:"",exercise_status:"not_applicable"};
+              return <div key={participant.user_id} style={{padding:"18px 0",borderBottom:"1px solid var(--brd)"}}>
+                <div style={{display:"grid",gridTemplateColumns:"minmax(180px,1fr) minmax(260px,1.35fr) minmax(210px,1fr)",gap:18,alignItems:"center"}}>
+                  <div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#1A1917"}}>{participant.full_name||participant.email||"Participant"}</div>{participant.email&&<div style={{fontSize:11.5,color:"#8A8884",marginTop:2}}>{participant.email}</div>}</div>
+                  <div><div style={{fontSize:10,fontWeight:700,color:"#8A8884",letterSpacing:".08em",textTransform:"uppercase",marginBottom:7}}>Attendance</div><div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    <AttendanceButton disabled={readOnly} active={row.status==="present"} onClick={()=>setAttendance(participant.user_id,"present")}>Present</AttendanceButton>
+                    <AttendanceButton disabled={readOnly} active={row.status==="absent"} onClick={()=>setAttendance(participant.user_id,"absent")}>Absent</AttendanceButton>
+                    <AttendanceButton disabled={readOnly} active={row.status==="excused"} onClick={()=>setAttendance(participant.user_id,"excused")}>Excused</AttendanceButton>
+                  </div></div>
+                  <div><div style={{fontSize:10,fontWeight:700,color:"#8A8884",letterSpacing:".08em",textTransform:"uppercase",marginBottom:7}}>Pre-session exercise</div>{row.status==="present"?<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    <AttendanceButton disabled={readOnly} active={row.exercise_status==="completed"} onClick={()=>setExercise(participant.user_id,"completed")}>Completed</AttendanceButton>
+                    <AttendanceButton disabled={readOnly} active={row.exercise_status==="not_completed"} onClick={()=>setExercise(participant.user_id,"not_completed")}>Not completed</AttendanceButton>
+                  </div>:<span style={{fontSize:12.5,color:"#8A8884"}}>—</span>}</div>
+                </div>
+              </div>;
+            })}
+          </div>
+        )}
 
-                      <div>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: "#8A8884", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 7 }}>Attendance</div>
-                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                          <AttendanceButton active={row.status === "present"} onClick={() => setAttendance(participant.user_id, "present")}>Present</AttendanceButton>
-                          <AttendanceButton active={row.status === "absent"} onClick={() => setAttendance(participant.user_id, "absent")}>Absent</AttendanceButton>
-                          <AttendanceButton active={row.status === "excused"} onClick={() => setAttendance(participant.user_id, "excused")}>Excused</AttendanceButton>
-                        </div>
-                      </div>
+        {error&&<div className="err" style={{marginTop:14}}>{error}</div>}
+        {message&&<div style={{marginTop:14,fontSize:13,fontWeight:700,color:"#1A6B46"}}>{message}</div>}
+        {!readOnly&&!!participants.length&&!!sessions.length&&<button className="br" onClick={save} disabled={saving} style={{marginTop:18,opacity:saving ? .65 : 1}}>{saving?"Saving…":session?.module_id===6?"Save attendance & complete course delivery":"Save attendance"}</button>}
 
-                      <div>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: "#8A8884", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 7 }}>Pre-session exercise</div>
-                        {row.status === "present" ? (
-                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                            <AttendanceButton active={row.exercise_status === "completed"} onClick={() => setExercise(participant.user_id, "completed")}>Completed</AttendanceButton>
-                            <AttendanceButton active={row.exercise_status === "not_completed"} onClick={() => setExercise(participant.user_id, "not_completed")}>Not completed</AttendanceButton>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: 12.5, color: "#8A8884" }}>—</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        {!readOnly&&session?.module_id<6&&attendanceComplete&&<div style={{marginTop:18,padding:"18px 20px",border:"1px solid var(--brd)",background:"#F7F6F2"}}>
+          {nextModuleUnlocked?<Txt s={{fontSize:13.5,color:"#1A6B46",fontWeight:700}}>Module {nextModuleId} is already unlocked for participants ✓</Txt>:<><Txt muted s={{fontSize:13.5,marginBottom:12}}>Attendance for Module {session.module_id} is saved. When your group is ready to move forward, unlock the next module.</Txt><button className="br" onClick={unlockNext} disabled={unlocking} style={{opacity:unlocking ? .65 : 1}}>{unlocking?"Unlocking…":`Unlock Module ${nextModuleId} for participants`}</button></>}
+        </div>}
 
-          {error && <div className="err" style={{ marginTop: 14 }}>{error}</div>}
-          {message && <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, color: "#1A6B46" }}>{message}</div>}
-          {!!participants.length && !!sessions.length && (
-            <button className="br" onClick={save} disabled={saving} style={{ marginTop: 18, opacity: saving ? .65 : 1 }}>
-              {saving ? "Saving…" : "Save attendance"}
-            </button>
-          )}
-
-          {session?.module_id < 6 && attendanceComplete && (
-            <div style={{ marginTop: 18, padding: "18px 20px", border: "1px solid var(--brd)", background: "#F7F6F2" }}>
-              {nextModuleUnlocked ? (
-                <Txt s={{ fontSize: 13.5, color: "#1A6B46", fontWeight: 700 }}>
-                  Module {nextModuleId} is already unlocked for participants ✓
-                </Txt>
-              ) : (
-                <>
-                  <Txt muted s={{ fontSize: 13.5, marginBottom: 12 }}>
-                    Attendance for Module {session.module_id} is saved. When your group is ready to move forward, unlock the next module.
-                  </Txt>
-                  <button className="br" onClick={unlockNext} disabled={unlocking} style={{ opacity: unlocking ? .65 : 1 }}>
-                    {unlocking ? "Unlocking…" : `Unlock Module ${nextModuleId} for participants`}
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-
-          {session?.module_id === 6 && attendanceComplete && (
-            <div style={{ marginTop: 18, padding: "18px 20px", border: "1px solid var(--brd)", background: "#F7F6F2" }}>
-              <Txt muted s={{ fontSize: 13.5 }}>
-                Module 6 attendance is saved. Capstone access is calculated automatically for each participant from attendance and pre-session exercise completion.
-              </Txt>
-            </div>
-          )}
-        </>
-      )}
+        {readOnly&&<div style={{marginTop:24,padding:"22px 24px",border:"1px solid var(--brd)",background:"#F7F6F2"}}>
+          <Ey label="Cohort complete ✓"/><H2 s={{marginBottom:10}}>Course delivery complete</H2>
+          <Txt muted s={{fontSize:13.5,marginBottom:14}}>You have completed all six live sessions for this group. Eligible participants will now receive access to the Capstone. Capstone submissions and final certification are reviewed by AIxBio Africa.</Txt>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:18}}><span className="tag tr">6 / 6 sessions</span><span className="tag tb">{participants.length} participants</span><span className="tag tb">{eligibleCount} Capstone eligible</span></div>
+          <div style={{borderTop:"1px solid var(--brd)",paddingTop:16}}><strong style={{fontFamily:"'Figtree',sans-serif",fontSize:13}}>Interested in facilitating another cohort?</strong><Txt muted s={{fontSize:13,marginTop:5,marginBottom:12}}>Let us know and we’ll use your existing facilitator application and facilitation record.</Txt>
+            {group.return_interest?<Txt s={{fontSize:13,color:"#1A6B46",fontWeight:700}}>Interest registered ✓</Txt>:<button className="br" onClick={registerReturnInterest} disabled={returning} style={{opacity:returning ? .65 : 1}}>{returning?"Registering…":"Facilitate Another Cohort"}</button>}
+          </div>
+        </div>}
+      </>}
     </div>
   );
 };
 
-
-/* ══════════ MODULE LIST (hub) ══════════════════════════ */
-
-export const FacilitatorHub = ({ go, courseMeta, courseModules }) => (
+export const FacilitatorHub = ({ go, courseMeta, courseModules, group }) => (
   <>
-    <PageHdr
-      label="Facilitator Guide"
-      title={courseMeta.title}
-      sub={courseMeta.subtitle}
-    />
+    <PageHdr label="Facilitator Guide" title={courseMeta.title} sub={courseMeta.subtitle}/>
     <Sec bg="#fff">
-      {/* Course-level context */}
-      <div className="reveal" style={{ marginBottom: 48 }}>
-        <Ey label="Course Overview" />
-        <H2 s={{ marginBottom: 18 }}>Purpose</H2>
-        <Txt s={{ marginBottom: 24, maxWidth: 760 }}>{courseMeta.purpose}</Txt>
-        <div className="g2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-          <div style={{ background: "#F7F6F2", border: "1px solid var(--brd)", padding: "20px 22px" }}>
-            <div style={{ fontFamily: "'Figtree',sans-serif", fontSize: 10.5, fontWeight: 700, color: "#5A5956", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 10 }}>Who It's For</div>
-            <Txt muted s={{ fontSize: 13.5 }}>{courseMeta.whoItsFor}</Txt>
-          </div>
-          <div style={{ background: "#F7F6F2", border: "1px solid var(--brd)", padding: "20px 22px" }}>
-            <div style={{ fontFamily: "'Figtree',sans-serif", fontSize: 10.5, fontWeight: 700, color: "#5A5956", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 10 }}>Learning Journey</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {courseMeta.learningJourney.map((step, i) => (
-                <span key={step} className="tag tb">{i + 1}. {step}</span>
-              ))}
-            </div>
-          </div>
+      <div className="reveal" style={{marginBottom:48}}>
+        <Ey label="Course Overview"/><H2 s={{marginBottom:18}}>Purpose</H2><Txt s={{marginBottom:24,maxWidth:760}}>{courseMeta.purpose}</Txt>
+        <div className="g2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+          <div style={{background:"#F7F6F2",border:"1px solid var(--brd)",padding:"20px 22px"}}><div style={{fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:10}}>Who It's For</div><Txt muted s={{fontSize:13.5}}>{courseMeta.whoItsFor}</Txt></div>
+          <div style={{background:"#F7F6F2",border:"1px solid var(--brd)",padding:"20px 22px"}}><div style={{fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:10}}>Learning Journey</div><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{courseMeta.learningJourney.map((step,i)=><span key={step} className="tag tb">{i+1}. {step}</span>)}</div></div>
         </div>
       </div>
-
-      <LiveSessionsPanel courseModules={courseModules} />
-
-      <FacilitatorAttendance />
-
-      {/* Module list */}
-      <div className="reveal">
-        <Ey label="Modules" />
-        <H2 s={{ marginBottom: 28 }}>Six Sessions</H2>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {courseModules.map((m, i) => (
-            <div
-              key={m.id}
-              className="reveal lft"
-              onClick={() => go("facilitator-module", { slug: m.slug })}
-              style={{ display: "grid", gridTemplateColumns: "56px 1fr auto", gap: 24, padding: "24px 0", borderTop: "1px solid var(--brd)", cursor: "pointer", alignItems: "center" }}
-            >
-              <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13, fontWeight: 600, color: "rgba(26,25,23,.22)" }}>
-                {String(m.id).padStart(2, "0")}
-              </span>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 5 }}>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 600, color: "#1A1917" }}>{m.title}</h3>
-                  <span className="tag tr">Module {m.id}</span>
-                </div>
-                <Txt muted s={{ fontSize: 14 }}>{m.overview}</Txt>
-              </div>
-              <span style={{ color: "#B8102A", fontSize: 18, flexShrink: 0 }}>→</span>
-            </div>
-          ))}
-          <div style={{ borderTop: "1px solid var(--brd)" }} />
-        </div>
-      </div>
+      <LiveSessionsPanel courseModules={courseModules} group={group}/>
+      <FacilitatorAttendance/>
+      <div className="reveal"><Ey label="Modules"/><H2 s={{marginBottom:28}}>Six Sessions</H2><div style={{display:"flex",flexDirection:"column"}}>{courseModules.map(m=><div key={m.id} className="reveal lft" onClick={()=>go("facilitator-module",{slug:m.slug})} style={{display:"grid",gridTemplateColumns:"56px 1fr auto",gap:24,padding:"24px 0",borderTop:"1px solid var(--brd)",cursor:"pointer",alignItems:"center"}}><span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"rgba(26,25,23,.22)"}}>{String(m.id).padStart(2,"0")}</span><div><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:5}}><h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917"}}>{m.title}</h3><span className="tag tr">Module {m.id}</span></div><Txt muted s={{fontSize:14}}>{m.overview}</Txt></div><span style={{color:"#B8102A",fontSize:18,flexShrink:0}}>→</span></div>)}<div style={{borderTop:"1px solid var(--brd)"}}/></div></div>
     </Sec>
   </>
 );
