@@ -1472,11 +1472,11 @@ export const courseModules = [
           },
           {
             "type": "bullet",
-            "text": "Submission of the final project."
+            "text": "AIxBio Africa approval of the Capstone final project."
           },
           {
             "type": "paragraph",
-            "text": "If you meet these criteria, you will receive a Certificate of Completion. Outstanding final projects may be recognized with a Certificate of Distinction."
+            "text": "Participants who meet the attendance and exercise requirements and have their Capstone approved by AIxBio Africa receive a Certificate of Completion."
           }
         ]
       },
