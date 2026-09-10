@@ -31,12 +31,29 @@ const useCourseSettings = () => {
   return {settings,loaded};
 };
 
+const useCourseMembershipAccess = session => {
+  const [memberships,setMemberships]=useState([]);
+  const [loaded,setLoaded]=useState(!session?.user);
+  useEffect(()=>{
+    let alive=true;
+    if(!session?.user){setMemberships([]);setLoaded(true);return;}
+    setLoaded(false);
+    supabase.from("cohort_members")
+      .select("id,role,status,group_id")
+      .eq("user_id",session.user.id)
+      .in("status",["accepted","completed"])
+      .then(({data})=>{if(alive){setMemberships(data||[]);setLoaded(true);}});
+    return()=>{alive=false;};
+  },[session?.user?.id]);
+  return {memberships,loaded};
+};
+
 const StatusTag = ({ status }) => {
   const label={pending:"Pending",accepted:"Approved",rejected:"Rejected",completed:"Completed",revoked:"Revoked"}[status]||status;
   return <span className={`tag ${status==="accepted"||status==="completed"?"tr":"tb"}`}>{label}</span>;
 };
 
-const Landing = ({ go, session, settings }) => {
+const Landing = ({ go, session, settings, memberships=[] }) => {
   const [open,setOpen]=useState(false);
   const [applications,setApplications]=useState([]);
   useEffect(()=>{
@@ -48,6 +65,7 @@ const Landing = ({ go, session, settings }) => {
   },[session?.user?.id]);
 
   const accepted=applications.filter(a=>a.status==="accepted");
+  const assignedRoles=[...new Set(memberships.map(m=>m.role))];
   const appsOpen=settings.participant_applications_open||settings.facilitator_applications_open;
 
   return <>
@@ -59,11 +77,11 @@ const Landing = ({ go, session, settings }) => {
           <div className="reveal"><Ey label="By the end"/><div style={{display:"flex",flexDirection:"column",gap:10}}>{courseMeta.outcomes.map((o,i)=><div key={i} style={{display:"flex",gap:11}}><span style={{color:"#B8102A",fontWeight:700}}>—</span><Txt muted s={{fontSize:14.5}}>{o}</Txt></div>)}</div></div>
         </div>
         <aside className="reveal d2" style={{background:"#F7F6F2",border:"1px solid var(--brd)",padding:"26px"}}>
-          <Ey label={accepted.length?"Course Access":"Applications"}/>
-          <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:10}}>{accepted.length?"Continue your course":appsOpen?"Join the course":"Applications closed"}</h3>
-          {accepted.length>0 ? <>
+          <Ey label={assignedRoles.length?"Course Access":"Applications"}/>
+          <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:10}}>{assignedRoles.length?"Continue your course":appsOpen?"Join the course":"Applications closed"}</h3>
+          {assignedRoles.length>0 ? <>
             <Txt muted s={{fontSize:14,marginBottom:16}}>Continue with any course role currently assigned to your account.</Txt>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{accepted.map(a=><button key={a.id} className={a.role==="participant"?"br":"bo"} onClick={()=>go(a.role)}>{a.role==="participant"?"Participant course":"Facilitator guide"} →</button>)}</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{assignedRoles.map(role=><button key={role} className={role==="participant"?"br":"bo"} onClick={()=>go(role)}>{role==="participant"?"Participant course":"Facilitator guide"} →</button>)}</div>
             {appsOpen&&<button className="bn" onClick={()=>go("course-apply")} style={{marginTop:16,color:"#B8102A",fontWeight:700,fontSize:12.5}}>View application options →</button>}
           </> : <>
             <Txt muted s={{fontSize:14,marginBottom:20}}>{appsOpen?"Choose whether to apply as a participant or facilitator after signing in.":"Applications for the next cohort are not currently open."}</Txt>
@@ -405,9 +423,10 @@ const AdminDashboard=({go})=>{
 
 export default function CourseShell({page,params,session,isAdmin,go,openAuth}){
   const {settings,loaded}=useCourseSettings();
-  if(!loaded&&!isAdmin)return <ComingSoon/>;
-  if(!settings.is_published&&!isAdmin&&page==="courses")return <ComingSoon/>;
-  if(page==="courses")return <Landing go={go} session={session} settings={settings}/>;
+  const {memberships,loaded:accessLoaded}=useCourseMembershipAccess(session);
+  if((!loaded||(session?.user&&!accessLoaded))&&!isAdmin)return <ComingSoon/>;
+  if(!settings.is_published&&!isAdmin&&page==="courses"&&memberships.length===0)return <ComingSoon/>;
+  if(page==="courses")return <Landing go={go} session={session} settings={settings} memberships={memberships}/>;
   if(page==="course-apply")return <ApplicationPage session={session} openAuth={openAuth} go={go} settings={settings}/>;
   if(page==="course-admin")return isAdmin?<AdminDashboard go={go}/>:<AccessMessage session={session} openAuth={openAuth} text="Admin access is required."/>;
   if(page==="facilitator"||page==="facilitator-module")return <RoleTool role="facilitator" page={page} params={params} session={session} isAdmin={isAdmin} go={go} openAuth={openAuth}/>;
