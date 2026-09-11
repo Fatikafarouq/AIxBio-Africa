@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import * as React from "react";
 import { supabase } from "../lib/supabase";
 import { courseMeta, coursePreviewModules } from "./courseMeta";
 import { PageHdr, Sec, Ey, H2, Txt, FF } from "./CoursePrimitives";
@@ -20,9 +20,9 @@ const ComingSoon = () => (
 );
 
 const useCourseSettings = () => {
-  const [settings,setSettings]=useState(EMPTY_SETTINGS);
-  const [loaded,setLoaded]=useState(false);
-  useEffect(()=>{
+  const [settings,setSettings]=React.useState(EMPTY_SETTINGS);
+  const [loaded,setLoaded]=React.useState(false);
+  React.useEffect(()=>{
     let alive=true;
     supabase.from("course_settings").select("is_published,participant_applications_open,facilitator_applications_open").eq("course_slug",COURSE_SLUG).maybeSingle()
       .then(({data})=>{if(alive){setSettings(data||EMPTY_SETTINGS);setLoaded(true);}});
@@ -32,9 +32,9 @@ const useCourseSettings = () => {
 };
 
 const useCourseMembershipAccess = session => {
-  const [memberships,setMemberships]=useState([]);
-  const [loaded,setLoaded]=useState(!session?.user);
-  useEffect(()=>{
+  const [memberships,setMemberships]=React.useState([]);
+  const [loaded,setLoaded]=React.useState(!session?.user);
+  React.useEffect(()=>{
     let alive=true;
     if(!session?.user){setMemberships([]);setLoaded(true);return;}
     setLoaded(false);
@@ -54,9 +54,9 @@ const StatusTag = ({ status }) => {
 };
 
 const Landing = ({ go, session, settings, memberships=[] }) => {
-  const [open,setOpen]=useState(false);
-  const [applications,setApplications]=useState([]);
-  useEffect(()=>{
+  const [open,setOpen]=React.useState(false);
+  const [applications,setApplications]=React.useState([]);
+  React.useEffect(()=>{
     let alive=true;
     if(!session?.user){setApplications([]);return;}
     supabase.from("applications").select("id,role,status,created_at").eq("user_id",session.user.id).order("created_at",{ascending:false})
@@ -113,19 +113,19 @@ const AvailabilityGrid=({value,onChange})=><div style={{marginBottom:22}}>
 </div>;
 
 const ApplicationPage=({session,openAuth,go,settings})=>{
-  const [role,setRole]=useState("");
-  const [applications,setApplications]=useState([]);
-  const [answers,setAnswers]=useState(participantEmpty);
-  const [done,setDone]=useState(false);
-  const [error,setError]=useState("");
-  const [fieldErrors,setFieldErrors]=useState({});
+  const [role,setRole]=React.useState("");
+  const [applications,setApplications]=React.useState([]);
+  const [answers,setAnswers]=React.useState(participantEmpty);
+  const [done,setDone]=React.useState(false);
+  const [error,setError]=React.useState("");
+  const [fieldErrors,setFieldErrors]=React.useState({});
 
   const loadApps=async()=>{
     if(!session?.user){setApplications([]);return;}
     const {data}=await supabase.from("applications").select("id,role,status,created_at,answers").eq("user_id",session.user.id).order("created_at",{ascending:false});
     setApplications(data||[]);
   };
-  useEffect(()=>{loadApps();},[session?.user?.id]);
+  React.useEffect(()=>{loadApps();},[session?.user?.id]);
   const existing=role?applications.find(a=>a.role===role):null;
   const roleOpen=r=>r==="participant"?settings.participant_applications_open:settings.facilitator_applications_open;
 
@@ -193,12 +193,12 @@ const AccessMessage=({session,openAuth,text})=><><PageHdr label="Course Access" 
 
 const RoleTool=({role,page,params,session,isAdmin,go,openAuth})=>{
   const storageKey=`aixbio-course-membership-${session?.user?.id||"anonymous"}-${role}`;
-  const [membershipId,setMembershipId]=useState(()=>{try{return sessionStorage.getItem(storageKey)||"";}catch{return "";}});
-  const [payload,setPayload]=useState(null); const [error,setError]=useState(""); const [loading,setLoading]=useState(true);
-  useEffect(()=>{
+  const [membershipId,setMembershipId]=React.useState(()=>{try{return sessionStorage.getItem(storageKey)||"";}catch{return "";}});
+  const [payload,setPayload]=React.useState(null); const [error,setError]=React.useState(""); const [loading,setLoading]=React.useState(true);
+  React.useEffect(()=>{
     try{setMembershipId(sessionStorage.getItem(storageKey)||"");}catch{setMembershipId("");}
   },[storageKey]);
-  useEffect(()=>{
+  React.useEffect(()=>{
     let alive=true;if(!session){setLoading(false);return;}setLoading(true);
     supabase.functions.invoke("course-content",{body:{role,membershipId:membershipId||null}}).then(({data,error:e})=>{if(!alive)return;if(e){setError(data?.error||e.message);setPayload(null);}else{setPayload(data);setError("");if(data?.selected_membership_id&&data.selected_membership_id!==membershipId){setMembershipId(data.selected_membership_id);try{sessionStorage.setItem(storageKey,data.selected_membership_id);}catch{/* ignore */}}}setLoading(false);});
     return()=>{alive=false;};
@@ -213,20 +213,20 @@ const RoleTool=({role,page,params,session,isAdmin,go,openAuth})=>{
 };
 
 const toDateTimeLocal=value=>{if(!value)return"";const d=new Date(value);const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);return local.toISOString().slice(0,16);};
-const FELLOWS=[{id:"frances-chinaza-agba",name:"Frances Chinaza Agba"},{id:"tegan-jegede",name:"Tegan Jegede"},{id:"gideon-abako",name:"Gideon Abako"}];
+const EMPTY_FELLOW_FORM={id:null,user_id:null,display_name:"",owner_email:"",certificate_name:"",cohort_label:"Pilot Cohort 2026",project_title:"",research_question:"",bio:"",research_areas:"",linkedin_url:"",photo_path:"",public_visible:false,display_order:"0",completion_status:"in_progress"};
 
 const AdminDashboard=({go})=>{
-  const [tab,setTab]=useState("applications"); const [error,setError]=useState(""); const [notice,setNotice]=useState(""); const [settingsSaving,setSettingsSaving]=useState(false);
-  const [applications,setApplications]=useState([]); const [cohorts,setCohorts]=useState([]); const [groups,setGroups]=useState([]); const [members,setMembers]=useState([]);
-  const [returning,setReturning]=useState([]); const [capstones,setCapstones]=useState([]); const [certificates,setCertificates]=useState([]); const [fellowRecords,setFellowRecords]=useState([]); const [settings,setSettings]=useState(EMPTY_SETTINGS);
-  const [publicationSettings,setPublicationSettings]=useState({page_visible:false}); const [publications,setPublications]=useState([]); const [publicationRequests,setPublicationRequests]=useState([]); const [publicationSaving,setPublicationSaving]=useState(false); const [publicationFile,setPublicationFile]=useState(null);
-  const [publicationForm,setPublicationForm]=useState({id:null,title:"",author_name:"",programme_type:"fellowship",fellow_record_id:"",capstone_id:"",cohort_label:"Pilot Cohort 2026",output_type:"pdf",research_question:"",short_description:"",research_areas:"",external_url:"",file_path:"",status:"draft",featured:false,display_order:"0"});
-  const [selectedCohort,setSelectedCohort]=useState(""); const [appStatus,setAppStatus]=useState("pending"); const [appRole,setAppRole]=useState("all"); const [appSearch,setAppSearch]=useState(""); const [appPage,setAppPage]=useState(1); const [expandedApp,setExpandedApp]=useState(""); const [capStatus,setCapStatus]=useState("all"); const [capGroup,setCapGroup]=useState("all"); const [capSort,setCapSort]=useState("recent");
-  const [appGroups,setAppGroups]=useState({}); const [returnGroups,setReturnGroups]=useState({});
-  const [newCohort,setNewCohort]=useState({name:"",start_date:""}); const [newGroup,setNewGroup]=useState({cohort_id:"",name:"",timezone_label:"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]});
-  const [groupEdits,setGroupEdits]=useState({}); const [cohortEdits,setCohortEdits]=useState({});
-  const [fellowForm,setFellowForm]=useState({profile_key:FELLOWS[0].id,owner_email:"",certificate_name:FELLOWS[0].name,completed:false});
-  const [attendanceEditor,setAttendanceEditor]=useState(null);
+  const [tab,setTab]=React.useState("applications"); const [error,setError]=React.useState(""); const [notice,setNotice]=React.useState(""); const [settingsSaving,setSettingsSaving]=React.useState(false);
+  const [applications,setApplications]=React.useState([]); const [cohorts,setCohorts]=React.useState([]); const [groups,setGroups]=React.useState([]); const [members,setMembers]=React.useState([]);
+  const [returning,setReturning]=React.useState([]); const [capstones,setCapstones]=React.useState([]); const [certificates,setCertificates]=React.useState([]); const [fellowRecords,setFellowRecords]=React.useState([]); const [settings,setSettings]=React.useState(EMPTY_SETTINGS);
+  const [publicationSettings,setPublicationSettings]=React.useState({page_visible:false}); const [publications,setPublications]=React.useState([]); const [publicationRequests,setPublicationRequests]=React.useState([]); const [publicationSaving,setPublicationSaving]=React.useState(false); const [publicationFile,setPublicationFile]=React.useState(null);
+  const [publicationForm,setPublicationForm]=React.useState({id:null,title:"",author_name:"",programme_type:"fellowship",fellow_record_id:"",capstone_id:"",cohort_label:"Pilot Cohort 2026",output_type:"pdf",research_question:"",short_description:"",research_areas:"",external_url:"",file_path:"",status:"draft",featured:false,display_order:"0"});
+  const [selectedCohort,setSelectedCohort]=React.useState(""); const [appStatus,setAppStatus]=React.useState("pending"); const [appRole,setAppRole]=React.useState("all"); const [appSearch,setAppSearch]=React.useState(""); const [appPage,setAppPage]=React.useState(1); const [expandedApp,setExpandedApp]=React.useState(""); const [capStatus,setCapStatus]=React.useState("all"); const [capGroup,setCapGroup]=React.useState("all"); const [capSort,setCapSort]=React.useState("recent");
+  const [appGroups,setAppGroups]=React.useState({}); const [returnGroups,setReturnGroups]=React.useState({});
+  const [newCohort,setNewCohort]=React.useState({name:"",start_date:""}); const [newGroup,setNewGroup]=React.useState({cohort_id:"",name:"",timezone_label:"",meeting_url:"",session_duration_minutes:"60",dates:["","","","","",""]});
+  const [groupEdits,setGroupEdits]=React.useState({}); const [cohortEdits,setCohortEdits]=React.useState({});
+  const [fellowForm,setFellowForm]=React.useState(EMPTY_FELLOW_FORM); const [fellowPhotoFile,setFellowPhotoFile]=React.useState(null); const [fellowSaving,setFellowSaving]=React.useState(false);
+  const [attendanceEditor,setAttendanceEditor]=React.useState(null);
 
   const load=async()=>{
     setError("");
@@ -250,7 +250,7 @@ const AdminDashboard=({go})=>{
     setGroupEdits(Object.fromEntries(gr.map(x=>{const sessions=[...(x.group_sessions||[])].sort((a,b)=>a.module_id-b.module_id);return [x.id,{name:x.name||"",timezone_label:x.timezone_label||"",meeting_url:x.meeting_url||"",session_duration_minutes:String(x.session_duration_minutes||60),dates:Array.from({length:6},(_,i)=>toDateTimeLocal(sessions.find(s=>Number(s.module_id)===i+1)?.session_date))}];})));
     if(!selectedCohort&&cr[0])setSelectedCohort(cr[0].id);
   };
-  useEffect(()=>{load();},[]);
+  React.useEffect(()=>{load();},[]);
 
   const activeGroups=groups.filter(g=>g.delivery_status!=="completed"&&g.delivery_status!=="archived");
   const APP_PAGE_SIZE=20;
@@ -294,11 +294,41 @@ const AdminDashboard=({go})=>{
   const saveSettings=async()=>{setError("");setNotice("");setSettingsSaving(true);try{const {data,error:e}=await supabase.rpc("admin_update_course_settings",{p_is_published:Boolean(settings.is_published),p_participant_applications_open:Boolean(settings.participant_applications_open),p_facilitator_applications_open:Boolean(settings.facilitator_applications_open)});if(e){setError(e.message||"Could not save course settings.");return;}if(data)setSettings(data);else await load();setNotice("Course settings saved.");}catch(e){setError(e?.message||"Could not save course settings.");}finally{setSettingsSaving(false);}};
   const revokeCert=async(cert)=>{const reason=prompt(`Reason for revoking ${cert.public_code}:`);if(!reason?.trim())return;const {error:e}=await supabase.rpc("admin_revoke_certificate",{p_certificate_id:cert.id,p_reason:reason});if(e){setError(e.message);return;}await load();};
   const reissueCert=async(cert)=>{const name=prompt("Name for the replacement certificate:",cert.recipient_name);if(!name?.trim())return;const {data:id,error:e}=await supabase.rpc("admin_reissue_certificate",{p_certificate_id:cert.id,p_recipient_name:name.trim()});if(e){setError(e.message);return;}await generateCertificate(id);};
-  const issueFellow=async()=>{const {profile_key,owner_email,certificate_name,completed}=fellowForm;if(!profile_key||!owner_email.trim()||!certificate_name.trim()){setError("Choose a fellow and enter their email and certificate name.");return;}let res=await supabase.rpc("admin_upsert_fellow_record",{p_profile_key:profile_key,p_owner_email:owner_email.trim(),p_certificate_name:certificate_name.trim(),p_completion_status:completed?"completed":"in_progress"});if(res.error){setError(res.error.message);return;}if(completed){res=await supabase.rpc("admin_issue_fellow_certificate",{p_profile_key:profile_key});if(res.error){setError(res.error.message);return;}await generateCertificate(res.data);}else await load();};
+  const resetFellowForm=()=>{setFellowForm(EMPTY_FELLOW_FORM);setFellowPhotoFile(null);};
+  const editFellow=fr=>{setFellowForm({id:fr.id,user_id:fr.user_id||null,display_name:fr.display_name||fr.certificate_name||"",owner_email:fr.owner_email||"",certificate_name:fr.certificate_name||fr.display_name||"",cohort_label:fr.cohort_label||"Pilot Cohort 2026",project_title:fr.project_title||"",research_question:fr.research_question||"",bio:fr.bio||"",research_areas:(fr.research_areas||[]).join(", "),linkedin_url:fr.linkedin_url||"",photo_path:fr.photo_path||"",public_visible:Boolean(fr.public_visible),display_order:String(fr.display_order??0),completion_status:fr.completion_status||"in_progress"});setFellowPhotoFile(null);setTab("fellows");};
+  const fellowPhotoUrl=path=>path?supabase.storage.from("fellow-photos").getPublicUrl(path).data.publicUrl:"";
+  const saveFellow=async()=>{
+    setError("");setNotice("");
+    if(!fellowForm.display_name.trim()){setError("Enter the fellow’s name.");return;}
+    setFellowSaving(true);
+    const id=fellowForm.id||crypto.randomUUID();
+    let photoPath=fellowForm.photo_path||"";
+    let uploadedPath="";
+    try{
+      if(fellowPhotoFile){
+        const safe=fellowPhotoFile.name.replace(/[^a-zA-Z0-9._-]+/g,"-")||"profile.jpg";
+        uploadedPath=`${id}/${Date.now()}-${safe}`;
+        const {error:upErr}=await supabase.storage.from("fellow-photos").upload(uploadedPath,fellowPhotoFile,{upsert:false,contentType:fellowPhotoFile.type||undefined});
+        if(upErr)throw upErr;
+        photoPath=uploadedPath;
+      }
+      const payload={display_name:fellowForm.display_name.trim(),owner_email:fellowForm.owner_email.trim()||null,certificate_name:fellowForm.certificate_name.trim()||fellowForm.display_name.trim(),cohort_label:fellowForm.cohort_label.trim()||"Pilot Cohort 2026",project_title:fellowForm.project_title.trim()||null,research_question:fellowForm.research_question.trim()||null,bio:fellowForm.bio.trim()||null,research_areas:fellowForm.research_areas.split(",").map(x=>x.trim()).filter(Boolean),linkedin_url:fellowForm.linkedin_url.trim()||null,photo_path:photoPath||null,public_visible:Boolean(fellowForm.public_visible),display_order:Number(fellowForm.display_order||0),completion_status:fellowForm.completion_status};
+      const {error:e}=await supabase.rpc("admin_save_fellow",{p_fellow_id:id,p_payload:payload});
+      if(e)throw e;
+      if(fellowPhotoFile&&fellowForm.photo_path&&fellowForm.photo_path!==photoPath)await supabase.storage.from("fellow-photos").remove([fellowForm.photo_path]);
+      setNotice(`${fellowForm.id?"Updated":"Added"} ${fellowForm.display_name.trim()}.`);
+      resetFellowForm();
+      await load();
+    }catch(e){
+      if(uploadedPath)await supabase.storage.from("fellow-photos").remove([uploadedPath]);
+      setError(e?.message||"Could not save fellow.");
+    }finally{setFellowSaving(false);}
+  };
+  const toggleFellowVisibility=async fr=>{const next=!fr.public_visible;const {error:e}=await supabase.rpc("admin_set_fellow_visibility",{p_fellow_id:fr.id,p_public_visible:next});if(e){setError(e.message);return;}setNotice(`${fr.display_name||fr.certificate_name} is now ${next?"visible":"hidden"} on the Fellowship page.`);await load();};
 
   const resetPublicationForm=()=>{setPublicationForm({id:null,title:"",author_name:"",programme_type:"fellowship",fellow_record_id:"",capstone_id:"",cohort_label:"Pilot Cohort 2026",output_type:"pdf",research_question:"",short_description:"",research_areas:"",external_url:"",file_path:"",status:"draft",featured:false,display_order:"0"});setPublicationFile(null);};
   const editPublication=p=>{setPublicationForm({id:p.id,title:p.title||"",author_name:p.author_name||"",programme_type:p.programme_type||"other",fellow_record_id:p.fellow_record_id||"",capstone_id:p.capstone_id||"",cohort_label:p.cohort_label||"",output_type:p.output_type||"other",research_question:p.research_question||"",short_description:p.short_description||"",research_areas:(p.research_areas||[]).join(", "),external_url:p.external_url||"",file_path:p.file_path||"",status:p.status||"draft",featured:Boolean(p.featured),display_order:String(p.display_order??0)});setPublicationFile(null);};
-  const choosePublicationFellow=id=>{const fr=fellowRecords.find(x=>x.id===id);const publicFellow=FELLOWS.find(f=>f.id===fr?.profile_key);setPublicationForm(x=>({...x,fellow_record_id:id,author_name:fr?.certificate_name||publicFellow?.name||x.author_name,cohort_label:x.cohort_label||"Pilot Cohort 2026"}));};
+  const choosePublicationFellow=id=>{const fr=fellowRecords.find(x=>x.id===id);setPublicationForm(x=>({...x,fellow_record_id:id,author_name:fr?.display_name||fr?.certificate_name||x.author_name,cohort_label:fr?.cohort_label||x.cohort_label||"Pilot Cohort 2026",research_question:fr?.research_question||x.research_question,research_areas:(fr?.research_areas||[]).join(", ")}));};
   const choosePublicationCapstone=id=>{const row=capstones.find(x=>x.capstone_id===id);setPublicationForm(x=>({...x,capstone_id:id,author_name:row?.participant_name||x.author_name,title:row?.project_title||x.title,research_question:row?.research_question||x.research_question,cohort_label:row?.cohort_name||x.cohort_label}));};
   const savePublicationSettings=async()=>{setError("");setNotice("");const {data,error:e}=await supabase.rpc("admin_update_publication_settings",{p_page_visible:Boolean(publicationSettings.page_visible)});if(e){setError(e.message);return;}setPublicationSettings(data||{page_visible:Boolean(publicationSettings.page_visible)});setNotice(`Publications page is now ${Boolean(publicationSettings.page_visible)?"visible":"hidden"}.`);};
   const savePublication=async()=>{
@@ -357,7 +387,7 @@ const AdminDashboard=({go})=>{
   };
 
   return <>
-    <div style={{background:"#1C1B18",padding:"128px 44px 0"}}><div style={{maxWidth:1160,margin:"0 auto"}}><Ey label="Course Admin"/><h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(26px,3vw,40px)",fontWeight:600,color:"#fff"}}>Introduction to AI &amp; Biosecurity in Africa</h1><div style={{display:"flex",marginTop:24,borderBottom:"1px solid rgba(255,255,255,.08)",overflowX:"auto"}}>{[["applications","Applications"],["returning","Returning Facilitators"],["cohorts","Cohorts"],["groups","Groups"],["capstones","Capstones & Completion"],["certificates","Certificates"],["publications","Publications"],["settings","Course Settings"],["preview","View as"]].map(([id,l])=><button key={id} className="nb" onClick={()=>setTab(id)} style={{color:tab===id?"#fff":"rgba(255,255,255,.38)",borderBottom:tab===id?"2px solid #B8102A":"2px solid transparent",padding:"11px 16px",fontSize:12.5,marginBottom:-1,whiteSpace:"nowrap"}}>{l}</button>)}</div></div></div>
+    <div style={{background:"#1C1B18",padding:"128px 44px 0"}}><div style={{maxWidth:1160,margin:"0 auto"}}><Ey label="Course Admin"/><h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(26px,3vw,40px)",fontWeight:600,color:"#fff"}}>Introduction to AI &amp; Biosecurity in Africa</h1><div style={{display:"flex",marginTop:24,borderBottom:"1px solid rgba(255,255,255,.08)",overflowX:"auto"}}>{[["applications","Applications"],["returning","Returning Facilitators"],["cohorts","Cohorts"],["groups","Groups"],["capstones","Capstones & Completion"],["certificates","Certificates"],["fellows","Fellows"],["publications","Publications"],["settings","Course Settings"],["preview","View as"]].map(([id,l])=><button key={id} className="nb" onClick={()=>setTab(id)} style={{color:tab===id?"#fff":"rgba(255,255,255,.38)",borderBottom:tab===id?"2px solid #B8102A":"2px solid transparent",padding:"11px 16px",fontSize:12.5,marginBottom:-1,whiteSpace:"nowrap"}}>{l}</button>)}</div></div></div>
     <Sec bg="#fff">{error&&<div className="err" style={{marginBottom:18}}>{error}</div>}{notice&&<div style={{marginBottom:18,padding:"11px 13px",border:"1px solid #B8D9C8",background:"#F5FBF7",fontSize:13,color:"#1A6B46",fontWeight:700}}>{notice}</div>}
 
     {tab==="applications"&&<div>
@@ -374,7 +404,7 @@ const AdminDashboard=({go})=>{
         <div style={{overflowX:"auto",border:"1px solid var(--brd)"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:880}}>
             <thead><tr style={{background:"#F7F6F2",textAlign:"left"}}>{["Applicant","Role","Status","Applied","Assignment",""].map(h=><th key={h} style={{padding:"11px 13px",fontSize:10.5,textTransform:"uppercase",letterSpacing:".08em",color:"#6C6A66",borderBottom:"1px solid var(--brd)"}}>{h}</th>)}</tr></thead>
-            <tbody>{pagedApps.map(a=>{const history=a.membership_history||[];const latest=history[0];const open=expandedApp===a.id;return <Fragment key={a.id}>
+            <tbody>{pagedApps.map(a=>{const history=a.membership_history||[];const latest=history[0];const open=expandedApp===a.id;return <React.Fragment key={a.id}>
               <tr style={{borderBottom:open?"none":"1px solid var(--brd)"}}>
                 <td style={{padding:"13px"}}><strong style={{fontSize:13.5}}>{a.full_name}</strong><div style={{fontSize:12,color:"#77746F",marginTop:2}}>{a.email}</div></td>
                 <td style={{padding:"13px",fontSize:13,textTransform:"capitalize"}}>{a.role}</td>
@@ -397,7 +427,7 @@ const AdminDashboard=({go})=>{
                   </div>
                 </div>
               </td></tr>}
-            </Fragment>;})}</tbody>
+            </React.Fragment>;})}</tbody>
           </table>
         </div>
         {appPageCount>1&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginTop:16}}><button className="bo" disabled={safeAppPage<=1} onClick={()=>setAppPage(p=>Math.max(1,p-1))}>← Previous</button><Txt muted s={{fontSize:12.5}}>Page {safeAppPage} of {appPageCount}</Txt><button className="bo" disabled={safeAppPage>=appPageCount} onClick={()=>setAppPage(p=>Math.min(appPageCount,p+1))}>Next →</button></div>}
@@ -452,7 +482,28 @@ const AdminDashboard=({go})=>{
       </div>)}
     </div>}
 
-    {tab==="certificates"&&<div><Ey label="Certificates"/><H2 s={{marginBottom:8}}>Issued credentials</H2><Txt muted s={{fontSize:13.5,marginBottom:22}}>Certificates are private files. The public QR verification page exposes only the credential details required to verify validity.</Txt><div style={{overflowX:"auto"}}>{!certificates.length?<Txt muted>No certificates have been issued yet.</Txt>:certificates.map(c=><div key={c.id} style={{borderTop:"1px solid var(--brd)",padding:"16px 0",display:"flex",justifyContent:"space-between",gap:14,flexWrap:"wrap"}}><div><strong>{c.recipient_name}</strong><Txt muted s={{fontSize:13}}>{c.program_type} · {c.cohort_name||"—"} · {c.public_code}</Txt><Txt muted s={{fontSize:12.5}}>{new Date(c.issued_at).toLocaleDateString()} · {c.status} · file {c.file_status}</Txt></div><div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>{c.status==="issued"&&c.file_status!=="ready"&&<button className="br" onClick={()=>generateCertificate(c.id)}>Generate PDF</button>}{c.status==="issued"&&c.file_status==="ready"&&<CertificateActions certificate={c} compact/>}{["issued","revoked"].includes(c.status)&&<button className="bo" onClick={()=>reissueCert(c)}>Reissue</button>}{c.status==="issued"&&<button className="bn" onClick={()=>revokeCert(c)} style={{color:"#B8102A",fontWeight:700}}>Revoke</button>}</div></div>)}</div><div style={{marginTop:44,paddingTop:28,borderTop:"1px solid var(--brd)",maxWidth:720}}><Ey label="Fellowship Certificates"/><H2 s={{marginBottom:8}}>Connect a pilot fellow</H2><Txt muted s={{fontSize:13.5,marginBottom:18}}>The fellow’s public research profile stays public. After you enter the email they use for AIxBio sign-in, only that fellow and AIxBio admins can see the private certificate controls on the profile.</Txt><FF label="Fellow"><select value={fellowForm.profile_key} onChange={e=>{const key=e.target.value;const f=FELLOWS.find(x=>x.id===key);const saved=fellowRecords.find(x=>x.profile_key===key);setFellowForm({profile_key:key,owner_email:saved?.owner_email||"",certificate_name:saved?.certificate_name||f?.name||"",completed:saved?.completion_status==="completed"});}}>{FELLOWS.map(f=><option key={f.id} value={f.id}>{f.name}</option>)}</select></FF><FF label="Fellow sign-in email"><input type="email" value={fellowForm.owner_email} onChange={e=>setFellowForm(x=>({...x,owner_email:e.target.value}))}/></FF><FF label="Name on certificate"><input value={fellowForm.certificate_name} onChange={e=>setFellowForm(x=>({...x,certificate_name:e.target.value}))}/></FF><label style={{display:"flex",gap:9,alignItems:"center",fontSize:13.5,marginBottom:18}}><input type="checkbox" checked={fellowForm.completed} onChange={e=>setFellowForm(x=>({...x,completed:e.target.checked}))}/> Fellowship successfully completed; issue Certificate of Completion</label><button className="br" onClick={issueFellow}>{fellowForm.completed?"Save & Issue Certificate":"Save Fellow Access"}</button>{fellowRecords.length>0&&<div style={{marginTop:28}}><Ey label="Connected Fellows"/>{fellowRecords.map(fr=>{const publicFellow=FELLOWS.find(f=>f.id===fr.profile_key);return <div key={fr.id} style={{borderTop:"1px solid var(--brd)",padding:"14px 0",display:"flex",justifyContent:"space-between",gap:14,flexWrap:"wrap"}}><div><strong>{publicFellow?.name||fr.certificate_name||fr.profile_key}</strong><Txt muted s={{fontSize:12.5}}>{fr.owner_email||"No owner email"} · {fr.completion_status.replaceAll("_"," ")}</Txt>{fr.certificate_code&&<Txt muted s={{fontSize:12.5}}>{fr.certificate_code} · {fr.certificate_file_status||"pending"}</Txt>}</div>{fr.certificate_id&&<CertificateActions certificate={{id:fr.certificate_id,status:fr.certificate_status,public_code:fr.certificate_code}} compact/>}</div>;})}</div>}</div></div>}
+    {tab==="certificates"&&<div><Ey label="Certificates"/><H2 s={{marginBottom:8}}>Issued credentials</H2><Txt muted s={{fontSize:13.5,marginBottom:22}}>Certificates are private files. Fellowship profile and ownership details are managed in the Fellows tab.</Txt><div style={{overflowX:"auto"}}>{!certificates.length?<Txt muted>No certificates have been issued yet.</Txt>:certificates.map(c=><div key={c.id} style={{borderTop:"1px solid var(--brd)",padding:"16px 0",display:"flex",justifyContent:"space-between",gap:14,flexWrap:"wrap"}}><div><strong>{c.recipient_name}</strong><Txt muted s={{fontSize:13}}>{c.program_type} · {c.cohort_name||"—"} · {c.public_code}</Txt><Txt muted s={{fontSize:12.5}}>{new Date(c.issued_at).toLocaleDateString()} · {c.status} · file {c.file_status}</Txt></div><div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>{c.status==="issued"&&c.file_status!=="ready"&&<button className="br" onClick={()=>generateCertificate(c.id)}>Generate PDF</button>}{c.status==="issued"&&c.file_status==="ready"&&<CertificateActions certificate={c} compact/>}{["issued","revoked"].includes(c.status)&&<button className="bo" onClick={()=>reissueCert(c)}>Reissue</button>}{c.status==="issued"&&<button className="bn" onClick={()=>revokeCert(c)} style={{color:"#B8102A",fontWeight:700}}>Revoke</button>}</div></div>)}</div></div>}
+
+    {tab==="fellows"&&<div>
+      <div style={{display:"flex",justifyContent:"space-between",gap:24,alignItems:"flex-start",flexWrap:"wrap",marginBottom:30}}><div style={{maxWidth:720}}><Ey label="Fellows"/><H2 s={{marginBottom:8}}>Fellowship profiles</H2><Txt muted s={{fontSize:13.5}}>Add and update fellows here. This is the source for the public Fellowship page, Publications ownership, and private certificate access. New cohorts do not require code changes.</Txt></div><button className="bo" onClick={resetFellowForm}>+ Add fellow</button></div>
+      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) minmax(320px,.8fr)",gap:34,alignItems:"start"}} className="g2">
+        <div>
+          <Ey label={fellowForm.id?"Edit Fellow":"Add Fellow"}/>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2"><FF label="Full name *"><input value={fellowForm.display_name} onChange={e=>setFellowForm(x=>({...x,display_name:e.target.value,certificate_name:x.certificate_name||e.target.value}))}/></FF><FF label="Cohort"><input value={fellowForm.cohort_label} onChange={e=>setFellowForm(x=>({...x,cohort_label:e.target.value}))} placeholder="e.g. Cohort Two · 2027"/></FF></div>
+          <FF label="Project title"><input value={fellowForm.project_title} onChange={e=>setFellowForm(x=>({...x,project_title:e.target.value}))}/></FF>
+          <FF label="Research question"><textarea rows={3} value={fellowForm.research_question} onChange={e=>setFellowForm(x=>({...x,research_question:e.target.value}))}/></FF>
+          <FF label="Bio"><textarea rows={5} value={fellowForm.bio} onChange={e=>setFellowForm(x=>({...x,bio:e.target.value}))}/></FF>
+          <FF label="Research areas"><input value={fellowForm.research_areas} onChange={e=>setFellowForm(x=>({...x,research_areas:e.target.value}))} placeholder="AI Safety, Public Health, Governance"/><Txt muted s={{fontSize:12,marginTop:5}}>Separate areas with commas.</Txt></FF>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2"><FF label="LinkedIn"><input value={fellowForm.linkedin_url} onChange={e=>setFellowForm(x=>({...x,linkedin_url:e.target.value}))} placeholder="https://linkedin.com/in/..."/></FF><FF label="Fellow sign-in email"><input type="email" value={fellowForm.owner_email} disabled={Boolean(fellowForm.user_id)} onChange={e=>setFellowForm(x=>({...x,owner_email:e.target.value}))} placeholder="Email they will use to sign in"/>{fellowForm.user_id&&<Txt muted s={{fontSize:12,marginTop:5}}>Account linked. Ownership is now tied to this fellow’s signed-in account, so the email cannot be changed here.</Txt>}</FF></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2"><FF label="Programme status"><select value={fellowForm.completion_status} onChange={e=>setFellowForm(x=>({...x,completion_status:e.target.value}))}><option value="in_progress">In progress</option><option value="completed">Completed</option></select></FF><FF label="Display order"><input type="number" min="0" value={fellowForm.display_order} onChange={e=>setFellowForm(x=>({...x,display_order:e.target.value}))}/></FF></div>
+          <FF label="Name on certificate"><input value={fellowForm.certificate_name} onChange={e=>setFellowForm(x=>({...x,certificate_name:e.target.value}))}/></FF>
+          <FF label="Profile photo"><input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setFellowPhotoFile(e.target.files?.[0]||null)}/>{fellowForm.photo_path&&<div style={{display:"flex",gap:12,alignItems:"center",marginTop:10}}><img src={fellowPhotoUrl(fellowForm.photo_path)} alt="Current fellow" style={{width:54,height:66,objectFit:"cover",border:"1px solid var(--brd)"}}/><Txt muted s={{fontSize:12}}>Current photo. Choose a new file only if you want to replace it.</Txt></div>}</FF>
+          <label style={{display:"flex",gap:9,alignItems:"center",fontSize:13.5,marginBottom:18}}><input type="checkbox" checked={Boolean(fellowForm.public_visible)} onChange={e=>setFellowForm(x=>({...x,public_visible:e.target.checked}))}/> Show this fellow on the public Fellowship page</label>
+          <div style={{display:"flex",gap:9,flexWrap:"wrap"}}><button className="br" onClick={saveFellow} disabled={fellowSaving}>{fellowSaving?"Saving…":fellowForm.id?"Save changes":"Add fellow"}</button>{fellowForm.id&&<button className="bo" onClick={resetFellowForm}>Cancel</button>}</div>
+        </div>
+        <div><Ey label="Fellow Directory"/><H2 s={{fontSize:24,marginBottom:14}}>{fellowRecords.length} fellow{fellowRecords.length===1?"":"s"}</H2>{!fellowRecords.length?<Txt muted>No fellows have been added yet.</Txt>:fellowRecords.map(fr=><div key={fr.id} style={{borderTop:"1px solid var(--brd)",padding:"15px 0",display:"flex",gap:12,alignItems:"flex-start"}}>{fr.photo_path?<img src={fellowPhotoUrl(fr.photo_path)} alt="" style={{width:52,height:64,objectFit:"cover",border:"1px solid var(--brd)",flexShrink:0}}/>:<div style={{width:52,height:64,background:"#F7F6F2",border:"1px solid var(--brd)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Cormorant Garamond',serif",fontSize:18,flexShrink:0}}>{(fr.display_name||"?").split(/\s+/).map(x=>x[0]).slice(0,2).join("")}</div>}<div style={{minWidth:0,flex:1}}><strong>{fr.display_name||fr.certificate_name||fr.profile_key}</strong><Txt muted s={{fontSize:12.5}}>{fr.cohort_label||"—"} · {String(fr.completion_status||"").replaceAll("_"," ")} · {fr.public_visible?"public":"hidden"}</Txt><Txt muted s={{fontSize:12}}>{fr.owner_email||"No sign-in email linked"}{fr.user_id?" · Account linked":""}</Txt><div style={{display:"flex",gap:8,marginTop:9,flexWrap:"wrap"}}><button className="bo" onClick={()=>editFellow(fr)}>Edit</button><button className="bn" onClick={()=>toggleFellowVisibility(fr)} style={{fontSize:12,color:fr.public_visible?"#B8102A":"#1A6B46",fontWeight:700}}>{fr.public_visible?"Hide":"Show"}</button></div></div></div>)}</div>
+      </div>
+    </div>}
 
     {tab==="publications"&&<div>
       <div style={{display:"flex",justifyContent:"space-between",gap:18,alignItems:"start",flexWrap:"wrap",marginBottom:30}}>
@@ -464,7 +515,7 @@ const AdminDashboard=({go})=>{
         <div>
           <Ey label={publicationForm.id?"Edit Output":"Add Output"}/><H2 s={{fontSize:24,marginBottom:16}}>{publicationForm.id?"Update publication record":"Create a publication record"}</H2>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2"><FF label="Programme"><select value={publicationForm.programme_type} onChange={e=>setPublicationForm(x=>({...x,programme_type:e.target.value,fellow_record_id:e.target.value==="fellowship"?x.fellow_record_id:"",capstone_id:e.target.value==="capstone"?x.capstone_id:""}))}><option value="fellowship">Fellowship</option><option value="capstone">Capstone Output</option><option value="other">Other AIxBio Output</option></select></FF><FF label="Output type"><select value={publicationForm.output_type} onChange={e=>setPublicationForm(x=>({...x,output_type:e.target.value}))}><option value="pdf">PDF</option><option value="docx">Word document</option><option value="github">GitHub project</option><option value="website">Website</option><option value="tool">Tool</option><option value="dataset">Dataset</option><option value="summary">Summary</option><option value="other">Other</option></select></FF></div>
-          {publicationForm.programme_type==="fellowship"&&<FF label="Fellow *"><select value={publicationForm.fellow_record_id} onChange={e=>choosePublicationFellow(e.target.value)}><option value="">Choose fellow</option>{fellowRecords.map(fr=>{const pf=FELLOWS.find(f=>f.id===fr.profile_key);return <option key={fr.id} value={fr.id}>{fr.certificate_name||pf?.name||fr.profile_key}{fr.owner_email?` · ${fr.owner_email}`:""}</option>;})}</select><Txt muted s={{fontSize:12,marginTop:5}}>Only the fellow linked to this record will be able to request changes to this project.</Txt></FF>}
+          {publicationForm.programme_type==="fellowship"&&<FF label="Fellow *"><select value={publicationForm.fellow_record_id} onChange={e=>choosePublicationFellow(e.target.value)}><option value="">Choose fellow</option>{fellowRecords.map(fr=><option key={fr.id} value={fr.id}>{fr.display_name||fr.certificate_name||fr.profile_key}{fr.owner_email?` · ${fr.owner_email}`:""}</option>)}</select><Txt muted s={{fontSize:12,marginTop:5}}>Only the fellow linked to this record will be able to request changes to this project.</Txt></FF>}
           {publicationForm.programme_type==="capstone"&&<FF label="Approved Capstone"><select value={publicationForm.capstone_id} onChange={e=>choosePublicationCapstone(e.target.value)}><option value="">Choose approved Capstone (optional while drafting)</option>{capstones.filter(x=>x.capstone_status==="approved"&&x.capstone_id).map(x=><option key={x.capstone_id} value={x.capstone_id}>{x.participant_name} — {x.project_title||"Capstone"}</option>)}</select></FF>}
           <FF label="Title *"><input value={publicationForm.title} onChange={e=>setPublicationForm(x=>({...x,title:e.target.value}))}/></FF>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2"><FF label="Author / creator *"><input value={publicationForm.author_name} onChange={e=>setPublicationForm(x=>({...x,author_name:e.target.value}))}/></FF><FF label="Cohort label"><input value={publicationForm.cohort_label} onChange={e=>setPublicationForm(x=>({...x,cohort_label:e.target.value}))} placeholder="e.g. Pilot Cohort 2026"/></FF></div>
