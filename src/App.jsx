@@ -926,121 +926,140 @@ const FellowCard = ({ fellow, expanded, onToggle, session, isAdmin }) => {
   );
 };
 
-const CurrentCohort = ({ session, isAdmin }) => (
-  <div className="reveal">
-    <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:28 }}>
-      <div>
-        <Ey label="Pilot Cohort 2026"/>
-        <H2 s={{ marginBottom:8 }}>Cohort One</H2>
-        <Txt muted s={{ maxWidth:720,fontSize:14.5 }}>
-          Our first cohort brought together four fellows exploring emerging questions at the intersection of AI, biology, biosecurity, health, and governance in African contexts.
-        </Txt>
-      </div>
-      <span className="tag tg" style={{ fontSize:11.5,padding:"6px 14px",whiteSpace:"nowrap" }}>Completed</span>
-    </div>
+const fellowPhotoUrl = path => path ? supabase.storage.from("fellow-photos").getPublicUrl(path).data.publicUrl : "";
 
-    <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"stretch" }}>
-      {FELLOWS.map(fellow => {
-        if (fellow.placeholder) {
+const PublicFellowCard = ({ fellow, session }) => {
+  const imageUrl = fellowPhotoUrl(fellow.photo_path);
+  return (
+    <article className="fellow-card" style={{ padding:24,display:"flex",flexDirection:"column",height:"100%" }}>
+      <div style={{ display:"flex",gap:18,alignItems:"center",marginBottom:22 }}>
+        {imageUrl ? (
+          <div style={{ width:82,height:100,flexShrink:0,overflow:"hidden",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+            <img src={imageUrl} alt={`${fellow.name} headshot`} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
+          </div>
+        ) : (
+          <div style={{ width:82,height:100,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+            <FellowInitials name={fellow.name}/>
+          </div>
+        )}
+        <div>
+          <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#8A8884",letterSpacing:".1em",textTransform:"uppercase",marginBottom:6 }}>Research Fellow</div>
+          <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:23,fontWeight:600,color:"#1A1917",lineHeight:1.18 }}>{fellow.name}</h3>
+        </div>
+      </div>
+
+      <div style={{ borderTop:"1px solid var(--brd)",paddingTop:18,flex:1 }}>
+        {fellow.project_title && <>
+          <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Project</div>
+          <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.4,margin:0 }}>{fellow.project_title}</h4>
+        </>}
+
+        {Array.isArray(fellow.research_areas) && fellow.research_areas.length > 0 && (
+          <div style={{ marginTop:18 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Research Areas</div>
+            <div className="fellow-tags">
+              {fellow.research_areas.map(area => <span key={area} className="tag" style={{ fontSize:10.5,padding:"5px 9px" }}>{area}</span>)}
+            </div>
+          </div>
+        )}
+
+        {fellow.bio && (
+          <div style={{ marginTop:18 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Bio</div>
+            <Txt muted s={{ fontSize:13.5,lineHeight:1.7 }}>{fellow.bio}</Txt>
+          </div>
+        )}
+
+        {fellow.linkedin_url && (
+          <div style={{ marginTop:18 }}>
+            <a href={fellow.linkedin_url} target="_blank" rel="noopener noreferrer" className="fellow-link" style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,fontWeight:700,color:"#B8102A",textDecoration:"none",borderBottom:"1px solid rgba(184,16,42,.28)",paddingBottom:2 }}>LinkedIn ↗</a>
+          </div>
+        )}
+      </div>
+
+      <FellowCertificateControls profileKey={fellow.profile_key} session={session}/>
+    </article>
+  );
+};
+
+const FellowshipPage = ({ session }) => {
+  const [fellows,setFellows] = useState([]);
+  const [loading,setLoading] = useState(true);
+  const [loadError,setLoadError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setLoadError("");
+    supabase.rpc("list_public_fellows").then(({ data, error }) => {
+      if (!alive) return;
+      if (error) {
+        setLoadError(error.message || "Could not load fellows.");
+        setFellows([]);
+      } else {
+        setFellows(Array.isArray(data) ? data : []);
+      }
+      setLoading(false);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const cohortMap = new Map();
+  fellows.forEach(fellow => {
+    const label = fellow.cohort_label || "Fellowship Cohort";
+    if (!cohortMap.has(label)) cohortMap.set(label, []);
+    cohortMap.get(label).push(fellow);
+  });
+  const cohorts = Array.from(cohortMap.entries());
+
+  return (
+    <>
+      <PageHdr
+        label="Fellowship"
+        title="AIxBio Africa Research Fellowship"
+        sub="Supporting early-career researchers and practitioners exploring questions at the intersection of artificial intelligence, biology, and biosecurity in African contexts."
+      />
+
+      <Sec bg="#fff">
+        <div className="reveal" style={{ maxWidth:760,marginBottom:52 }}>
+          <Ey label="About the Fellowship"/>
+          <H2 s={{ marginBottom:18 }}>Research grounded in African contexts</H2>
+          <Txt s={{ fontSize:15.5,lineHeight:1.75 }}>
+            The AIxBio Africa Research Fellowship creates space for emerging researchers to develop focused work on questions where AI, biology, biosecurity, health, and governance intersect across Africa. Each cohort may take a different shape as the programme evolves.
+          </Txt>
+        </div>
+
+        {loading && <Txt muted>Loading fellows…</Txt>}
+        {loadError && <div className="err">{loadError}</div>}
+        {!loading && !loadError && cohorts.length === 0 && <Txt muted>Fellow profiles will appear here as cohorts are added.</Txt>}
+
+        {cohorts.map(([cohort,items]) => {
+          const completed = items.length > 0 && items.every(item => item.completion_status === "completed");
           return (
-            <article key={fellow.id} className="fellow-card" style={{ padding:24,minHeight:210,display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center" }}>
-              <div>
-                <div style={{ width:72,height:88,margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-                  <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,color:"#8A8884" }}>04</span>
+            <div key={cohort} className="reveal" style={{ marginBottom:58 }}>
+              <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:28 }}>
+                <div>
+                  <Ey label="Fellowship Cohort"/>
+                  <H2 s={{ marginBottom:8 }}>{cohort}</H2>
+                  <Txt muted s={{ maxWidth:720,fontSize:14.5 }}>
+                    {items.length} fellow{items.length === 1 ? "" : "s"} exploring AI, biology, biosecurity, health, and governance questions in African contexts.
+                  </Txt>
                 </div>
-                <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Fellow profile forthcoming</h3>
-                <Txt muted s={{ fontSize:13.5 }}>Pilot Cohort 2026</Txt>
+                <span className={`tag ${completed ? "tg" : "ty"}`} style={{ fontSize:11.5,padding:"6px 14px",whiteSpace:"nowrap" }}>
+                  {completed ? "Completed" : "In Progress"}
+                </span>
               </div>
-            </article>
+
+              <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"stretch" }}>
+                {items.map(fellow => <PublicFellowCard key={fellow.id} fellow={fellow} session={session}/>)}
+              </div>
+            </div>
           );
-        }
-
-        return (
-          <article key={fellow.id} className="fellow-card" style={{ padding:24,display:"flex",flexDirection:"column",height:"100%" }}>
-            <div style={{ display:"flex",gap:18,alignItems:"center",marginBottom:22 }}>
-              {fellow.image ? (
-                <div style={{ width:82,height:100,flexShrink:0,overflow:"hidden",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-                  <img src={fellow.image} alt={`${fellow.name} headshot`} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
-                </div>
-              ) : (
-                <div style={{ width:82,height:100,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-                  <FellowInitials name={fellow.name}/>
-                </div>
-              )}
-              <div>
-                <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#8A8884",letterSpacing:".1em",textTransform:"uppercase",marginBottom:6 }}>Research Fellow</div>
-                <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:23,fontWeight:600,color:"#1A1917",lineHeight:1.18 }}>{fellow.name}</h3>
-              </div>
-            </div>
-
-            <div style={{ borderTop:"1px solid var(--brd)",paddingTop:18,flex:1 }}>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Project</div>
-              <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.4,margin:0 }}>{fellow.projectTitle}</h4>
-
-              {fellow.researchAreas?.length > 0 && (
-                <div style={{ marginTop:18 }}>
-                  <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Research Areas</div>
-                  <div className="fellow-tags">
-                    {fellow.researchAreas.map(area => (
-                      <span key={area} className="tag" style={{ fontSize:10.5,padding:"5px 9px" }}>{area}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {fellow.bio && (
-                <div style={{ marginTop:18 }}>
-                  <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Bio</div>
-                  <Txt muted s={{ fontSize:13.5,lineHeight:1.7 }}>{fellow.bio}</Txt>
-                </div>
-              )}
-
-              {fellow.links?.linkedin && (
-                <div style={{ marginTop:18 }}>
-                  <a
-                    href={fellow.links.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="fellow-link"
-                    style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,fontWeight:700,color:"#B8102A",textDecoration:"none",borderBottom:"1px solid rgba(184,16,42,.28)",paddingBottom:2 }}
-                  >
-                    LinkedIn ↗
-                  </a>
-                </div>
-              )}
-            </div>
-
-            <FellowCertificateControls profileKey={fellow.id} session={session} isAdmin={isAdmin}/>
-          </article>
-        );
-      })}
-    </div>
-  </div>
-);
-
-/* ══════════ FELLOWSHIP PAGE ════════════════════════ */
-
-const FellowshipPage = ({ session, isAdmin }) => (
-  <>
-    <PageHdr
-      label="Fellowship"
-      title="AIxBio Africa Research Fellowship"
-      sub="Supporting early-career researchers and practitioners exploring questions at the intersection of artificial intelligence, biology, and biosecurity in African contexts."
-    />
-
-    <Sec bg="#fff">
-      <div className="reveal" style={{ maxWidth:760,marginBottom:52 }}>
-        <Ey label="About the Fellowship"/>
-        <H2 s={{ marginBottom:18 }}>Research grounded in African contexts</H2>
-        <Txt s={{ fontSize:15.5,lineHeight:1.75 }}>
-          The AIxBio Africa Research Fellowship creates space for emerging researchers to develop focused work on questions where AI, biology, biosecurity, health, and governance intersect across Africa. Each cohort may take a different shape as the programme evolves.
-        </Txt>
-      </div>
-
-      <CurrentCohort session={session} isAdmin={isAdmin}/>
-    </Sec>
-  </>
-);
+        })}
+      </Sec>
+    </>
+  );
+};
 
 const MentorsPage = ({ go }) => (<>
   <PageHdr label="Mentors" title="Mentor Network" sub="Meet the mentors guiding fellows through the AIxBio Africa Pilot Cohort 2026, and learn how to join our growing mentor network."/>
