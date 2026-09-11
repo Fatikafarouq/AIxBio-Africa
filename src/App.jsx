@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "./lib/supabase";
 import CourseShell from "./course/CourseShell";
 import CourseAuth from "./course/CourseAuth";
@@ -7,9 +7,6 @@ import FellowCertificateControls from "./FellowCertificateControls";
 import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
-import francesAgba from "./assets/frances.jpeg";
-import teganJegede from "./assets/tegan.jpeg";
-import gideonAbako from "./assets/gideon-abako.jpeg";
 import fatikaIbrahim from "./assets/fatika-ibrahim.png";
 /* ══════════════════════════════════════════════════════
    AIxBio Africa · Institutional Website
@@ -106,129 +103,6 @@ const MENTORS = [
     img: jeanneVincendeau,
     bio: "Jeanne is an independent researcher working at the intersection of international relations, political violence, and AI governance. Her work explores power concentration, AI geopolitics, and the use of AI in diplomatic contexts, always with a focus on ensuring AI development remains inclusive and human-centered. She is the co-founder of Horizon AGI, a French nonprofit supporting AI safety by raising awareness and empowering interdisciplinary talents. Through the fellowship, Jeanne is committed to helping fellows strengthen their political impact while building confidence in navigating the technical-governance gaps of the AI safety ecosystem.",
   },
-];
-
-const FELLOWS = [
-  {
-    id: "frances-chinaza-agba",
-    name: "Frances Chinaza Agba",
-    image: francesAgba,
-    role: "AI Governance, Risk and Assurance Specialist; Computer Science educator",
-    affiliation: "Co-founder, LumenAfri",
-    country: "UK",
-    projectTitle: "Beyond Refusal — Evaluating Culturally Grounded Public-Health AI Responses Across Nigerian Languages",
-    researchQuestion: "Does AI behave differently when culturally grounded Nigerian public-health scenarios are presented in Nigerian languages (Pidgin, Yoruba, Igbo) vs. standard English?",
-    projectSummary: "This project evaluates two frontier AI models on matched prompts—direct versus culturally contextualised—across six Nigerian-context domains: women's health and harmful practices, mental health and stigma, traditional health practices, illness recognition, outbreaks and emergencies, and endemic diseases. Responses are assessed on safety calibration, public-health quality, and cultural calibration. The scope was narrowed from biosecurity guardrails to a focused multilingual evaluation, with calibration rather than refusal rate as the core metric. A structured prompt library connecting translations, model outputs, and coding is being developed.",
-    africanContext: "TODO: Add Frances's final wording on why this research matters in the African context.",
-    researchAreas: ["AI Safety", "Multilingual AI", "Public Health", "Cultural Calibration"],
-    methodology: [
-      "Matched-prompt testing across two frontier AI models",
-      "Direct versus culturally contextualised prompt conditions",
-      "Six-domain taxonomy scoring",
-      "Structured prompt library linking translation, outputs, and coding"
-    ],
-    mentor: { name: "Jeanne Vincendeau", affiliation: "" },
-    status: "In Progress",
-    expectedOutput: "Research paper and a lightweight “Beyond Refusal” evaluation prototype",
-    bio: "Frances is an AI Governance, Risk and Assurance Specialist and Computer Science educator. Her work focuses on responsible AI, AI governance, multilingual AI safety, and AI education, with particular interest in AI safety and equity across African contexts. She is also co-founder of LumenAfri, a nonprofit expanding digital and AI education access for underserved communities in Nigeria.",
-    links: {
-      linkedin: "https://www.linkedin.com/in/nazaagba",
-      website: "",
-      github: "",
-      scholar: "",
-      orcid: ""
-    },
-    outputs: []
-  },
-  {
-    id: "tegan-jegede",
-    name: "Tegan Jegede",
-    image: teganJegede,
-    role: "Empirical AI Safety Researcher",
-    affiliation: "Nile University · Computer Science master's candidate",
-    country: "Nigeria",
-    projectTitle: "Evaluating Confidence and Policy Collapse in Multimodal Agents: Towards Robust Auditing Standards for African Healthcare",
-    researchQuestion: "How reliably does a multimodal agent's confidence correspond to its correctness across healthcare domains, and how does that relationship change with degraded medical images or regionally relevant clinical questions?",
-    projectSummary: "This project audits whether multimodal AI systems are appropriately uncertain on healthcare questions in African contexts, measuring calibration, abstention, and high-confidence errors rather than treating all wrong answers as hallucinations. It tests LLaVA-1.5-7B against AfriMed-QA, with SLAKE and PathVQA as imaging controls, using accuracy, Expected Calibration Error, Brier score, abstention rate, and high-confidence error rate. Robustness is also evaluated under controlled image blur and reduced illumination. The work is framed strictly as a research auditing study rather than a clinical diagnostic system.",
-    africanContext: "AfriMed-QA provides the primary African healthcare context for the audit, supporting evaluation of multimodal systems against regionally relevant clinical questions and informing auditing standards for potential use in African healthcare settings.",
-    researchAreas: ["Uncertainty Quantification", "Multimodal AI Safety", "Healthcare AI Auditing", "Model Calibration"],
-    methodology: [
-      "Benchmark LLaVA-1.5-7B using AfriMed-QA, SLAKE, and PathVQA",
-      "Evaluate accuracy, ECE, Brier score, abstention rate, and high-confidence error rate",
-      "Test robustness under controlled image blur and reduced illumination",
-      "Estimate confidence from relative probabilities across predefined answer options"
-    ],
-    mentor: { name: "Jeanne Vincendeau", affiliation: "" },
-    status: "In Progress",
-    expectedOutput: "Reproducible audit pipeline, cross-domain failure-mode analysis, and preliminary recommendations for evaluating multimodal systems in African healthcare",
-    bio: "Tegan is an empirical AI safety researcher and computer science master's candidate at Nile University, building on a foundation in electrical and electronics engineering. His research focuses on Uncertainty Quantification and Hybrid Reward Architectures to mitigate confident hallucinations in multimodal agents. During the fellowship, he is extending PyTorch multi-seed evaluation pipelines published at ICML 2026 to test open-weight models for policy collapse on dual-use biological tasks.",
-    links: {
-      linkedin: "https://www.linkedin.com/in/tegan-jegede-52b296197",
-      website: "",
-      github: "",
-      scholar: "",
-      orcid: ""
-    },
-    outputs: []
-  },
-  {
-    id: "gideon-abako",
-    name: "Gideon Abako",
-    image: gideonAbako,
-    role: "Founder, Public Interest Technology",
-    affiliation: "Neuravox Foundation",
-    country: "",
-    projectTitle: "Minimum Risk Management Checks for AI Decision Support Tools in Primary and Community Health Care",
-    researchQuestion: "What minimum risk management checks should health institutions apply across the deployment lifecycle of AI decision support tools used in primary and community health care?",
-    projectSummary: "This project examines how health institutions can translate high-level AI governance principles into practical, minimum risk management checks for AI decision support tools used in frontline health care. Drawing on a targeted review of global governance frameworks, digital health guidance, medical-device guidance, and emerging African deployment evidence, the research develops a practitioner-facing lifecycle framework covering the selection, local validation, deployment, monitoring, and eventual withdrawal of AI decision support systems. The work focuses primarily on primary care, while treating community health as an adjacent frontline context with additional language, referral, authority, and implementation risks.",
-    africanContext: "Primary and community health institutions in African settings may face distinct challenges when deploying AI decision support systems, including uneven infrastructure, language and local-context gaps, limited specialist support, variable documentation quality, data representativeness concerns, and limited institutional leverage over technology vendors. This research aims to translate broad AI governance principles into practical, context-sensitive checks that health institutions can use when deciding whether and how AI systems should influence frontline care.",
-    researchAreas: ["AI Governance", "Health AI", "AI Risk Management", "Primary Health Care"],
-    methodology: [
-      "Targeted literature review and source matrix covering 22 core governance, health-system, regulatory, and empirical sources",
-      "Evidence mapping of AI decision support risks and implementation evidence in primary and community health care",
-      "Development of a risk taxonomy covering clinical safety, data, human oversight, workflow, accountability, infrastructure, privacy, vendors, monitoring, and decommissioning",
-      "Development of a five-stage lifecycle framework spanning procurement, pre-deployment assessment, deployment, monitoring, and post-deployment learning"
-    ],
-    mentor: { name: "Mark Aiken", affiliation: "Policy Mentor" },
-    status: "In Progress",
-    expectedOutput: "Lifecycle risk management framework paper or practitioner report, supported by a one-page minimum risk checklist",
-    bio: "Gideon Abako is Founder of Neuravox Foundation, a public interest technology organisation working across artificial intelligence, data systems, health, language infrastructure and digital governance in Africa. His work spans government, regional and funder programmes including FCDO/Elrha-funded research on AI-enabled health supply chains in Uganda, Mozilla Common Voice language data infrastructure, and a cross-country East African Community study on AI-enabled immunization stock monitoring in Uganda and Tanzania. He has also advised UK FCDO on AI and commercialization as well as innovation ecosystems in West Africa.",
-    links: {
-      linkedin: "https://www.linkedin.com/in/gideonluper/",
-      website: "",
-      github: "",
-      scholar: "",
-      orcid: ""
-    },
-    outputs: []
-  },
-  {
-    id: "fellow-4",
-    placeholder: true,
-    name: "",
-    image: null,
-    role: "",
-    affiliation: "",
-    country: "",
-    projectTitle: "",
-    researchQuestion: "",
-    projectSummary: "",
-    africanContext: "",
-    researchAreas: [],
-    methodology: [],
-    mentor: { name: "", affiliation: "" },
-    status: "",
-    expectedOutput: "",
-    bio: "",
-    links: {
-      linkedin: "",
-      website: "",
-      github: "",
-      scholar: "",
-      orcid: ""
-    },
-    outputs: []
-  }
 ];
 
 const FAQS = [
@@ -926,121 +800,103 @@ const FellowCard = ({ fellow, expanded, onToggle, session, isAdmin }) => {
   );
 };
 
-const CurrentCohort = ({ session, isAdmin }) => (
-  <div className="reveal">
-    <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:28 }}>
-      <div>
-        <Ey label="Pilot Cohort 2026"/>
-        <H2 s={{ marginBottom:8 }}>Cohort One</H2>
-        <Txt muted s={{ maxWidth:720,fontSize:14.5 }}>
-          Our first cohort brought together four fellows exploring emerging questions at the intersection of AI, biology, biosecurity, health, and governance in African contexts.
-        </Txt>
-      </div>
-      <span className="tag tg" style={{ fontSize:11.5,padding:"6px 14px",whiteSpace:"nowrap" }}>Completed</span>
-    </div>
+const fellowPhotoUrl = path => path ? supabase.storage.from("fellow-photos").getPublicUrl(path).data.publicUrl : "";
 
-    <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"stretch" }}>
-      {FELLOWS.map(fellow => {
-        if (fellow.placeholder) {
-          return (
-            <article key={fellow.id} className="fellow-card" style={{ padding:24,minHeight:210,display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center" }}>
-              <div>
-                <div style={{ width:72,height:88,margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-                  <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,color:"#8A8884" }}>04</span>
-                </div>
-                <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Fellow profile forthcoming</h3>
-                <Txt muted s={{ fontSize:13.5 }}>Pilot Cohort 2026</Txt>
-              </div>
-            </article>
-          );
-        }
-
-        return (
-          <article key={fellow.id} className="fellow-card" style={{ padding:24,display:"flex",flexDirection:"column",height:"100%" }}>
-            <div style={{ display:"flex",gap:18,alignItems:"center",marginBottom:22 }}>
-              {fellow.image ? (
-                <div style={{ width:82,height:100,flexShrink:0,overflow:"hidden",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-                  <img src={fellow.image} alt={`${fellow.name} headshot`} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
-                </div>
-              ) : (
-                <div style={{ width:82,height:100,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-                  <FellowInitials name={fellow.name}/>
-                </div>
-              )}
-              <div>
-                <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#8A8884",letterSpacing:".1em",textTransform:"uppercase",marginBottom:6 }}>Research Fellow</div>
-                <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:23,fontWeight:600,color:"#1A1917",lineHeight:1.18 }}>{fellow.name}</h3>
-              </div>
-            </div>
-
-            <div style={{ borderTop:"1px solid var(--brd)",paddingTop:18,flex:1 }}>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Project</div>
-              <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.4,margin:0 }}>{fellow.projectTitle}</h4>
-
-              {fellow.researchAreas?.length > 0 && (
-                <div style={{ marginTop:18 }}>
-                  <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Research Areas</div>
-                  <div className="fellow-tags">
-                    {fellow.researchAreas.map(area => (
-                      <span key={area} className="tag" style={{ fontSize:10.5,padding:"5px 9px" }}>{area}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {fellow.bio && (
-                <div style={{ marginTop:18 }}>
-                  <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Bio</div>
-                  <Txt muted s={{ fontSize:13.5,lineHeight:1.7 }}>{fellow.bio}</Txt>
-                </div>
-              )}
-
-              {fellow.links?.linkedin && (
-                <div style={{ marginTop:18 }}>
-                  <a
-                    href={fellow.links.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="fellow-link"
-                    style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,fontWeight:700,color:"#B8102A",textDecoration:"none",borderBottom:"1px solid rgba(184,16,42,.28)",paddingBottom:2 }}
-                  >
-                    LinkedIn ↗
-                  </a>
-                </div>
-              )}
-            </div>
-
-            <FellowCertificateControls profileKey={fellow.id} session={session} isAdmin={isAdmin}/>
-          </article>
-        );
-      })}
-    </div>
-  </div>
-);
-
-/* ══════════ FELLOWSHIP PAGE ════════════════════════ */
-
-const FellowshipPage = ({ session, isAdmin }) => (
-  <>
-    <PageHdr
-      label="Fellowship"
-      title="AIxBio Africa Research Fellowship"
-      sub="Supporting early-career researchers and practitioners exploring questions at the intersection of artificial intelligence, biology, and biosecurity in African contexts."
-    />
-
-    <Sec bg="#fff">
-      <div className="reveal" style={{ maxWidth:760,marginBottom:52 }}>
-        <Ey label="About the Fellowship"/>
-        <H2 s={{ marginBottom:18 }}>Research grounded in African contexts</H2>
-        <Txt s={{ fontSize:15.5,lineHeight:1.75 }}>
-          The AIxBio Africa Research Fellowship creates space for emerging researchers to develop focused work on questions where AI, biology, biosecurity, health, and governance intersect across Africa. Each cohort may take a different shape as the programme evolves.
-        </Txt>
+const PublicFellowCard = ({ fellow, session }) => {
+  const imageUrl=fellowPhotoUrl(fellow.photo_path);
+  return (
+    <article className="fellow-card" style={{ padding:24,display:"flex",flexDirection:"column",height:"100%" }}>
+      <div style={{ display:"flex",gap:18,alignItems:"center",marginBottom:22 }}>
+        {imageUrl ? (
+          <div style={{ width:82,height:100,flexShrink:0,overflow:"hidden",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+            <img src={imageUrl} alt={`${fellow.name} headshot`} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
+          </div>
+        ) : (
+          <div style={{ width:82,height:100,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+            <FellowInitials name={fellow.name}/>
+          </div>
+        )}
+        <div>
+          <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#8A8884",letterSpacing:".1em",textTransform:"uppercase",marginBottom:6 }}>Research Fellow</div>
+          <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:23,fontWeight:600,color:"#1A1917",lineHeight:1.18 }}>{fellow.name}</h3>
+        </div>
       </div>
 
-      <CurrentCohort session={session} isAdmin={isAdmin}/>
-    </Sec>
-  </>
-);
+      <div style={{ borderTop:"1px solid var(--brd)",paddingTop:18,flex:1 }}>
+        {fellow.project_title&&<><div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Project</div><h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.4,margin:0 }}>{fellow.project_title}</h4></>}
+
+        {fellow.research_areas?.length > 0 && (
+          <div style={{ marginTop:18 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Research Areas</div>
+            <div className="fellow-tags">{fellow.research_areas.map(area=><span key={area} className="tag" style={{ fontSize:10.5,padding:"5px 9px" }}>{area}</span>)}</div>
+          </div>
+        )}
+
+        {fellow.bio&&<div style={{ marginTop:18 }}><div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Bio</div><Txt muted s={{ fontSize:13.5,lineHeight:1.7 }}>{fellow.bio}</Txt></div>}
+
+        {fellow.linkedin_url&&<div style={{ marginTop:18 }}><a href={fellow.linkedin_url} target="_blank" rel="noopener noreferrer" className="fellow-link" style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,fontWeight:700,color:"#B8102A",textDecoration:"none",borderBottom:"1px solid rgba(184,16,42,.28)",paddingBottom:2 }}>LinkedIn ↗</a></div>}
+      </div>
+
+      <FellowCertificateControls profileKey={fellow.profile_key} session={session}/>
+    </article>
+  );
+};
+
+const FellowshipPage = ({ session }) => {
+  const [fellows,setFellows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [loadError,setLoadError]=useState("");
+
+  useEffect(()=>{
+    let alive=true;
+    supabase.rpc("list_public_fellows").then(({data,error})=>{
+      if(!alive)return;
+      if(error){setLoadError(error.message||"Could not load fellows.");setFellows([]);}
+      else setFellows(data||[]);
+      setLoading(false);
+    });
+    return()=>{alive=false;};
+  },[]);
+
+  const cohorts=useMemo(()=>{
+    const map=new Map();
+    fellows.forEach(f=>{
+      const key=f.cohort_label||"Fellowship Cohort";
+      if(!map.has(key))map.set(key,[]);
+      map.get(key).push(f);
+    });
+    return [...map.entries()];
+  },[fellows]);
+
+  return (
+    <>
+      <PageHdr label="Fellowship" title="AIxBio Africa Research Fellowship" sub="Supporting early-career researchers and practitioners exploring questions at the intersection of artificial intelligence, biology, and biosecurity in African contexts."/>
+
+      <Sec bg="#fff">
+        <div className="reveal" style={{ maxWidth:760,marginBottom:52 }}>
+          <Ey label="About the Fellowship"/>
+          <H2 s={{ marginBottom:18 }}>Research grounded in African contexts</H2>
+          <Txt s={{ fontSize:15.5,lineHeight:1.75 }}>The AIxBio Africa Research Fellowship creates space for emerging researchers to develop focused work on questions where AI, biology, biosecurity, health, and governance intersect across Africa. Each cohort may take a different shape as the programme evolves.</Txt>
+        </div>
+
+        {loading&&<Txt muted>Loading fellows…</Txt>}
+        {loadError&&<div className="err">{loadError}</div>}
+        {!loading&&!loadError&&!cohorts.length&&<Txt muted>Fellow profiles will appear here as cohorts are added.</Txt>}
+
+        {cohorts.map(([cohort,items])=>{
+          const completed=items.length>0&&items.every(x=>x.completion_status==="completed");
+          return <div key={cohort} className="reveal" style={{marginBottom:58}}>
+            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:28 }}>
+              <div><Ey label="Fellowship Cohort"/><H2 s={{ marginBottom:8 }}>{cohort}</H2><Txt muted s={{ maxWidth:720,fontSize:14.5 }}>{items.length} fellow{items.length===1?"":"s"} exploring AI, biology, biosecurity, health, and governance questions in African contexts.</Txt></div>
+              <span className={`tag ${completed?"tg":"ty"}`} style={{ fontSize:11.5,padding:"6px 14px",whiteSpace:"nowrap" }}>{completed?"Completed":"In Progress"}</span>
+            </div>
+            <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"stretch" }}>{items.map(f=><PublicFellowCard key={f.id} fellow={f} session={session}/>)}</div>
+          </div>;
+        })}
+      </Sec>
+    </>
+  );
+};
 
 const MentorsPage = ({ go }) => (<>
   <PageHdr label="Mentors" title="Mentor Network" sub="Meet the mentors guiding fellows through the AIxBio Africa Pilot Cohort 2026, and learn how to join our growing mentor network."/>
