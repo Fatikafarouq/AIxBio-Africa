@@ -926,327 +926,88 @@ const FellowCard = ({ fellow, expanded, onToggle, session, isAdmin }) => {
   );
 };
 
-const CurrentCohort = ({ session, isAdmin }) => {
-  const [expandedIds,setExpandedIds] = useState({});
-  const toggleFellow = id => setExpandedIds(current => ({ ...current, [id]: !current[id] }));
-  return (
-    <div className="reveal" style={{ marginBottom:64 }}>
-      <Ey label="2026 Pilot Cohort"/>
-      <H2 s={{ marginBottom:12 }}>Current Cohort</H2>
-      <Txt muted s={{ maxWidth:760,marginBottom:32 }}>Meet the researchers in AIxBio Africa's current fellowship cohort and explore the questions they are investigating at the intersection of artificial intelligence, biosecurity, governance, public health, and emerging technologies.</Txt>
-      <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"start" }}>
-        {FELLOWS.map(fellow => (
-          <FellowCard key={fellow.id} fellow={fellow} expanded={Boolean(expandedIds[fellow.id])} onToggle={() => toggleFellow(fellow.id)} session={session} isAdmin={isAdmin}/>
-        ))}
+const CurrentCohort = ({ session, isAdmin }) => (
+  <div className="reveal">
+    <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:28 }}>
+      <div>
+        <Ey label="Pilot Cohort 2026"/>
+        <H2 s={{ marginBottom:8 }}>Cohort One</H2>
+        <Txt muted s={{ maxWidth:720,fontSize:14.5 }}>
+          Our first cohort brought together four fellows exploring emerging questions at the intersection of AI, biology, biosecurity, health, and governance in African contexts.
+        </Txt>
       </div>
+      <span className="tag tg" style={{ fontSize:11.5,padding:"6px 14px",whiteSpace:"nowrap" }}>Completed</span>
     </div>
-  );
-};
+
+    <div className="fg" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18,alignItems:"stretch" }}>
+      {FELLOWS.map(fellow => {
+        if (fellow.placeholder) {
+          return (
+            <article key={fellow.id} className="fellow-card" style={{ padding:24,minHeight:210,display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center" }}>
+              <div>
+                <div style={{ width:72,height:88,margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+                  <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,color:"#8A8884" }}>04</span>
+                </div>
+                <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Fellow profile forthcoming</h3>
+                <Txt muted s={{ fontSize:13.5 }}>Pilot Cohort 2026</Txt>
+              </div>
+            </article>
+          );
+        }
+
+        return (
+          <article key={fellow.id} className="fellow-card" style={{ padding:24,display:"flex",flexDirection:"column",height:"100%" }}>
+            <div style={{ display:"flex",gap:18,alignItems:"center",marginBottom:22 }}>
+              {fellow.image ? (
+                <div style={{ width:82,height:100,flexShrink:0,overflow:"hidden",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+                  <img src={fellow.image} alt={`${fellow.name} headshot`} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
+                </div>
+              ) : (
+                <div style={{ width:82,height:100,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+                  <FellowInitials name={fellow.name}/>
+                </div>
+              )}
+              <div>
+                <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#8A8884",letterSpacing:".1em",textTransform:"uppercase",marginBottom:6 }}>Research Fellow</div>
+                <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:23,fontWeight:600,color:"#1A1917",lineHeight:1.18 }}>{fellow.name}</h3>
+              </div>
+            </div>
+
+            <div style={{ borderTop:"1px solid var(--brd)",paddingTop:18,flex:1 }}>
+              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Project</div>
+              <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.4,margin:0 }}>{fellow.projectTitle}</h4>
+            </div>
+
+            <FellowCertificateControls profileKey={fellow.id} session={session} isAdmin={isAdmin}/>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+);
 
 /* ══════════ FELLOWSHIP PAGE ════════════════════════ */
 
-const FellowshipPage = ({ go, addApp, startTab = "overview", session, isAdmin }) => {
-  const [tab,setTab] = useState(startTab);
-  const [step,setStep] = useState(1);
-  const [fd,setFd] = useState({ name:"",email:"",country:"",institution:"",stage:"",area:"",background:"",statement:"",question:"",ref1name:"",ref1email:"",terms:false,draft:false });
-  const [errs,setErrs] = useState({});
-  const [submitting,setSubmitting] = useState(false);
-  const [done,setDone] = useState(false);
+const FellowshipPage = ({ session, isAdmin }) => (
+  <>
+    <PageHdr
+      label="Fellowship"
+      title="AIxBio Africa Research Fellowship"
+      sub="Supporting early-career researchers and practitioners exploring questions at the intersection of artificial intelligence, biology, and biosecurity in African contexts."
+    />
 
-  /* Re-run IntersectionObserver whenever tab changes so newly mounted
-     .reveal elements inside each tab panel become visible */
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); obs.unobserve(e.target); } }),
-      { threshold: 0.05, rootMargin: "0px 0px -16px 0px" }
-    );
-    const t = setTimeout(() => document.querySelectorAll(".reveal:not(.in)").forEach(el => obs.observe(el)), 60);
-    return () => { obs.disconnect(); clearTimeout(t); };
-  }, [tab]);
-
-  const upd = k => e => setFd(f=>({...f,[k]: e.target.type==="checkbox" ? e.target.checked : e.target.value}));
-
-  const validate = (s) => {
-    const e = {};
-    if (s===1) { if (!fd.name.trim()) e.name="Required"; if (!fd.email.includes("@")) e.email="Valid email required"; if (!fd.country.trim()) e.country="Required"; }
-    if (s===2) { if (!fd.stage) e.stage="Required"; if (!fd.area) e.area="Required"; if (fd.background.trim().length<30) e.background="Please provide some background (30+ chars)"; }
-    if (s===3) { if (fd.statement.trim().length<80) e.statement="Please write at least a brief statement of interest"; if (fd.question.trim().length<20) e.question="Please describe a research question you find interesting"; }
-    if (s===4) { if (!fd.terms) e.terms="Please confirm you have read the programme details"; }
-    return e;
-  };
-
-  const next = () => {
-    const e = validate(step);
-    if (Object.keys(e).length) { setErrs(e); return; }
-    setErrs({}); setStep(s=>s+1);
-  };
-
-  const submit = () => {
-    const e = validate(4);
-    if (Object.keys(e).length) { setErrs(e); return; }
-    setSubmitting(true);
-    setTimeout(() => { addApp({...fd,ref:`AIX-2026-${String(Date.now()).slice(-5)}`}); setDone(true); setSubmitting(false); }, 900);
-  };
-
-  const TABS = [["overview","Overview"],["eligibility","Eligibility"],["mentors","Mentors"],["faqs","FAQs"],["apply","Apply"]];
-
-  return (<>
-    <PageHdr label="Fellowship" title="AIxBio Africa Research Fellowship – Pilot Cohort 2026" sub="A 5-week remote research programme for aspiring and early-career researchers working on AI, biosecurity, health systems, governance, and societal challenges in Africa."/>
-
-    {/* Fellow applications closed / mentor call banner */}
-    <div style={{ background:"#1A1917",padding:"14px 44px" }}>
-      <div style={{ maxWidth:1160,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
-        <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,fontWeight:700,color:"rgba(255,255,255,.85)",letterSpacing:".06em",textTransform:"uppercase" }}>Fellow Applications Closed</span>
-          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"rgba(255,255,255,.55)" }}>Now welcoming applications from prospective <strong style={{ color:"#fff" }}>mentors</strong> for the pilot cohort.</span>
-        </div>
-        <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer"
-          style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#fff",letterSpacing:".06em",textTransform:"uppercase",textDecoration:"none",border:"1px solid #B8102A",padding:"6px 16px",transition:"background .18s",background:"#B8102A" }}
-          onMouseEnter={e=>e.currentTarget.style.background="#8A0D20"}
-          onMouseLeave={e=>e.currentTarget.style.background="#B8102A"}>
-          Apply to Mentor →
-        </a>
+    <Sec bg="#fff">
+      <div className="reveal" style={{ maxWidth:760,marginBottom:52 }}>
+        <Ey label="About the Fellowship"/>
+        <H2 s={{ marginBottom:18 }}>Research grounded in African contexts</H2>
+        <Txt s={{ fontSize:15.5,lineHeight:1.75 }}>
+          The AIxBio Africa Research Fellowship creates space for emerging researchers to develop focused work on questions where AI, biology, biosecurity, health, and governance intersect across Africa. Each cohort may take a different shape as the programme evolves.
+        </Txt>
       </div>
-    </div>
-    <div style={{ background:"#fff",borderBottom:"1px solid var(--brd)",position:"sticky",top:68,zIndex:100 }}>
-      <div style={{ maxWidth:1160,margin:"0 auto",padding:"0 44px",display:"flex",overflowX:"auto" }}>
-        {TABS.map(([id,label]) => <button key={id} className={`tab-b ${tab===id?"on":""}`} onClick={() => { setTab(id); if(id==="apply") setStep(1); }}>{label}</button>)}
-      </div>
-    </div>
 
-    {tab==="overview" && (
-      <Sec bg="#fff">
-        {/* Description */}
-        <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,marginBottom:64 }}>
-          <div className="reveal">
-            <Ey label="About the Programme"/>
-            <H2 s={{ marginBottom:20 }}>Fellowship Overview</H2>
-            <Txt s={{ marginBottom:14 }}>AIxBio Africa is an independent research organisation advancing research at the intersection of artificial intelligence, biosecurity, health, governance, and societal resilience in African contexts.</Txt>
-            <Txt s={{ marginBottom:14 }}>The AIxBio Africa Research Fellowship is a 5-week remote research program for aspiring and early-career researchers interested in producing rigorous, impactful work on AI, biosecurity, health systems, governance, and related societal challenges in Africa.</Txt>
-            <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>Fellows will pursue independent research projects aligned with AIxBio Africa's mission and produce a substantial research output suitable for publication. Fellow applications for this cohort are now closed.</Txt>
-            <button className="br" onClick={() => setTab("mentors")}>Explore Mentor Applications →</button>
-          </div>
-
-          {/* Fellowship Details */}
-          <div className="reveal d2">
-            <div style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"28px 26px",marginBottom:16 }}>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".14em",textTransform:"uppercase",marginBottom:18 }}>Fellowship Details</div>
-              {[["Duration","5 Weeks"],["Format","Remote"],["Cohort Size","4 Fellows"],["Cost","Free"],["Stipend","None (Pilot Cohort)"]].map(([k,v])=>(
-                <div key={k} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 0",borderBottom:"1px solid var(--brd)" }}>
-                  <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"#5A5956" }}>{k}</span>
-                  <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#1A1917" }}>{v}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Key features */}
-            {[["Research-focused","Participants develop practical research skills through guided independent inquiry, not passive instruction."],
-              ["Interdisciplinary","The programme welcomes backgrounds across life sciences, technology, policy, and social sciences."],
-              ["No cost to participants","The programme is offered at no charge to all accepted fellows."],
-              ["Substantial output","Fellows produce a real research artifact — preprint, report, or policy paper — by the end of the programme."]
-            ].map(([t,d],i)=>(
-              <div key={t} className={`reveal d${i+1}`} style={{ display:"flex",gap:16,padding:"18px 0",borderBottom:i<3?"1px solid var(--brd)":"none" }}>
-                <div style={{ width:7,height:7,borderRadius:"50%",background:"#B8102A",marginTop:8,flexShrink:0 }}/>
-                <div>
-                  <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",marginBottom:4 }}>{t}</div>
-                  <Txt muted s={{ fontSize:14 }}>{d}</Txt>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Current Cohort */}
-        <CurrentCohort session={session} isAdmin={isAdmin}/>
-
-        {/* Research Areas */}
-        <div className="reveal" style={{ marginBottom:56 }}>
-          <Ey label="Research Areas"/>
-          <H2 s={{ marginBottom:32 }}>Areas of Focus</H2>
-          <div className="g3" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16 }}>
-            {[["AI and Biosecurity","tr"],["AI and Health Systems","tb"],["AI Governance and Policy","ta"],["AI Safety and Evaluation","tr"],["Public Health and Emerging Technologies","tg"],["Societal Impacts of AI in Africa","tl"]].map(([area,tc],i)=>(
-              <div key={area} className={`reveal d${i+1}`} style={{ padding:"20px 22px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-                <span className={`tag ${tc}`} style={{ marginBottom:10,display:"inline-block" }}>Research Area</span>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#1A1917",lineHeight:1.3 }}>{area}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Expected Outputs */}
-        <div className="reveal" style={{ marginBottom:56 }}>
-          <Ey label="Expected Outputs"/>
-          <H2 s={{ marginBottom:20 }}>What Fellows Produce</H2>
-          <Txt s={{ marginBottom:24 }}>By the end of the fellowship, fellows should produce one of the following:</Txt>
-          <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
-            {[["Research Report","A structured investigation of a defined research question with methodology, findings, and recommendations."],
-              ["Preprint","A research paper submitted to a preprint server (e.g. SSRN, OSF, bioRxiv) for open access."],
-              ["Conference Paper Submission","A paper submitted for consideration at a relevant academic conference or workshop."],
-              ["Policy Research Paper","A policy-oriented document presenting evidence-based recommendations to relevant stakeholders."]
-            ].map(([t,d],i)=>(
-              <div key={t} style={{ display:"flex",gap:16,padding:"20px 22px",border:"1px solid var(--brd)",background:"#fff" }}>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:700,color:"rgba(184,16,42,.4)",paddingTop:2,flexShrink:0 }}>{String(i+1).padStart(2,"0")}</div>
-                <div>
-                  <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#1A1917",marginBottom:6 }}>{t}</div>
-                  <Txt muted s={{ fontSize:13.5,lineHeight:1.6 }}>{d}</Txt>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Timeline */}
-        <div className="reveal">
-          <Ey label="Timeline"/>
-          <H2 s={{ marginBottom:28 }}>Key Dates</H2>
-          <div style={{ display:"flex",flexDirection:"column",gap:0 }}>
-            {[["Fellow Applications","Closed 3 July 2026","tl"],["Decisions Released","July 2026","tb"],["Fellowship Begins","July 2026","ta"],["Mentor Applications","Open Now","tg"]].map(([event,date,tc],i,arr)=>(
-              <div key={event} style={{ display:"flex",alignItems:"center",gap:24,padding:"18px 0",borderBottom:i<arr.length-1?"1px solid var(--brd)":"none" }}>
-                <div style={{ display:"flex",alignItems:"center",gap:14,flex:1 }}>
-                  <div style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:0 }}>
-                    <div style={{ width:10,height:10,borderRadius:"50%",background: event==="Mentor Applications" ? "#1A7646" : "#B8102A",flexShrink:0 }}/>
-                  </div>
-                  <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:14.5,color:"#3A3835" }}>{event}</span>
-                </div>
-                <span className={`tag ${tc}`} style={{ fontSize:11,padding:"4px 12px" }}>{date}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="reveal" style={{ marginTop:48,paddingTop:40,borderTop:"1px solid var(--brd)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:16 }}>
-          <div>
-            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:6 }}>Want to help shape this cohort?</h4>
-            <Txt muted s={{ fontSize:14.5 }}>We're welcoming mentor applications now — <strong style={{ color:"#1A1917" }}>volunteer role</strong>, no deadline set.</Txt>
-          </div>
-          <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",padding:"14px 32px",fontSize:13,letterSpacing:".05em" }}>Apply to Mentor →</a>
-        </div>
-      </Sec>
-    )}
-
-    {tab==="eligibility" && (
-      <Sec bg="#fff">
-        <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72 }}>
-          <div className="reveal">
-            <Ey label="Who Can Apply"/><H2 s={{ marginBottom:20 }}>Eligibility</H2>
-            <Txt s={{ marginBottom:16 }}>Fellow applications for the pilot cohort are now closed. Eligibility criteria below are retained for reference and for future cohorts.</Txt>
-            <Txt s={{ marginBottom:28 }}>We welcome applications from a broad range of backgrounds. No prior research experience in AI safety or biosecurity is required — what matters is genuine intellectual curiosity and a commitment to producing meaningful research.</Txt>
-            <div style={{ marginBottom:20 }}>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:14 }}>We welcome applications from</div>
-              {["Students","Recent Graduates","Independent Researchers","Early-Career Professionals"].map((t,i)=>(
-                <div key={i} style={{ display:"flex",gap:10,padding:"10px 0",borderBottom:"1px solid var(--brd)" }}>
-                  <span style={{ color:"#B8102A",fontWeight:700,flexShrink:0 }}>—</span>
-                  <Txt muted s={{ fontSize:14.5,lineHeight:1.58 }}>{t}</Txt>
-                </div>
-              ))}
-            </div>
-            <Txt muted s={{ fontSize:14 }}>Applicants from outside Africa whose work is directly relevant to African AI and biosecurity contexts may be considered on a case-by-case basis.</Txt>
-          </div>
-          <div className="reveal d2">
-            <div style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"28px 24px",marginBottom:16 }}>
-              <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:16 }}>What we look for</h4>
-              {["Genuine interest in AI, biosecurity, health systems, governance, or related societal challenges","Analytical ability and intellectual curiosity","Motivation to produce a real, publishable research output","Commitment to completing the 5-week programme","Capacity to work independently in a remote setting","Connection to or interest in African research contexts"].map((t,i)=>(
-                <div key={i} style={{ display:"flex",gap:10,marginBottom:10 }}>
-                  <span style={{ color:"#B8102A",fontWeight:700,marginTop:1 }}>—</span>
-                  <Txt muted s={{ fontSize:14,lineHeight:1.6 }}>{t}</Txt>
-                </div>
-              ))}
-            </div>
-            <div style={{ border:"1px solid var(--brd)",padding:"20px 22px",marginBottom:20 }}>
-              <h4 style={{ fontFamily:"'Figtree',sans-serif",fontSize:11,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:12 }}>Selection</h4>
-              <Txt muted s={{ fontSize:13.5 }}>Selection is based on demonstrated interest, motivation, analytical ability, and commitment to producing a research output. The pilot cohort is limited to 5 fellows.</Txt>
-            </div>
-            <button className="br" onClick={() => setTab("mentors")}>Interested in Mentoring Instead? →</button>
-          </div>
-        </div>
-      </Sec>
-    )}
-
-    {tab==="mentors" && (
-      <Sec bg="#fff">
-        <div style={{ maxWidth:700 }}>
-          <div className="reveal" style={{ marginBottom:32 }}>
-            <Ey label="Mentors"/>
-            <H2 s={{ marginBottom:20 }}>Mentor Network</H2>
-            <Txt s={{ marginBottom:20 }}>With fellow applications now closed for the pilot cohort, we're turning our attention to building out the mentor network. We're inviting researchers and practitioners across AI, biosecurity, health systems, and governance to help guide fellows through their independent research projects.</Txt>
-            <Txt muted s={{ fontSize:14.5 }}>This is a volunteer role — mentors are not compensated for the pilot cohort. In return, mentors join a growing interdisciplinary network at the intersection of AI and biosecurity in African contexts, and are credited as contributors to the programme.</Txt>
-          </div>
-          <div className="reveal" style={{ padding:"26px 28px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Now welcoming mentor applications</h4>
-            <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers on a volunteer basis, we'd love to hear from you.</Txt>
-            <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
-          </div>
-        </div>
-      </Sec>
-    )}
-
-    {tab==="faqs" && (
-      <Sec bg="#fff">
-        <div className="reveal" style={{ marginBottom:48 }}><Ey label="FAQs"/><H2>Frequently Asked Questions</H2></div>
-        <div style={{ maxWidth:720 }}>
-          {FAQS.map(({ q,a },i) => (
-            <FaqItem key={i} q={q} a={a} i={i}/>
-          ))}
-        </div>
-      </Sec>
-    )}
-
-    {tab==="apply" && (
-      <Sec bg="#fff">
-        <div style={{ maxWidth:620 }}>
-          <Ey label="Apply"/>
-          <H2 s={{ marginBottom:16 }}>Fellow Applications Are Closed</H2>
-          {/* Status callout */}
-          <div style={{ display:"flex",alignItems:"center",gap:10,background:"rgba(90,89,86,.06)",border:"1px solid rgba(90,89,86,.18)",padding:"12px 18px",marginBottom:28,flexWrap:"wrap" }}>
-            <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,fontWeight:700,color:"#5A5956",letterSpacing:".04em",textTransform:"uppercase" }}>Fellow Applications</span>
-            <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#1A1917" }}>Closed 3 July 2026</span>
-          </div>
-          <Txt s={{ marginBottom:14 }}>Thank you to everyone who applied to join our pilot cohort. Applications are now closed while we review submissions — decisions will be released in July 2026.</Txt>
-          <Txt muted s={{ marginBottom:28 }}>In the meantime, we're welcoming applications from prospective mentors interested in supporting this cohort. It's a volunteer role open to researchers and practitioners across AI, biosecurity, health systems, and governance.</Txt>
-          <a
-            href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="br"
-            style={{ textDecoration:"none",display:"inline-block",padding:"14px 36px",fontSize:13,letterSpacing:".05em",marginBottom:16 }}
-          >
-            Apply to Mentor →
-          </a>
-          <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#9A9896",lineHeight:1.6 }}>
-            Questions about your fellowship application? Contact us at <a href="mailto:contact@aixbioafrica.org" style={{ color:"#1A1917",textDecoration:"none",borderBottom:"1px solid rgba(26,25,23,.25)" }}>contact@aixbioafrica.org</a>
-          </p>
-        </div>
-      </Sec>
-    )}
-
-    {/* Contact CTA strip */}
-    <Sec bg="#F7F6F2" style={{ padding:"44px 44px" }}>
-      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16 }}>
-        <div>
-          <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:4 }}>Questions about the fellowship or mentoring?</h4>
-          <Txt muted s={{ fontSize:14.5 }}>We respond to fellowship and mentor questions within 3–5 working days.</Txt>
-        </div>
-        <div style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-          <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block",flexShrink:0 }}>Apply to Mentor →</a>
-          <button className="bo" style={{ flexShrink:0 }} onClick={()=>go("contact")}>Contact Us</button>
-        </div>
-      </div>
+      <CurrentCohort session={session} isAdmin={isAdmin}/>
     </Sec>
-  </>);
-};
-
-/* ══════════ MENTORS PAGE ════════════════════════════ */
-
-const MentorCard = ({ name, role, img, bio }) => (
-  <div className="reveal lft" style={{ background:"#fff",border:"1px solid var(--brd)",padding:"28px 26px",display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap" }}>
-    <img src={img} alt={name} style={{ width:92,height:92,borderRadius:"50%",objectFit:"cover",flexShrink:0,border:"1px solid var(--brd)" }}/>
-    <div style={{ flex:1,minWidth:220 }}>
-      <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:"#1A1917",marginBottom:6 }}>{name}</h3>
-      <span className="tag tr" style={{ marginBottom:14,display:"inline-block" }}>{role}</span>
-      <Txt muted s={{ fontSize:14,lineHeight:1.7 }}>{bio}</Txt>
-    </div>
-  </div>
+  </>
 );
 
 const MentorsPage = ({ go }) => (<>
