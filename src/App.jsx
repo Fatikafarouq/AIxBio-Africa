@@ -976,6 +976,38 @@ const CurrentCohort = ({ session, isAdmin }) => (
             <div style={{ borderTop:"1px solid var(--brd)",paddingTop:18,flex:1 }}>
               <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Project</div>
               <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",lineHeight:1.4,margin:0 }}>{fellow.projectTitle}</h4>
+
+              {fellow.researchAreas?.length > 0 && (
+                <div style={{ marginTop:18 }}>
+                  <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Research Areas</div>
+                  <div className="fellow-tags">
+                    {fellow.researchAreas.map(area => (
+                      <span key={area} className="tag" style={{ fontSize:10.5,padding:"5px 9px" }}>{area}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {fellow.bio && (
+                <div style={{ marginTop:18 }}>
+                  <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#5A5956",letterSpacing:".12em",textTransform:"uppercase",marginBottom:8 }}>Bio</div>
+                  <Txt muted s={{ fontSize:13.5,lineHeight:1.7 }}>{fellow.bio}</Txt>
+                </div>
+              )}
+
+              {fellow.links?.linkedin && (
+                <div style={{ marginTop:18 }}>
+                  <a
+                    href={fellow.links.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fellow-link"
+                    style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,fontWeight:700,color:"#B8102A",textDecoration:"none",borderBottom:"1px solid rgba(184,16,42,.28)",paddingBottom:2 }}
+                  >
+                    LinkedIn ↗
+                  </a>
+                </div>
+              )}
             </div>
 
             <FellowCertificateControls profileKey={fellow.id} session={session} isAdmin={isAdmin}/>
