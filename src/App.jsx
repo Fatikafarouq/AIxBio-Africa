@@ -4,6 +4,7 @@ import CourseShell from "./course/CourseShell";
 import CourseAuth from "./course/CourseAuth";
 import CertificateVerificationPage from "./course/CertificateVerificationPage";
 import FellowCertificateControls from "./FellowCertificateControls";
+import PublicationsPage from "./PublicationsPage";
 import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
 import jeanneVincendeau from "./assets/jeanne-vincendeau.jpeg";
@@ -92,7 +93,7 @@ const MENTORS = [
     name: "Mark Aiken",
     role: "Policy Mentor",
     img: markAiken,
-    bio: "Mark is a lawyer and AI governance practitioner with over 20 years of experience advancing good governance, institutional reform, and public policy across Africa, Asia-Pacific, and the Middle East. His work spans governments, the United Nations, multilateral development banks, and international organisations, leading complex governance initiatives in high-risk and politically sensitive environments. His current research focuses on the governance of AI, with particular interest in decision support systems and their responsible deployment across the public and private sectors.",
+    bio: "Mark is a lawyer and AI governance practitioner with over 20 years of experience advancing good governance, institutional reform, and public policy across Africa, Asia-Pacific, and the Middle East. His work spans governments, the United Nations, multilateral development banks, and international organizations, leading complex governance initiatives in high-risk and politically sensitive environments. His current research focuses on the governance of AI, with particular interest in decision support systems and their responsible deployment across the public and private sectors.",
   },
   {
     name: "Gowthaam Gokulakrishnan",
@@ -192,7 +193,7 @@ const FELLOWS = [
     mentor: { name: "Mark Aiken", affiliation: "Policy Mentor" },
     status: "In Progress",
     expectedOutput: "Lifecycle risk management framework paper or practitioner report, supported by a one-page minimum risk checklist",
-    bio: "Gideon Abako is Founder of Neuravox Foundation, a public interest technology organisation working across artificial intelligence, data systems, health, language infrastructure and digital governance in Africa. His work spans government, regional and funder programmes including FCDO/Elrha-funded research on AI-enabled health supply chains in Uganda, Mozilla Common Voice language data infrastructure, and a cross-country East African Community study on AI-enabled immunization stock monitoring in Uganda and Tanzania. He has also advised UK FCDO on AI and commercialization as well as innovation ecosystems in West Africa.",
+    bio: "Gideon Abako is Founder of Neuravox Foundation, a public interest technology organization working across artificial intelligence, data systems, health, language infrastructure and digital governance in Africa. His work spans government, regional and funder programs including FCDO/Elrha-funded research on AI-enabled health supply chains in Uganda, Mozilla Common Voice language data infrastructure, and a cross-country East African Community study on AI-enabled immunization stock monitoring in Uganda and Tanzania. He has also advised UK FCDO on AI and commercialization as well as innovation ecosystems in West Africa.",
     links: {
       linkedin: "https://www.linkedin.com/in/gideonluper/",
       website: "",
@@ -232,9 +233,9 @@ const FELLOWS = [
 ];
 
 const FAQS = [
-  {q:"How long is the fellowship?",a:"The fellowship is a 5-week intensive remote programme. All sessions are conducted online, with a combination of scheduled seminars, mentored research time, and small group work."},
+  {q:"How long is the fellowship?",a:"The fellowship is a 5-week intensive remote program. All sessions are conducted online, with a combination of scheduled seminars, mentored research time, and small group work."},
   {q:"Who is eligible to apply?",a:"Applicants from all African countries are encouraged to apply. We welcome students, recent graduates, independent researchers, and early-career professionals with an interest in AI, biosecurity, health systems, governance, or related fields. No prior biosecurity research experience is required."},
-  {q:"Is there a cost to participate?",a:"The programme is offered at no cost to accepted fellows. There is no stipend for the pilot cohort."},
+  {q:"Is there a cost to participate?",a:"The program is offered at no cost to accepted fellows. There is no stipend for the pilot cohort."},
   {q:"What are the expected outputs?",a:"By the end of the fellowship, each fellow is expected to produce one of the following: a research report, a preprint, a conference paper submission, or a policy research paper."},
   {q:"Can I apply if I am not based in Africa?",a:"The fellowship is designed for African researchers or those working on African biosecurity and AI contexts. Applicants from outside Africa whose work is directly relevant may be considered on a case-by-case basis."},
   {q:"When is the application deadline?",a:"Fellow applications for the pilot cohort closed on 3 July 2026. Decisions will be released in July 2026 and the fellowship begins in July 2026. We are currently welcoming applications from prospective mentors for this cohort — see the Mentors tab for details."},
@@ -322,7 +323,7 @@ const Avatar = ({ initials, color, size=68 }) => (
 
 /* ══════════ NAV ══════════════════════════════════════ */
 
-const Nav = ({ go, page, session, isAdmin, onSignIn, onSignOut }) => {
+const Nav = ({ go, page, session, isAdmin, publicationsVisible, onSignIn, onSignOut }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [programsOpen, setProgramsOpen] = useState(false);
@@ -368,12 +369,13 @@ const Nav = ({ go, page, session, isAdmin, onSignIn, onSignOut }) => {
 
   const mainLinksAfterPrograms = [
     ["Mentors","mentors"],
+    ...(publicationsVisible ? [["Publications","publications"]] : []),
     ["Team","team"],
     ["FAQs","faqs"],
     ["Contact","contact"],
   ];
 
-  const programsActive = page === "fellowship" || page === "apply" || page === "courses" || page === "course-apply" || page === "facilitator" || page === "facilitator-module" || page === "participant" || page === "participant-module" || page === "course-admin";
+  const programsActive = page === "fellowship" || page === "apply" || page === "courses" || page === "course-apply" || page === "facilitator" || page === "facilitator-module" || page === "participant" || page === "participant-module" || page === "course-admin" || page === "events";
 
   /*
     Colour logic:
@@ -459,6 +461,7 @@ const Nav = ({ go, page, session, isAdmin, onSignIn, onSignOut }) => {
                 <div className="dd" role="menu" style={{ left:0,right:"auto",minWidth:170 }}>
                   <button role="menuitem" onClick={() => go("fellowship")}>Fellowships</button>
                   <button role="menuitem" onClick={() => go("courses")}>Courses</button>
+                  <button role="menuitem" onClick={() => go("events")}>Webinars</button>
                 </div>
               )}
             </div>
@@ -542,6 +545,10 @@ const Nav = ({ go, page, session, isAdmin, onSignIn, onSignOut }) => {
                 onClick={() => { go("courses"); setMobileOpen(false); }}
                 style={{ display:"block",width:"100%",textAlign:"left",padding:"10px 0",background:"none",border:"none",fontFamily:"'Figtree',sans-serif",fontSize:14,color:page==="courses"?"#B8102A":"#5A5956",cursor:"pointer" }}
               >Courses</button>
+              <button
+                onClick={() => { go("events"); setMobileOpen(false); }}
+                style={{ display:"block",width:"100%",textAlign:"left",padding:"10px 0",background:"none",border:"none",fontFamily:"'Figtree',sans-serif",fontSize:14,color:page==="events"?"#B8102A":"#5A5956",cursor:"pointer" }}
+              >Webinars</button>
             </div>
           )}
 
@@ -574,28 +581,29 @@ const Hero = ({ go }) => (
       <AfricaSvg style={{ width:"100%",height:"auto",color:"#1A1917" }}/>
     </div>
     <div style={{ maxWidth:1160,margin:"0 auto",width:"100%",position:"relative",zIndex:2 }}>
-      <div style={{ maxWidth:680 }}>
+      <div style={{ maxWidth:760 }}>
         <div className="ha" style={{ display:"flex",alignItems:"center",gap:10,marginBottom:26 }}>
           <div style={{ width:22,height:1.5,background:"#B8102A" }}/>
-          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#B8102A",letterSpacing:".2em",textTransform:"uppercase" }}>Research Initiative · Africa</span>
+          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,fontWeight:700,color:"#B8102A",letterSpacing:".2em",textTransform:"uppercase" }}>AI · Biosecurity · Africa</span>
         </div>
         <h1 className="ha" style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(34px,4.6vw,66px)",fontWeight:600,color:"#1A1917",lineHeight:1.1,letterSpacing:"-0.025em",marginBottom:24 }}>
-          Advancing Research on<br/><em style={{ fontStyle:"italic" }}>Biosecurity, AI, and</em><br/>Emerging Technologies in Africa
+          Building African Capacity for<br/><em style={{ fontStyle:"italic" }}>Safer AI and Stronger Biosecurity</em>
         </h1>
-        <p className="hb" style={{ fontFamily:"'Figtree',sans-serif",fontSize:17,color:"#5A5956",lineHeight:1.76,maxWidth:510,marginBottom:12 }}>
-          AIxBio Africa is an independent research initiative working at the intersection of biosecurity, artificial intelligence, and emerging technology governance.
+        <p className="hb" style={{ fontFamily:"'Figtree',sans-serif",fontSize:17,color:"#5A5956",lineHeight:1.76,maxWidth:610,marginBottom:12 }}>
+          AIxBio Africa is a research and capacity-building organization working at the intersection of artificial intelligence, biology, and biosecurity in African contexts.
         </p>
-        <p className="hb" style={{ fontFamily:"'Figtree',sans-serif",fontSize:17,color:"#5A5956",lineHeight:1.76,maxWidth:510,marginBottom:36 }}>
-          We conduct research, support capacity-building, and foster interdisciplinary collaboration to better understand and manage technological and biological risks in African contexts.
+        <p className="hb" style={{ fontFamily:"'Figtree',sans-serif",fontSize:17,color:"#5A5956",lineHeight:1.76,maxWidth:610,marginBottom:36 }}>
+          We build pathways from learning to contribution through research, fellowships, courses, expert-led webinars, and collaboration.
         </p>
         <div className="hc" style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-          <button className="br" style={{ padding:"13px 28px" }} onClick={() => go("fellowship")}>Fellowship Programme →</button>
+          <button className="br" style={{ padding:"13px 28px" }} onClick={() => go("about")}>Explore AIxBio Africa →</button>
+          <button className="bo" style={{ padding:"12px 26px" }} onClick={() => go("courses")}>View Courses</button>
         </div>
-        <div className="hd" style={{ display:"flex",gap:40,marginTop:48,paddingTop:32,borderTop:"1px solid var(--brd)",flexWrap:"wrap" }}>
-          {[["5 weeks","Fellowship duration"],["2026","Launch year"]].map(([n,l]) => (
-            <div key={l}>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:700,color:"#1A1917",lineHeight:1 }}>{n}</div>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,color:"#9A9896",letterSpacing:".06em",textTransform:"uppercase",marginTop:5 }}>{l}</div>
+        <div className="hd sg" style={{ display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:18,marginTop:48,paddingTop:32,borderTop:"1px solid var(--brd)" }}>
+          {["Research","Fellowships","Courses","Webinars"].map((label,i) => (
+            <div key={label}>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:700,color:"#B8102A",lineHeight:1 }}>{String(i+1).padStart(2,"0")}</div>
+              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10.5,color:"#5A5956",letterSpacing:".08em",textTransform:"uppercase",marginTop:7 }}>{label}</div>
             </div>
           ))}
         </div>
@@ -611,60 +619,48 @@ const HomeAbout = ({ go }) => (
     <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,alignItems:"start" }}>
       <div className="reveal">
         <Ey label="About"/>
-        <H2 s={{ marginBottom:22 }}>Work in Africa, Relevant to the World</H2>
-        <Txt s={{ marginBottom:16 }}>AIxBio Africa was founded on a straightforward observation: biological and technological risks do not align with the distribution of scientific capacity. Africa carries a disproportionate share of emerging biological risk and is underrepresented in global biosecurity research, pandemic preparedness, and emerging technology governance.</Txt>
-        <Txt s={{ marginBottom:28 }}>Our work spans research, training, and policy engagement. We study biosecurity challenges in African contexts, examine how emerging technologies intersect with biological risks, and build research capacity among African scientists and practitioners.</Txt>
+        <H2 s={{ marginBottom:22 }}>African Context, Global Relevance</H2>
+        <Txt s={{ marginBottom:16 }}>AIxBio Africa exists to strengthen African participation in the research, skills, and institutions shaping how artificial intelligence and biological risks are understood and governed.</Txt>
+        <Txt s={{ marginBottom:28 }}>Our work connects capacity-building with substantive research. We help people enter the field, develop practical judgement, work with experienced researchers and practitioners, and contribute evidence grounded in African contexts.</Txt>
         <button className="bo" onClick={() => go("about")}>About AIxBio Africa →</button>
       </div>
-      <div>
-        {[["01","Research","We investigate biosecurity challenges, emerging biological risks, and how advanced technologies interact with biological systems in African contexts."],["02","Train","We design fellowship programmes, workshops, and mentorship structures for African researchers entering biosecurity and emerging technology fields."],["03","Advise","Where our research has policy implications, we communicate findings clearly to relevant institutions and decision-makers."]].map(([n,t,d],i)=>(
-          <div key={n} className={`reveal d${i+1}`} style={{ display:"flex",gap:22,padding:"24px 0",borderBottom:i<2?"1px solid var(--brd)":"none" }}>
-            <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".05em",paddingTop:3,flexShrink:0 }}>{n}</span>
-            <div>
-              <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:6,lineHeight:1.2 }}>{t}</h3>
-              <Txt muted s={{ fontSize:14.5 }}>{d}</Txt>
-            </div>
-          </div>
-        ))}
+      <div className="reveal d2" style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"30px" }}>
+        <Ey label="Our Approach"/>
+        <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:27,fontWeight:600,color:"#1A1917",marginBottom:14,lineHeight:1.25 }}>From curiosity to contribution</h3>
+        <Txt muted s={{ fontSize:14.5,marginBottom:16 }}>We are building a connected pathway rather than isolated activities: accessible learning, expert engagement, mentored research, and opportunities to produce and share meaningful work.</Txt>
+        <Txt muted s={{ fontSize:14.5 }}>The aim is not simply to create awareness, but to help more African students, researchers, and practitioners become active contributors to AI safety and biosecurity.</Txt>
       </div>
     </div>
   </Sec>
 );
 
-const HomeFellowship = ({ go }) => (
-  <Sec bg="#fff" id="fellowship">
-    <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,alignItems:"center" }}>
-      <div className="reveal">
-        <Ey label="Fellowship"/>
-        <H2 s={{ marginBottom:16 }}>5-Week Research Fellowship</H2>
-        <div style={{ display:"inline-flex",alignItems:"center",gap:8,background:"rgba(90,89,86,.08)",border:"1px solid rgba(90,89,86,.22)",padding:"7px 14px",marginBottom:18 }}>
-          <span style={{ width:7,height:7,borderRadius:"50%",background:"#5A5956",flexShrink:0,display:"inline-block" }}/>
-          <span style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#5A5956",letterSpacing:".06em",textTransform:"uppercase" }}>Fellow Applications Closed</span>
-        </div>
-        <Txt s={{ marginBottom:16 }}>The AIxBio Africa Research Fellowship is a 5-week remote research programme for aspiring and early-career researchers interested in producing rigorous, impactful work on AI, biosecurity, health systems, governance, and related societal challenges in Africa.</Txt>
-        <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>Fellows pursue independent research projects aligned with AIxBio Africa's mission and produce a substantial research output suitable for publication. The programme is offered at no cost to participants.</Txt>
-        <div style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
-          <button className="bo" onClick={() => go("fellowship")}>Programme Details →</button>
-          <button className="br" onClick={() => go("mentors")}>Become a Mentor →</button>
-        </div>
+const HomePillars = ({ go }) => {
+  const pillars = [
+    { n:"01", title:"Research", desc:"We support and produce Africa-relevant work on AI safety, biosecurity, health systems, governance, evaluation, and emerging technological risks.", action:null },
+    { n:"02", title:"Fellowships", desc:"Our research fellowships give early-career researchers structured mentorship and a pathway to develop substantial independent research outputs.", action:["View Fellowship","fellowship"] },
+    { n:"03", title:"Courses", desc:"Our courses build foundational understanding and practical judgement around AI, biology, and biosecurity through structured, Africa-focused learning.", action:["View Courses","courses"] },
+    { n:"04", title:"Webinars", desc:"Expert-led sessions connect our community with researchers and practitioners working across AI safety, biosecurity, public health, and governance.", action:["View Webinars","events"] },
+  ];
+  return (
+    <Sec bg="#F7F6F2">
+      <div className="reveal" style={{ maxWidth:760,marginBottom:38 }}>
+        <Ey label="What We Do"/>
+        <H2 s={{ marginBottom:14 }}>Four connected pillars</H2>
+        <Txt muted>Research, fellowships, courses, and webinars reinforce one another to create a stronger pathway into the field and a growing base of Africa-relevant knowledge.</Txt>
       </div>
-      <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
-        {[["AI and Biosecurity","Safety evaluation, dual-use research governance, and biosecurity threats in African contexts."],["AI and Health Systems","How AI intersects with public health infrastructure and surveillance in Africa."],["AI Governance and Policy","Policy frameworks, regulation, and responsible technology deployment."],["Societal Impacts of AI in Africa","How AI affects communities, institutions, and public good in African societies."]].map(([title,desc],i) => (
-          <div key={title} className={`reveal d${i+1}`} style={{ display:"flex",gap:18,padding:"18px 22px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-            <div style={{ flexShrink:0 }}>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#B8102A",letterSpacing:".1em",textTransform:"uppercase" }}>Area {i+1}</div>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#1A1917",marginTop:4,lineHeight:1.3 }}>{title}</div>
-            </div>
-            <div style={{ borderLeft:"1.5px solid var(--brd)",paddingLeft:18 }}>
-              <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:13,color:"#5A5956",lineHeight:1.6 }}>{desc}</div>
-            </div>
-          </div>
+      <div className="g2" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:18 }}>
+        {pillars.map((p,i) => (
+          <article key={p.title} className={`reveal d${i+1} lft`} style={{ background:"#fff",border:"1px solid var(--brd)",padding:"28px",display:"flex",flexDirection:"column",minHeight:250 }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#B8102A",letterSpacing:".12em",textTransform:"uppercase",marginBottom:24 }}>{p.n}</div>
+            <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:600,color:"#1A1917",lineHeight:1.2,marginBottom:12 }}>{p.title}</h3>
+            <Txt muted s={{ fontSize:14.5,lineHeight:1.7,marginBottom:22 }}>{p.desc}</Txt>
+            {p.action && <button className="bn" onClick={() => go(p.action[1])} style={{ marginTop:"auto",textAlign:"left",fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".06em",textTransform:"uppercase" }}>{p.action[0]} →</button>}
+          </article>
         ))}
-        <button className="bn" onClick={() => go("fellowship")} style={{ fontFamily:"'Figtree',sans-serif",fontSize:12.5,color:"#B8102A",fontWeight:600,letterSpacing:".04em",textTransform:"uppercase",textAlign:"left",padding:"4px 0" }}>View programme details →</button>
       </div>
-    </div>
-  </Sec>
-);
+    </Sec>
+  );
+};
 
 const HomeNewsletter = ({ addSub }) => {
   const [email,setEmail] = useState(""); const [done,setDone] = useState(false);
@@ -676,7 +672,7 @@ const HomeNewsletter = ({ addSub }) => {
       </div>
       <div style={{ maxWidth:520,margin:"0 auto",textAlign:"center",position:"relative",zIndex:2 }}>
         <h2 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(22px,2.6vw,36px)",fontWeight:600,color:"#fff",lineHeight:1.2,marginBottom:12 }}>Stay Informed</h2>
-        <Txt s={{ color:"rgba(255,255,255,.55)",marginBottom:28,fontSize:15.5 }}>Research updates, fellowship announcements, and occasional writing — delivered to your inbox.</Txt>
+        <Txt s={{ color:"rgba(255,255,255,.55)",marginBottom:28,fontSize:15.5 }}>Research updates, course and webinar announcements, publications, and opportunities from AIxBio Africa — delivered to your inbox.</Txt>
         {!done ? (
           <div style={{ display:"flex",maxWidth:400,margin:"0 auto" }}>
             <input type="email" placeholder="Email address" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sub()}
@@ -711,39 +707,55 @@ const HomeTeamCta = ({ go }) => (
 );
 
 const HomePage = ({ go, addSub }) => (<>
-  <Hero go={go}/><HomeAbout go={go}/><HomeFellowship go={go}/>
+  <Hero go={go}/><HomeAbout go={go}/><HomePillars go={go}/>
   <HomeTeamCta go={go}/><HomeNewsletter addSub={addSub}/>
 </>);
 
 /* ══════════ ABOUT ═══════════════════════════════════ */
 
 const AboutPage = ({ go }) => (<>
-  <PageHdr label="About" title="About AIxBio Africa" sub="An independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies."/>
+  <PageHdr label="About" title="About AIxBio Africa" sub="A research and capacity-building organization strengthening African participation in AI safety and biosecurity."/>
   <Sec bg="#fff">
-    {/* Mission and trajectory */}
     <div className="g2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:72,marginBottom:60 }}>
       <div className="reveal">
         <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:600,color:"#1A1917",marginBottom:16,lineHeight:1.2 }}>Why we exist</h3>
-        <Txt s={{ marginBottom:14 }}>Biological and technological risks do not align with the distribution of scientific capacity. Africa faces significant biosecurity challenges — a high burden of zoonotic disease, emerging biological risks, and limited representation in global research, pandemic preparedness, and technology governance frameworks.</Txt>
-        <Txt s={{ marginBottom:14 }}>Emerging technologies, including advanced AI, are increasingly relevant to how biological risks are studied, managed, and communicated. Understanding how these technologies interact with African contexts requires researchers grounded in both the science and the setting.</Txt>
-        <Txt>This is not work for Africa in isolation. Biosecurity failures anywhere affect global health security. The capacity we build and the questions we investigate have implications beyond the continent.</Txt>
+        <Txt s={{ marginBottom:14 }}>Artificial intelligence is becoming increasingly relevant to biological research, public health, scientific capability, and biosecurity. Yet the people, institutions, languages, and realities of African countries remain underrepresented in many of the global conversations shaping these technologies and their risks.</Txt>
+        <Txt s={{ marginBottom:14 }}>AIxBio Africa was created to help close that gap by building stronger pathways for African students, researchers, and practitioners to learn, conduct research, engage with experts, and contribute to the evidence and governance shaping AI and biosecurity.</Txt>
+        <Txt>This work is locally grounded but globally relevant. Safer AI systems, stronger biosecurity institutions, and better evidence in African contexts contribute to wider scientific and global health security.</Txt>
       </div>
       <div className="reveal d2">
         <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:26,fontWeight:600,color:"#1A1917",marginBottom:16,lineHeight:1.2 }}>What we are building</h3>
-        <Txt s={{ marginBottom:14 }}>We are a new organisation. We do not have a large team or an established funding base. We have a clear research agenda, a commitment to methodological rigour, and a determination to build something credible and durable.</Txt>
-        <Txt s={{ marginBottom:14 }}>In the near term, we are focused on publishing early research findings, launching our fellowship programme in 2026, and establishing partnerships with African universities and international research institutions working on biosecurity and emerging technology governance.</Txt>
-        <Txt>In the longer term, we aim to be a recognised centre for biosecurity and emerging technology research in Africa.</Txt>
+        <Txt s={{ marginBottom:14 }}>AIxBio Africa is building a research-to-capacity ecosystem that connects four areas of work: research, fellowships, courses, and expert-led webinars.</Txt>
+        <Txt s={{ marginBottom:14 }}>Our first research fellowship has given us a working proof of concept for supporting emerging researchers through mentorship, structured feedback, and independent projects. We are building on that foundation with courses, public learning sessions, research outputs, and partnerships that can expand the pathway into the field.</Txt>
+        <Txt>Our long-term aim is to strengthen the community, evidence base, and institutional capacity needed for African researchers and organizations to contribute meaningfully to AI safety and biosecurity.</Txt>
       </div>
     </div>
 
-    {/* Pull quote */}
+    <div className="reveal" style={{ marginBottom:60 }}>
+      <Ey label="Our Work"/>
+      <H2 s={{ marginBottom:24 }}>Four connected pillars</H2>
+      <div className="g2" style={{ display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:16 }}>
+        {[
+          ["Research","Producing and supporting rigorous, Africa-relevant work across AI safety, biosecurity, health, evaluation, and governance."],
+          ["Fellowships","Supporting emerging researchers to develop independent projects through mentorship, feedback, and structured research experience."],
+          ["Courses","Building accessible foundational knowledge and practical judgement for people entering AI and biosecurity."],
+          ["Webinars","Bringing researchers, practitioners, and our community together for expert-led discussion and learning."]
+        ].map(([title,desc],i)=>(
+          <div key={title} className={`reveal d${i+1}`} style={{ padding:"24px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+            <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#B8102A",letterSpacing:".1em",textTransform:"uppercase",marginBottom:9 }}>0{i+1}</div>
+            <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:7 }}>{title}</h4>
+            <Txt muted s={{ fontSize:14,lineHeight:1.65 }}>{desc}</Txt>
+          </div>
+        ))}
+      </div>
+    </div>
+
     <div className="reveal" style={{ borderLeft:"2.5px solid #B8102A",paddingLeft:26,marginBottom:56 }}>
-      <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(18px,2vw,25px)",fontStyle:"italic",color:"#1A1917",lineHeight:1.5,maxWidth:720 }}>
-        AIxBio Africa is an independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies.
+      <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(18px,2vw,25px)",fontStyle:"italic",color:"#1A1917",lineHeight:1.5,maxWidth:760 }}>
+        We are building African contributors to AI safety and biosecurity — not simply an audience for work developed elsewhere.
       </p>
     </div>
 
-    {/* Founder profile */}
     <div className="reveal" style={{ marginBottom:48 }}>
       <Ey label="Founder"/>
       <H2 s={{ marginBottom:24 }}>About the Founder</H2>
@@ -757,13 +769,12 @@ const AboutPage = ({ go }) => (<>
           <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,color:"#1A1917",marginBottom:3,lineHeight:1.2 }}>Fatika Umar Ibrahim</h3>
           <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:11.5,fontWeight:700,color:"#B8102A",letterSpacing:".08em",textTransform:"uppercase",marginBottom:18 }}>Founder &amp; Executive Director</div>
           <Txt s={{ marginBottom:13 }}>Fatika Umar Ibrahim is an independent AI safety researcher and Founder of AIxBio Africa, with a background in veterinary medicine and ongoing clinical training towards a Doctor of Veterinary Medicine (DVM).</Txt>
-          <Txt s={{ marginBottom:13 }}>His research focuses on computational drug discovery and the intersection of AI safety and biosecurity, with particular interest in evaluating AI biosecurity guardrails in African contexts.</Txt>
-          <Txt muted s={{ fontSize:14.5 }}>He founded AIxBio Africa to strengthen African participation and research capacity in AI safety and biosecurity, create pathways for emerging researchers to enter these fields, and support work grounded in the realities and priorities of the continent.</Txt>
+          <Txt s={{ marginBottom:13 }}>His research interests sit at the intersection of AI safety and biosecurity, including the evaluation of AI biosecurity safeguards in African and multilingual contexts.</Txt>
+          <Txt muted s={{ fontSize:14.5 }}>He founded AIxBio Africa to strengthen African participation and research capacity in AI safety and biosecurity, create credible pathways into these fields, and support work grounded in the realities and priorities of the continent.</Txt>
         </div>
       </div>
     </div>
 
-    {/* Actions */}
     <div className="reveal" style={{ display:"flex",gap:12,flexWrap:"wrap" }}>
       <button className="br" onClick={()=>go("contact")}>Get in Touch</button>
     </div>
@@ -1025,7 +1036,7 @@ const FellowshipPage = ({ session }) => {
           <Ey label="About the Fellowship"/>
           <H2 s={{ marginBottom:18 }}>Research grounded in African contexts</H2>
           <Txt s={{ fontSize:15.5,lineHeight:1.75 }}>
-            The AIxBio Africa Research Fellowship creates space for emerging researchers to develop focused work on questions where AI, biology, biosecurity, health, and governance intersect across Africa. Each cohort may take a different shape as the programme evolves.
+            The AIxBio Africa Research Fellowship creates space for emerging researchers to develop focused work on questions where AI, biology, biosecurity, health, and governance intersect across Africa. Each cohort may take a different shape as the program evolves.
           </Txt>
         </div>
 
@@ -1061,27 +1072,37 @@ const FellowshipPage = ({ session }) => {
   );
 };
 
+const MentorCard = ({ name, role, img, bio }) => (
+  <article className="lft" style={{ background:"#fff",border:"1px solid var(--brd)",overflow:"hidden",display:"flex",flexDirection:"column",height:"100%" }}>
+    <div style={{ height:220,background:"#F2F0EC",overflow:"hidden",borderBottom:"1px solid var(--brd)" }}>
+      <img src={img} alt={`${name} portrait`} style={{ width:"100%",height:"100%",objectFit:"cover",objectPosition:"center top",display:"block" }}/>
+    </div>
+    <div style={{ padding:"24px",display:"flex",flexDirection:"column",flex:1 }}>
+      <div style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"#B8102A",letterSpacing:".11em",textTransform:"uppercase",marginBottom:8 }}>{role}</div>
+      <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:25,fontWeight:600,color:"#1A1917",lineHeight:1.2,marginBottom:12 }}>{name}</h3>
+      <Txt muted s={{ fontSize:13.5,lineHeight:1.7 }}>{bio}</Txt>
+    </div>
+  </article>
+);
+
 const MentorsPage = ({ go }) => (<>
-  <PageHdr label="Mentors" title="Mentor Network" sub="Meet the mentors guiding fellows through the AIxBio Africa Pilot Cohort 2026, and learn how to join our growing mentor network."/>
+  <PageHdr label="Mentors" title="Mentors for Pilot Cohort 1 — 2026" sub="Researchers and practitioners who supported the first AIxBio Africa Research Fellowship cohort through project guidance and feedback."/>
   <Sec bg="#fff">
-    <div style={{ marginBottom:56 }}>
-      <Ey label="Pilot Cohort 2026"/>
-      <H2 s={{ marginBottom:18 }}>Mentors for Pilot Cohort 2026</H2>
-      <Txt muted s={{ marginBottom:32,maxWidth:700 }}>Our pilot cohort fellows are guided by mentors across technical, policy, and governance domains, each bringing deep expertise to help fellows shape and strengthen their research.</Txt>
-      <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
-        {MENTORS.map(m => <MentorCard key={m.name} {...m}/>)}
-      </div>
+    <div className="reveal" style={{ maxWidth:760,marginBottom:36 }}>
+      <Ey label="Research Fellowship"/>
+      <H2 s={{ marginBottom:14 }}>Pilot Cohort 1 Mentors</H2>
+      <Txt muted>Our first cohort was supported by mentors spanning policy, technical AI, and governance. Their role was to help fellows sharpen research questions, strengthen their approach, and navigate the development of their projects.</Txt>
     </div>
 
-    <div style={{ maxWidth:700 }}>
-      <Txt s={{ marginBottom:18 }}>Beyond the pilot cohort, we're building out a wider mentor network. We're inviting researchers and practitioners working in biosecurity, artificial intelligence, public health, veterinary science, policy, and related fields to help guide future fellows through their independent research projects.</Txt>
-      <Txt muted s={{ marginBottom:48 }}>This is a volunteer role — mentors are not compensated for the pilot cohort. In return, mentors join a growing interdisciplinary network at the intersection of AI and biosecurity in African contexts, and are credited as contributors to the programme.</Txt>
+    <div className="g3" style={{ display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:18,alignItems:"stretch",marginBottom:64 }}>
+      {MENTORS.map(m => <MentorCard key={m.name} {...m}/>)}
+    </div>
 
-      <div className="reveal" style={{ padding:"28px 30px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
-        <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Now welcoming mentor applications</h4>
-        <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>If you work in biosecurity, AI, public health, veterinary science, technology governance, or a related field and are interested in supporting early-career African researchers on a volunteer basis, we'd love to hear from you.</Txt>
-        <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Apply to Mentor →</a>
-      </div>
+    <div className="reveal" style={{ maxWidth:760,padding:"30px",background:"#F7F6F2",border:"1px solid var(--brd)" }}>
+      <Ey label="Mentor Network"/>
+      <H2 s={{ fontSize:28,marginBottom:12 }}>Interested in mentoring a future cohort?</H2>
+      <Txt muted s={{ fontSize:14.5,marginBottom:20 }}>We welcome researchers and practitioners across biosecurity, artificial intelligence, public health, veterinary science, technology governance, and related fields who are interested in supporting future AIxBio Africa fellows.</Txt>
+      <a href="https://airtable.com/apph1o7t9K13CL84h/pag73OEGWci1TN0uN/form" target="_blank" rel="noopener noreferrer" className="br" style={{ textDecoration:"none",display:"inline-block" }}>Express Interest in Mentoring →</a>
     </div>
   </Sec>
 </>);
@@ -1092,7 +1113,7 @@ const TeamPage = () => (<>
   <PageHdr
     label="Team"
     title="Join AIxBio Africa"
-    sub="We're building a small volunteer founding team to help strengthen AIxBio Africa's research, programmes, operations, communications, and partnerships."
+    sub="We're building a small volunteer founding team to help strengthen AIxBio Africa's research, programs, operations, communications, and partnerships."
   />
 
   <Sec bg="#fff">
@@ -1100,10 +1121,10 @@ const TeamPage = () => (<>
       <Ey label="Founding Team"/>
       <H2 s={{ marginBottom:18 }}>Help Build AIxBio Africa</H2>
       <Txt s={{ marginBottom:16 }}>
-        AIxBio Africa is building a small volunteer founding team across research, programmes, operations, communications, and partnerships. We're looking for people who can take ownership of meaningful work and help strengthen the systems behind our research and programmes.
+        AIxBio Africa is building a small volunteer founding team across research, programs, operations, communications, and partnerships. We're looking for people who can take ownership of meaningful work and help strengthen the systems behind our research and programs.
       </Txt>
       <Txt muted s={{ marginBottom:28,fontSize:14.5 }}>
-        Applications are reviewed on a rolling basis. As the organisation grows and secures funding, future paid opportunities may become available, but participation in the founding team does not guarantee a paid role.
+        Applications are reviewed on a rolling basis. As the organization grows and secures funding, future paid opportunities may become available, but participation in the founding team does not guarantee a paid role.
       </Txt>
       <a
         href={TEAM_APPLY_URL}
@@ -1163,7 +1184,7 @@ const ContactPage = ({ go, addContact }) => {
           <div>
             <div style={{ background:"#F7F6F2",padding:"24px",border:"1px solid var(--brd)",marginBottom:14 }}>
               <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917",marginBottom:14 }}>We respond to</h4>
-              {["Research collaborations and joint projects","Fellowship and programme questions","Media and press inquiries","General questions about our work"].map((t,i)=>(
+              {["Research collaborations and joint projects","Fellowship and program questions","Media and press inquiries","General questions about our work"].map((t,i)=>(
                 <div key={i} style={{ display:"flex",gap:8,marginBottom:9 }}>
                   <span style={{ color:"#B8102A",fontWeight:700,marginTop:1 }}>—</span>
                   <Txt muted s={{ fontSize:14,lineHeight:1.58 }}>{t}</Txt>
@@ -1196,12 +1217,12 @@ const CollaboratePage = ({ go }) => (<>
       <div className="reveal">
         <Ey label="Work with us"/>
         <H2 s={{ marginBottom:20 }}>We welcome serious collaboration</H2>
-        <Txt s={{ marginBottom:16 }}>AIxBio Africa is actively building a network of research collaborators across African universities, international biosecurity institutions, and AI safety organisations.</Txt>
+        <Txt s={{ marginBottom:16 }}>AIxBio Africa is actively building a network of research collaborators across African universities, international biosecurity institutions, and AI safety organizations.</Txt>
         <Txt muted s={{ marginBottom:28 }}>If you are interested in joint research, co-authorship, dataset sharing, or any form of substantive collaboration, please use the contact form to reach us with a brief description of your interests.</Txt>
         <button className="br" onClick={()=>go("contact")}>Contact Us →</button>
       </div>
       <div>
-        {[["Research institutions","Joint projects, co-authorship, and data sharing with African universities and research institutes."],["AI organisations","Collaboration with AI labs and safety organisations on evaluation methodology and model testing."],["Funders","We welcome conversations with funders aligned with our research agenda."],["Policy bodies","Engagement with African governments, the Africa CDC, and international health organisations."]].map(([t,d],i)=>(
+        {[["Research institutions","Joint projects, co-authorship, and data sharing with African universities and research institutes."],["AI organizations","Collaboration with AI labs and safety organizations on evaluation methodology and model testing."],["Funders","We welcome conversations with funders aligned with our research agenda."],["Policy bodies","Engagement with African governments, the Africa CDC, and international health organizations."]].map(([t,d],i)=>(
           <div key={t} className={`reveal d${i+1}`} style={{ padding:"18px 0",borderBottom:i<3?"1px solid var(--brd)":"none" }}>
             <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,color:"#1A1917",marginBottom:5 }}>{t}</div>
             <Txt muted s={{ fontSize:14 }}>{d}</Txt>
@@ -1216,11 +1237,11 @@ const DonatePage = ({ go }) => (<>
   <PageHdr label="Donate" title="Support AIxBio Africa"/>
   <Sec bg="#fff">
     <div style={{ maxWidth:640 }}>
-      <Txt s={{ marginBottom:18 }}>AIxBio Africa is currently funded through research grants and institutional support. We are developing a formal process for individual and organisational donations.</Txt>
-      <Txt muted s={{ marginBottom:28 }}>If you are interested in supporting our work financially, please contact us directly. We can discuss unrestricted support, project-specific funding, or fellowship programme sponsorship.</Txt>
+      <Txt s={{ marginBottom:18 }}>AIxBio Africa is currently funded through research grants and institutional support. We are developing a formal process for individual and organizational donations.</Txt>
+      <Txt muted s={{ marginBottom:28 }}>If you are interested in supporting our work financially, please contact us directly. We can discuss unrestricted support, project-specific funding, or fellowship program sponsorship.</Txt>
       <div style={{ background:"#F7F6F2",border:"1px solid var(--brd)",padding:"24px",marginBottom:28 }}>
         <h4 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600,color:"#1A1917",marginBottom:12 }}>Funding priorities</h4>
-        {["Fellowship programme costs, including operational and access support for accepted fellows",
+        {["Fellowship program costs, including operational and access support for accepted fellows",
           "Research infrastructure and API access for evaluation work",
           "Travel support for field research and conference participation",
           "Open-access publication of research findings"].map((t,i)=>(
@@ -1377,7 +1398,7 @@ const AdminPage = ({ apps,contacts,subs,auth,setAuth }) => {
 
 /* ══════════ FOOTER ══════════════════════════════════ */
 
-const Footer = ({ go }) => (
+const Footer = ({ go, publicationsVisible }) => (
   <footer style={{ background:"#1C1B18",padding:"64px 44px 36px",position:"relative",overflow:"hidden" }}>
     <div style={{ position:"absolute",left:"-2%",bottom:"-6%",width:"22vw",maxWidth:300,opacity:.04,pointerEvents:"none" }}>
       <AfricaSvg style={{ width:"100%",height:"auto",color:"#fff" }}/>
@@ -1387,7 +1408,7 @@ const Footer = ({ go }) => (
         <div>
           {/* light=true so logo text is readable on dark footer background */}
           <div style={{ marginBottom:18 }}><Logo size={19} onClick={()=>go("home")} light={true}/></div>
-          <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"rgba(255,255,255,.42)",maxWidth:252,marginBottom:22,lineHeight:1.72 }}>AIxBio Africa is an independent African research initiative focused on biosecurity, AI, and the responsible development of emerging technologies.</p>
+          <p style={{ fontFamily:"'Figtree',sans-serif",fontSize:13.5,color:"rgba(255,255,255,.42)",maxWidth:252,marginBottom:22,lineHeight:1.72 }}>AIxBio Africa is a research and capacity-building organization working at the intersection of AI, biology, and biosecurity in African contexts.</p>
           <div style={{ display:"flex",gap:8 }}>
             <a href="https://www.linkedin.com/company/aixbioafrica/about/?viewAsMember=true" target="_blank" rel="noopener noreferrer"
               style={{ background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.09)",color:"rgba(255,255,255,.45)",padding:"5px 11px",fontFamily:"'Figtree',sans-serif",fontSize:11,fontWeight:500,cursor:"pointer",textDecoration:"none",display:"inline-block",transition:"all .15s" }}
@@ -1396,7 +1417,11 @@ const Footer = ({ go }) => (
             </a>
           </div>
         </div>
-        {[{t:"Explore",ls:[["About","about"],["FAQs","faqs"]]},{t:"Programs",ls:[["Fellowships","fellowship"],["Courses","courses"],["Mentors","mentors"]]},{t:"Organisation",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}].map(({t,ls})=>(
+        {[
+          {t:"Explore",ls:[["About","about"],...(publicationsVisible ? [["Publications","publications"]] : []),["FAQs","faqs"]]},
+          {t:"Programs",ls:[["Fellowships","fellowship"],["Courses","courses"],["Webinars","events"],["Mentors","mentors"]]},
+          {t:"Organization",ls:[["Team","team"],["Contact","contact"],["Collaborate","collaborate"],["Donate","donate"]]}
+        ].map(({t,ls})=>(
           <div key={t}>
             <h4 style={{ fontFamily:"'Figtree',sans-serif",fontSize:10,fontWeight:700,color:"rgba(255,255,255,.28)",letterSpacing:".17em",textTransform:"uppercase",marginBottom:16 }}>{t}</h4>
             <ul style={{ listStyle:"none",display:"flex",flexDirection:"column",gap:10 }}>
@@ -1451,6 +1476,7 @@ export default function App() {
   const [page,setPage]=useState(initial.page); const [params,setParams]=useState(initial.params);
   const [apps,setApps]=useState([]); const [contacts,setContacts]=useState([]); const [subs,setSubs]=useState([]);
   const [session,setSession]=useState(null); const [isAdmin,setIsAdmin]=useState(false); const [authOpen,setAuthOpen]=useState(false);
+  const [publicationsVisible,setPublicationsVisible]=useState(false);
 
   const pagePath=useCallback((p,ps={})=>{
     const base="/courses/intro-ai-biosecurity";
@@ -1510,6 +1536,14 @@ export default function App() {
   },[pathState]);
 
   useEffect(()=>{
+    let alive=true;
+    supabase.rpc("get_publications_page_status").then(({data,error})=>{
+      if(alive && !error) setPublicationsVisible(Boolean(data));
+    });
+    return()=>{alive=false;};
+  },[]);
+
+  useEffect(()=>{
     const s=document.createElement("style"); s.textContent=CSS; document.head.appendChild(s);
     return ()=>document.head.removeChild(s);
   },[]);
@@ -1552,7 +1586,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight:"100vh",fontFamily:"'Figtree',sans-serif",overflowX:"hidden",background:"#F7F6F2" }}>
-      <Nav go={go} page={page} session={session} isAdmin={isAdmin} onSignIn={()=>setAuthOpen(true)} onSignOut={signOut}/>
+      <Nav go={go} page={page} session={session} isAdmin={isAdmin} publicationsVisible={publicationsVisible} onSignIn={()=>setAuthOpen(true)} onSignOut={signOut}/>
       {page==="home"&&<HomePage go={go} addSub={addSub}/>}
       {page==="about"&&<AboutPage go={go}/>}
       {page==="fellowship"&&<FellowshipPage go={go} addApp={addApp} session={session} isAdmin={isAdmin}/>}
@@ -1565,13 +1599,13 @@ export default function App() {
       {page==="collaborate"&&<CollaboratePage go={go}/>}
       {page==="donate"&&<DonatePage go={go}/>}
       {page==="opportunities"&&<StubPage label="Opportunities" title="Opportunities" sub="Fellowships, grants, and collaborations will be announced here." go={go}/>}
-      {page==="publications"&&<StubPage label="Publications" title="Publications &amp; Reports" go={go}/>}
-      {page==="events"&&<StubPage label="Events" title="Events" go={go}/>}
+      {page==="publications"&&<PublicationsPage go={go} onVisibilityChange={setPublicationsVisible}/>}
+      {page==="events"&&<StubPage label="Webinars" title="AIxBio Africa Webinars" sub="Expert-led sessions on AI safety, biosecurity, public health, governance, and related fields." go={go}/>} 
       {page==="resources"&&<StubPage label="Resources" title="Resources" go={go}/>}
       {page==="policies"&&<StubPage label="Policies" title="Policies" go={go}/>}
       {page==="faqs"&&<FaqsPage go={go}/>}
       {page==="admin"&&<AdminPage apps={apps} contacts={contacts} subs={subs} auth={false} setAuth={()=>{}}/>}
-      <Footer go={go}/>
+      <Footer go={go} publicationsVisible={publicationsVisible}/>
       <CourseAuth open={authOpen} onClose={()=>setAuthOpen(false)}/>
     </div>
   );
