@@ -752,7 +752,7 @@ const AboutPage = ({ go }) => (<>
 
     <div className="reveal" style={{ borderLeft:"2.5px solid #B8102A",paddingLeft:26,marginBottom:56 }}>
       <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(18px,2vw,25px)",fontStyle:"italic",color:"#1A1917",lineHeight:1.5,maxWidth:760 }}>
-        We are building African contributors to AI safety and biosecurity — not simply an audience for work developed elsewhere.
+        Our goal is to strengthen African research capacity so more researchers, students, and practitioners can contribute meaningfully to AI safety and biosecurity.
       </p>
     </div>
 
