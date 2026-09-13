@@ -4,6 +4,7 @@ import CourseShell from "./course/CourseShell";
 import CourseAuth from "./course/CourseAuth";
 import CertificateVerificationPage from "./course/CertificateVerificationPage";
 import FellowCertificateControls from "./FellowCertificateControls";
+import FellowPublicationUpdateControls from "./FellowPublicationUpdateControls";
 import PublicationsPage from "./PublicationsPage";
 import markAiken from "./assets/mark-aiken.png";
 import gowthaamGokulakrishnan from "./assets/gowthaam-gokulakrishnan.jpeg";
@@ -989,6 +990,7 @@ const PublicFellowCard = ({ fellow, session }) => {
       </div>
 
       <FellowCertificateControls profileKey={fellow.profile_key} session={session}/>
+      <FellowPublicationUpdateControls profileKey={fellow.profile_key} session={session}/>
     </article>
   );
 };
